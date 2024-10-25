@@ -1,0 +1,95 @@
+{
+	"name": "tweakpane-plugin-color-plus",
+	"version": "0.0.0",
+	"type": "module",
+	"description": "Advanced color handling for Tweakpane.",
+	"repository": "github:kitschpatrol/tweakpane-plugin-color-plus",
+	"homepage": "https://github.com/kitschpatrol/tweakpane-plugin-color-plus",
+	"bugs": "https://github.com/kitschpatrol/tweakpane-plugin-color-plus/issues",
+	"author": {
+		"name": "Eric Mika",
+		"email": "eric@ericmika.com",
+		"url": "https://ericmika.com"
+	},
+	"license": "MIT",
+	"packageManager": "pnpm@9.12.2",
+	"engines": {
+		"node": ">=18.0.0",
+		"pnpm": ">=9.0.0"
+	},
+	"main": "dist/tweakpane-plugin-color-plus.js",
+	"exports": {
+		".": {
+			"types": "./dist/types/index.d.ts",
+			"default": "./dist/tweakpane-plugin-color-plus.js"
+		},
+		"./lite": {
+			"types": "./dist/types/index.d.ts",
+			"default": "./dist/tweakpane-plugin-color-plus.lite.js"
+		}
+	},
+	"types": "dist/types/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"keywords": [
+		"npm-package",
+		"tweakpane",
+		"tweakpane-plugin"
+	],
+	"scripts": {
+		"build": "run-p build:*",
+		"build:dev": "rollup --config rollup.config.js",
+		"build:dts": "tsc --project src/tsconfig-dts.json",
+		"build:prod": "rollup --config rollup.config.js --environment BUILD:production",
+		"clean": "rimraf dist",
+		"format": "run-p format:*",
+		"format:scss": "prettier --parser scss --write \"src/sass/**/*.scss\"",
+		"format:ts": "eslint --fix \"src/**/*.ts\"",
+		"lint:ts": "eslint --config eslint.config.js src/",
+		"prepare": "run-s clean build",
+		"prepublishOnly": "npm test",
+		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
+		"server": "http-server -c-1 -o /test/browser.html",
+		"start": "run-p watch server",
+		"test": "eslint \"src/**/*.ts\"",
+		"watch": "run-p watch:*",
+		"watch:sass": "onchange --initial --kill \"src/sass/**/*.scss\" -- npm run build:dev",
+		"watch:ts": "onchange --initial --kill \"src/**/*.ts\" -- rollup --config rollup.config.js"
+	},
+	"peerDependencies": {
+		"tweakpane": "^4.0.0-beta.2"
+	},
+	"dependencies": {
+		"@tweakpane/core": "^2.0.4"
+	},
+	"devDependencies": {
+		"@rollup/plugin-alias": "^5.1.1",
+		"@rollup/plugin-node-resolve": "^15.3.0",
+		"@rollup/plugin-replace": "^6.0.1",
+		"@rollup/plugin-terser": "^0.4.4",
+		"@rollup/plugin-typescript": "^12.1.1",
+		"@typescript-eslint/eslint-plugin": "^8.11.0",
+		"@typescript-eslint/parser": "^8.11.0",
+		"autoprefixer": "^10.4.20",
+		"bumpp": "^9.7.1",
+		"eslint": "^9.13.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.2.1",
+		"eslint-plugin-simple-import-sort": "^12.1.1",
+		"http-server": "^14.1.1",
+		"npm-run-all": "^4.1.5",
+		"onchange": "^7.1.0",
+		"postcss": "^8.4.47",
+		"prettier": "^3.3.3",
+		"prettier-plugin-pkg": "^0.18.1",
+		"rimraf": "^6.0.1",
+		"rollup": "^4.24.0",
+		"rollup-plugin-cleanup": "^3.2.1",
+		"sass": "^1.80.4",
+		"typescript": "^5.6.3"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

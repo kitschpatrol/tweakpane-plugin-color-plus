@@ -1,0 +1,8 @@
+{
+	"compilerOptions": {
+		"lib": ["DOM", "ES2020"],
+		"moduleResolution": "Bundler",
+		"strict": true,
+		"target": "ES6"
+	}
+}

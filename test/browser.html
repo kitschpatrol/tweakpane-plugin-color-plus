@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title></title>
+		<script type="importmap">
+			{
+				"imports": {
+					"tweakpane": "../node_modules/tweakpane/dist/tweakpane.js",
+					"@tweakpane/core": "../node_modules/@tweakpane/core/dist/index.js",
+					"tweakpane-plugin-color-plus": "../dist/tweakpane-plugin-color-plus.lite.js"
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<script type="module">
+			import {Pane} from 'tweakpane';
+			import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus';
+
+			const params = {
+				prop: 3,
+			};
+
+			const pane = new Pane();
+			// Register plugin
+			pane.registerPlugin(TweakpanePluginColorPlus);
+
+			// TODO: Update parameters for your plugin
+			pane
+				.addBinding(params, 'prop', {
+					view: 'dots',
+				})
+				.on('change', (ev) => {
+					console.log(ev.value);
+				});
+
+			window.pane = pane;
+		</script>
+	</body>
+</html>
