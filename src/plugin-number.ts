@@ -33,16 +33,6 @@ function createFormatter(supportsAlpha: boolean): Formatter<IntColor> {
 		: (v: IntColor) => colorToHexRgbString(v, '0x');
 }
 
-function isForColor(params: Record<string, unknown>): boolean {
-	if ('color' in params) {
-		return true;
-	}
-	if (params.view === 'color-plus') {
-		return true;
-	}
-	return false;
-}
-
 export interface NumberColorPlusInputParams extends ColorInputParams {
 	supportsAlpha: boolean;
 }
@@ -55,13 +45,14 @@ export const NumberColorPlusInputPlugin: InputBindingPlugin<
 	number,
 	NumberColorPlusInputParams
 > = createPlugin({
-	id: 'input-color-number',
+	id: 'input-color-plus-number',
 	type: 'input',
 	accept: (value, params) => {
-		if (typeof value !== 'number') {
+		if (params.view !== 'color-plus') {
 			return null;
 		}
-		if (!isForColor(params)) {
+
+		if (typeof value !== 'number') {
 			return null;
 		}
 

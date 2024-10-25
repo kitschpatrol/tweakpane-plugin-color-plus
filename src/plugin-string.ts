@@ -32,15 +32,17 @@ export const StringColorPlusInputPlugin: InputBindingPlugin<
 	string,
 	StringColorPlusInputParams
 > = createPlugin({
-	id: 'input-color-string',
+	id: 'input-color-plus-string',
 	type: 'input',
 	accept: (value, params) => {
+		if (params.view !== 'color-plus') {
+			return null;
+		}
+
 		if (typeof value !== 'string') {
 			return null;
 		}
-		if (params.view === 'text') {
-			return null;
-		}
+
 		const format = detectStringColorFormat(value, extractColorType(params));
 		if (!format) {
 			return null;

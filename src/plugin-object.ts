@@ -66,9 +66,13 @@ export const ObjectColorPlusInputPlugin: InputBindingPlugin<
 	RgbColorObject | RgbaColorObject,
 	ObjectColorPlusInputParams
 > = createPlugin({
-	id: 'input-color-object',
+	id: 'input-color-plus-object',
 	type: 'input',
 	accept: (value, params) => {
+		if (params.view !== 'color-plus') {
+			return null;
+		}
+
 		if (!isColorObject(value)) {
 			return null;
 		}
