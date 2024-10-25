@@ -1,11 +1,33 @@
-import {TemplateInputPlugin} from './plugin.js';
+// Import both the plugins and their types
+import {
+	type NumberColorPlusInputParams,
+	NumberColorPlusInputPlugin,
+} from './plugin-number.js';
+import {
+	type ObjectColorPlusInputParams,
+	ObjectColorPlusInputPlugin,
+} from './plugin-object.js';
+import {
+	type StringColorPlusInputParams,
+	StringColorPlusInputPlugin,
+} from './plugin-string.js';
 
-// The identifier of the plugin bundle.
-export const id = 'template';
+// The identifier of the plugin bundle
+export const id = 'color-plus';
 
-// This plugin template injects a compiled CSS by @rollup/plugin-replace
-// See rollup.config.js for details
+// CSS injection
 export const css = '__css__';
 
-// Export your plugin(s) as a constant `plugins`
-export const plugins = [TemplateInputPlugin];
+// Re-export the parameter types
+export type {
+	NumberColorPlusInputParams,
+	ObjectColorPlusInputParams,
+	StringColorPlusInputParams,
+};
+
+// Export plugins array with explicit typing
+export const plugins = [
+	NumberColorPlusInputPlugin,
+	StringColorPlusInputPlugin,
+	ObjectColorPlusInputPlugin,
+] as const;

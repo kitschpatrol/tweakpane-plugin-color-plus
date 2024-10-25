@@ -19,7 +19,13 @@
 			import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus';
 
 			const params = {
-				prop: 3,
+				stringColor: '#ff00ff',
+				numberColor: 0xff00ff,
+				objectColor: {
+					r: 255,
+					g: 0,
+					b: 255,
+				},
 			};
 
 			const pane = new Pane();
@@ -27,13 +33,18 @@
 			pane.registerPlugin(TweakpanePluginColorPlus);
 
 			// TODO: Update parameters for your plugin
-			pane
-				.addBinding(params, 'prop', {
-					view: 'dots',
-				})
-				.on('change', (ev) => {
-					console.log(ev.value);
-				});
+			pane.addBinding(params, 'stringColor', {
+				label: 'String Color',
+				view: 'color-plus',
+			});
+			pane.addBinding(params, 'numberColor', {
+				label: 'Number Color',
+				view: 'color-plus',
+			});
+			pane.addBinding(params, 'objectColor', {
+				label: 'Object Color',
+				view: 'color-plus',
+			});
 
 			window.pane = pane;
 		</script>
