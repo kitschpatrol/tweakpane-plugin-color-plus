@@ -1,8 +1,28 @@
 {
 	"compilerOptions": {
-		"lib": ["DOM", "ES2020"],
-		"moduleResolution": "Bundler",
-		"strict": true,
-		"target": "ES6"
+		// Essential for union type safety
+		"strict": true, // Enables all strict type checking options
+		"strictNullChecks": true, // More precise null/undefined checking
+		"strictFunctionTypes": true, // More precise function parameter checking
+
+		// Recommended for better type inference
+		"noImplicitAny": true, // Raise error on expressions with implied 'any'
+		"noUncheckedIndexedAccess": true, // Add undefined to indexed access results
+
+		// Optional but helpful
+		"noPropertyAccessFromIndexSignature": true, // Require dot notation for known properties
+		"exactOptionalPropertyTypes": true, // More precise optional property checking
+
+		// For the latest TypeScript features
+		"target": "ES2022", // Or whatever ECMAScript target you need
+		"lib": ["DOM", "ES2022"], // Include necessary runtime libraries
+
+		// Module settings (adjust based on your needs)
+		"module": "ESNext",
+		"moduleResolution": "Bundler", // Or "Node" depending on your setup
+
+		// Additional recommended settings
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
 	}
 }

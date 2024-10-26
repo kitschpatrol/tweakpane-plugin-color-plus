@@ -12,6 +12,15 @@
 				}
 			}
 		</script>
+		<style>
+			:root {
+				--tp-blade-value-width: 260px;
+			}
+
+			div.tp-dfwv {
+				width: 410px;
+			}
+		</style>
 	</head>
 	<body>
 		<script type="module">
@@ -21,10 +30,38 @@
 			const params = {
 				stringColor: '#ff00ff',
 				numberColor: 0xff00ff,
-				objectColor: {
+
+				stringColorAlpha: '#ff00ff00',
+				numberColorAlpha: 0xff00ff,
+				stringRgb: 'rgb(255, 0, 255)',
+				stringRgba: 'rgba(255, 0, 255, 0.5)',
+				stringHsl: 'hsl(255, 0, 255)',
+				stringHsla: 'hsla(255, 0, 50, 0.5)',
+				stringHsv: 'hsv(255, 0, 255)',
+				stringHsva: 'hsva(255, 0, 50, 0.5)',
+				stringHsb: 'hsb(255, 0, 255)',
+				stringHsvb: 'hsba(255, 0, 50, 0.5)',
+				objectRgba: {
 					r: 255,
 					g: 0,
 					b: 255,
+					a: 0.5,
+				},
+				objectRgb: {
+					r: 255,
+					g: 0,
+					b: 255,
+				},
+				objectHsva: {
+					h: 255,
+					s: 0,
+					v: 255,
+					a: 0,
+				},
+				objectHsv: {
+					h: 255,
+					s: 0,
+					v: 255,
 				},
 			};
 
@@ -32,19 +69,41 @@
 			// Register plugin
 			pane.registerPlugin(TweakpanePluginColorPlus);
 
+			for (const key of Object.keys(params)) {
+				pane.addBinding(params, key, {
+					view: 'color',
+					// color: {type: 'float'},
+				});
+			}
+
 			// TODO: Update parameters for your plugin
-			pane.addBinding(params, 'stringColor', {
-				label: 'String Color',
-				view: 'color-plus',
-			});
-			pane.addBinding(params, 'numberColor', {
-				label: 'Number Color',
-				view: 'color-plus',
-			});
-			pane.addBinding(params, 'objectColor', {
-				label: 'Object Color',
-				view: 'color-plus',
-			});
+			// pane.addBinding(params, 'stringColor', {
+			// 	label: 'String Color',
+			// 	view: 'color-plus',
+			// });
+			// pane.addBinding(params, 'numberColor', {
+			// 	label: 'Number Color',
+			// 	view: 'color-plus',
+			// });
+			// pane.addBinding(params, 'objectColor', {
+			// 	label: 'Object Color',
+			// 	view: 'color-plus',
+			// });
+			// pane.addBinding(params, 'stringColorAlpha', {
+			// 	label: 'String Color Alpha',
+			// 	view: 'color-plus',
+			// });
+			// pane.addBinding(params, 'numberColorAlpha', {
+			// 	label: 'Number Color Alpha',
+			// 	view: 'color-plus',
+			// 	color: {alpha: true},
+			// });
+			// pane.addBinding(params, 'objectColorAlpha', {
+			// 	label: 'Object Color Alpha',
+			// 	view: 'color-plus',
+			// 	picker: 'inline',
+			// 	expanded: true,
+			// });
 
 			window.pane = pane;
 		</script>

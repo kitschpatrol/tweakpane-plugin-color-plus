@@ -94,6 +94,13 @@ function createComponentControllers(
 		parser: parseNumber,
 		viewProps: config.viewProps,
 	};
+
+	console.log('----------------------------------');
+
+	console.log(config.colorMode);
+
+	// console.log(`exposeAlpha: ${exposeAlpha}`);
+
 	return [0, 1, 2].map((i) => {
 		const c = createComponentController(doc, cc, i);
 		connectValues({

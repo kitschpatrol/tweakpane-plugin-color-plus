@@ -59,27 +59,28 @@ export class ColorPickerView implements View {
 		rgbElem.appendChild(this.textsView_.element);
 		this.element.appendChild(rgbElem);
 
-		if (config.alphaViews) {
-			this.alphaViews_ = {
-				palette: config.alphaViews.palette,
-				text: config.alphaViews.text,
-			};
+		// Use an extra box instead?
+		// if (config.alphaViews) {
+		// 	this.alphaViews_ = {
+		// 		palette: config.alphaViews.palette,
+		// 		text: config.alphaViews.text,
+		// 	};
 
-			const aElem = doc.createElement('div');
-			aElem.classList.add(cn('a'));
+		// 	const aElem = doc.createElement('div');
+		// 	aElem.classList.add(cn('a'));
 
-			const apElem = doc.createElement('div');
-			apElem.classList.add(cn('ap'));
-			apElem.appendChild(this.alphaViews_.palette.element);
-			aElem.appendChild(apElem);
+		// 	const apElem = doc.createElement('div');
+		// 	apElem.classList.add(cn('ap'));
+		// 	apElem.appendChild(this.alphaViews_.palette.element);
+		// 	aElem.appendChild(apElem);
 
-			const atElem = doc.createElement('div');
-			atElem.classList.add(cn('at'));
-			atElem.appendChild(this.alphaViews_.text.element);
-			aElem.appendChild(atElem);
+		// 	const atElem = doc.createElement('div');
+		// 	atElem.classList.add(cn('at'));
+		// 	atElem.appendChild(this.alphaViews_.text.element);
+		// 	aElem.appendChild(atElem);
 
-			this.element.appendChild(aElem);
-		}
+		// 	this.element.appendChild(aElem);
+		// }
 	}
 
 	get allFocusableElements(): HTMLElement[] {

@@ -69,6 +69,11 @@
 
 ### Implementation notes
 
+- [CSS Color Module Level 4](https://drafts.csswg.org/css-color/)
+- https://github.com/color-js/color.js (By the CSS color people)
+- https://github.com/Evercoder/culori (Used in https://lch.oklch.com/)
+- https://github.com/iamlite/color-core (Too anemic)
+
 ### Similar projects
 
 ## The future
@@ -84,3 +89,13 @@ _State anyone or anything that significantly helped with the development of your
 <!-- contributing -->
 
 <!-- license -->
+
+##
+
+| Style                                           | Tweakpane | Tweakane Plugin Color Plus |
+| ----------------------------------------------- | --------- | -------------------------- |
+| `rgb()`                                         | ✅        |
+| `rgba()`                                        | ✅        |
+| `hsl()`                                         | ✅        |
+| `hsla()`                                        | ✅        |
+| `{r: number, g: number, b: number, a?: number}` | ✅        |
