@@ -1,4 +1,3 @@
-// Import both the plugins and their types
 import {
 	type NumberColorPlusInputParams,
 	NumberColorPlusInputPlugin,
@@ -16,7 +15,7 @@ import {
 export const id = 'color-plus';
 
 // CSS injection
-export const css = '__css__';
+export const css: string = '__css__';
 
 // Re-export the parameter types
 export type {

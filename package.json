@@ -39,10 +39,11 @@
 	],
 	"scripts": {
 		"build": "run-p build:*",
-		"build:dev": "rollup --config rollup.config.js",
-		"build:dts": "tsc --project src/tsconfig-dts.json",
-		"build:prod": "rollup --config rollup.config.js --environment BUILD:production",
+		"build:dev": "vite build",
+		"build:dts": "tsc --noEmit",
+		"build:prod": "vite build --mode production",
 		"clean": "rimraf dist",
+		"dev": "vite",
 		"format": "run-p format:*",
 		"format:scss": "prettier --parser scss --write \"src/sass/**/*.scss\"",
 		"format:ts": "eslint --fix \"src/**/*.ts\"",
@@ -50,25 +51,18 @@
 		"prepare": "run-s clean build",
 		"prepublishOnly": "npm test",
 		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
-		"server": "http-server -c-1 -o /test/browser.html",
-		"start": "run-p watch server",
+		"server": "vite preview",
+		"start": "vite",
 		"test": "eslint \"src/**/*.ts\"",
-		"watch": "run-p watch:*",
-		"watch:sass": "onchange --initial --kill \"src/sass/**/*.scss\" -- npm run build:dev",
-		"watch:ts": "onchange --initial --kill \"src/**/*.ts\" -- rollup --config rollup.config.js"
+		"watch": "vite"
 	},
 	"peerDependencies": {
-		"tweakpane": "^4.0.0-beta.2"
+		"tweakpane": "^4.0.0"
 	},
 	"dependencies": {
 		"@tweakpane/core": "^2.0.4"
 	},
 	"devDependencies": {
-		"@rollup/plugin-alias": "^5.1.1",
-		"@rollup/plugin-node-resolve": "^15.3.0",
-		"@rollup/plugin-replace": "^6.0.1",
-		"@rollup/plugin-terser": "^0.4.4",
-		"@rollup/plugin-typescript": "^12.1.1",
 		"@typescript-eslint/eslint-plugin": "^8.11.0",
 		"@typescript-eslint/parser": "^8.11.0",
 		"autoprefixer": "^10.4.20",
@@ -77,17 +71,15 @@
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-prettier": "^5.2.1",
 		"eslint-plugin-simple-import-sort": "^12.1.1",
-		"http-server": "^14.1.1",
 		"npm-run-all": "^4.1.5",
-		"onchange": "^7.1.0",
 		"postcss": "^8.4.47",
 		"prettier": "^3.3.3",
 		"prettier-plugin-pkg": "^0.18.1",
 		"rimraf": "^6.0.1",
-		"rollup": "^4.24.0",
-		"rollup-plugin-cleanup": "^3.2.1",
 		"sass": "^1.80.4",
-		"typescript": "^5.6.3"
+		"typescript": "^5.6.3",
+		"vite": "^5.0.0",
+		"vite-plugin-dts": "^4.3.0"
 	},
 	"publishConfig": {
 		"access": "public"
