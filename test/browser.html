@@ -12,6 +12,15 @@
 				}
 			}
 		</script>
+		<style>
+			:root {
+				--tp-blade-value-width: 260px;
+			}
+
+			div.tp-dfwv {
+				width: 410px;
+			}
+		</style>
 	</head>
 	<body>
 		<script type="module">
@@ -26,6 +35,8 @@
 					g: 0,
 					b: 255,
 				},
+				objectColorString: '{r: 255, g: 0, b: 255}',
+				cssColor: `rgb(255 0 255 / 0.5)`,
 			};
 
 			const pane = new Pane();
@@ -43,6 +54,15 @@
 			});
 			pane.addBinding(params, 'objectColor', {
 				label: 'Object Color',
+				view: 'color-plus',
+			});
+			pane.addBinding(params, 'objectColorString', {
+				label: 'Object Color',
+				view: 'color-plus',
+			});
+
+			pane.addBinding(params, 'cssColor', {
+				label: 'Object Color Culori',
 				view: 'color-plus',
 			});
 

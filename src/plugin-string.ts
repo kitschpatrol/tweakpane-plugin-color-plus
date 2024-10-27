@@ -45,7 +45,9 @@ export const StringColorPlusInputPlugin: InputBindingPlugin<
 		if (!format) {
 			return null;
 		}
+
 		const stringifier = findColorStringifier(format);
+
 		if (!stringifier) {
 			return null;
 		}

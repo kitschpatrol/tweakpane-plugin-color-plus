@@ -19,8 +19,13 @@ import {
 import {createColor, mapColorType} from '../model/colors.js';
 import {FloatColor} from '../model/float-color.js';
 import {IntColor} from '../model/int-color.js';
+import {
+	detectStringColorCulori,
+	findColorStringifierCulori,
+	parseCssColorInt,
+} from './color-string-culori.js';
 
-type StringColorNotation = 'func' | 'hex' | 'object';
+export type StringColorNotation = 'func' | 'hex' | 'object' | 'css';
 
 export interface StringColorFormat {
 	alpha: boolean;
@@ -306,7 +311,7 @@ function createObjectRgbaColorParser(type: ColorType): Parser<Color> {
 	};
 }
 
-type DetectionResult = Omit<StringColorFormat, 'type'>;
+export type DetectionResult = Omit<StringColorFormat, 'type'>;
 
 const PARSER_AND_RESULT: {
 	parser: Parser<unknown>;
@@ -379,14 +384,18 @@ const PARSER_AND_RESULT: {
 ];
 
 function detectStringColor(text: string): DetectionResult | null {
-	return PARSER_AND_RESULT.reduce(
-		(prev: DetectionResult | null, {parser, result: detection}) => {
-			if (prev) {
-				return prev;
-			}
-			return parser(text) ? detection : null;
-		},
-		null,
+	return (
+		PARSER_AND_RESULT.reduce(
+			(prev: DetectionResult | null, {parser, result: detection}) => {
+				if (prev) {
+					return prev;
+				}
+				return parser(text) ? detection : null;
+			},
+			null,
+		) ??
+		// Fall through to culari detector
+		detectStringColorCulori(text)
 	);
 }
 
@@ -410,6 +419,13 @@ export function detectStringColorFormat(
 			type: type,
 		};
 	}
+	//Culori additions
+	if (r.notation === 'css' && type !== 'float') {
+		return {
+			...r,
+			type: type,
+		};
+	}
 	return null;
 }
 
@@ -428,6 +444,7 @@ export function createColorStringParser(type: ColorType): Parser<Color> {
 		parsers.push(
 			createObjectRgbColorParser('int'),
 			createObjectRgbaColorParser('int'),
+			parseCssColorInt,
 		);
 	}
 	if (type === 'float') {
@@ -439,12 +456,18 @@ export function createColorStringParser(type: ColorType): Parser<Color> {
 	const parser = composeParsers(parsers);
 
 	return (text) => {
+		console.log('----------------------------------');
+		console.log(text);
 		const result = parser(text);
+		console.log(result);
 		return result ? mapColorType(result, type) : null;
 	};
 }
 
 export function readIntColorString(value: unknown): IntColor {
+	console.log('----------------------------------');
+	console.log(value);
+
 	const parser = createColorStringParser('int');
 	if (typeof value !== 'string') {
 		return IntColor.black();
@@ -642,15 +665,14 @@ const FORMAT_AND_STRINGIFIERS: FormatAndStringifier[] = [
 export function findColorStringifier(
 	format: StringColorFormat,
 ): Formatter<Color> | null {
-	return FORMAT_AND_STRINGIFIERS.reduce(
-		(prev: Formatter<Color> | null, fas) => {
+	return (
+		FORMAT_AND_STRINGIFIERS.reduce((prev: Formatter<Color> | null, fas) => {
 			if (prev) {
 				return prev;
 			}
 			return equalsStringColorFormat(fas.format, format)
 				? fas.stringifier
 				: null;
-		},
-		null,
+		}, null) ?? findColorStringifierCulori(format)
 	);
 }

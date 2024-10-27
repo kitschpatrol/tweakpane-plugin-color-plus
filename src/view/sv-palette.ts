@@ -7,7 +7,6 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {hsvToRgbInt} from '../model/color-model.js';
 import {IntColor} from '../model/int-color.js';
 
 const cn = ClassName('svp');
@@ -90,4 +89,40 @@ export class SvPaletteView implements View {
 	private onValueChange_(): void {
 		this.update_();
 	}
+}
+
+// TODO replace with culori
+function hsvToRgbInt(
+	h: number,
+	s: number,
+	v: number,
+): [number, number, number] {
+	const c = v * s;
+	const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+	const m = v - c;
+
+	const rgbp = (() => {
+		if (h < 60) {
+			return [c, x, 0];
+		}
+		if (h < 120) {
+			return [x, c, 0];
+		}
+		if (h < 180) {
+			return [0, c, x];
+		}
+		if (h < 240) {
+			return [0, x, c];
+		}
+		if (h < 300) {
+			return [x, 0, c];
+		}
+		return [c, 0, x];
+	})();
+
+	return [
+		Math.round((rgbp[0] + m) * 255),
+		Math.round((rgbp[1] + m) * 255),
+		Math.round((rgbp[2] + m) * 255),
+	];
 }
