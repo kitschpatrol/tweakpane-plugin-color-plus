@@ -16,32 +16,32 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {ColorType} from '../model/color-model.js';
-import {IntColor} from '../model/int-color.js';
+import {ColorValueInternal} from '../plugin.js';
 import {ColorView} from '../view/color.js';
 import {ColorPickerController} from './color-picker.js';
 import {ColorSwatchController} from './color-swatch.js';
 
 interface Config {
-	colorType: ColorType;
 	expanded: boolean;
-	formatter: Formatter<IntColor>;
-	parser: Parser<IntColor>;
-	pickerLayout: PickerLayout;
+	formatter: Formatter<ColorValueInternal>;
+	parser: Parser<ColorValueInternal>;
 	supportsAlpha: boolean;
-	value: Value<IntColor>;
+	pickerLayout: PickerLayout;
+	value: Value<ColorValueInternal>;
 	viewProps: ViewProps;
 }
 
 /**
  * @hidden
  */
-export class ColorController implements ValueController<IntColor, ColorView> {
-	public readonly value: Value<IntColor>;
+export class ColorController
+	implements ValueController<ColorValueInternal, ColorView>
+{
+	public readonly value: Value<ColorValueInternal>;
 	public readonly view: ColorView;
 	public readonly viewProps: ViewProps;
 	private readonly swatchC_: ColorSwatchController;
-	private readonly textC_: TextController<IntColor>;
+	private readonly textC_: TextController<ColorValueInternal>;
 	private readonly pickerC_: ColorPickerController;
 	private readonly popC_: PopupController | null;
 	private readonly foldable_: Foldable;
@@ -89,8 +89,6 @@ export class ColorController implements ValueController<IntColor, ColorView> {
 				: null;
 
 		const pickerC = new ColorPickerController(doc, {
-			colorType: config.colorType,
-			supportsAlpha: config.supportsAlpha,
 			value: this.value,
 			viewProps: this.viewProps,
 		});
@@ -117,7 +115,7 @@ export class ColorController implements ValueController<IntColor, ColorView> {
 		}
 	}
 
-	get textController(): TextController<IntColor> {
+	get textController(): TextController<ColorValueInternal> {
 		return this.textC_;
 	}
 

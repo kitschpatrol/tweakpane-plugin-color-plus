@@ -10,12 +10,12 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {IntColor} from '../model/int-color.js';
+import {ColorValueInternal} from '../plugin.js';
 import {getKeyScaleForColor} from '../util.js';
 import {APaletteView} from '../view/a-palette.js';
 
 interface Config {
-	value: Value<IntColor>;
+	value: Value<ColorValueInternal>;
 	viewProps: ViewProps;
 }
 
@@ -23,9 +23,9 @@ interface Config {
  * @hidden
  */
 export class APaletteController
-	implements ValueController<IntColor, APaletteView>
+	implements ValueController<ColorValueInternal, APaletteView>
 {
-	public readonly value: Value<IntColor>;
+	public readonly value: Value<ColorValueInternal>;
 	public readonly view: APaletteView;
 	public readonly viewProps: ViewProps;
 	private readonly ptHandler_: PointerHandler;
@@ -59,11 +59,12 @@ export class APaletteController
 			return;
 		}
 
-		const alpha = d.point.x / d.bounds.width;
-
-		const c = this.value.rawValue;
-		const [h, s, v] = c.getComponents('hsv');
-		this.value.setRawValue(new IntColor([h, s, v, alpha], 'hsv'), opts);
+		// TODO revisit
+		console.log(opts);
+		// const alpha = d.point.x / d.bounds.width;
+		// const c = this.value.rawValue;
+		// const [h, s, v] = c.getComponents('hsv');
+		// this.value.setRawValue(new IntColor([h, s, v, alpha], 'hsv'), opts);
 	}
 
 	private onPointerDown_(ev: PointerHandlerEvents['down']): void {
@@ -96,12 +97,13 @@ export class APaletteController
 			return;
 		}
 
-		const c = this.value.rawValue;
-		const [h, s, v, a] = c.getComponents('hsv');
-		this.value.setRawValue(new IntColor([h, s, v, a + step], 'hsv'), {
-			forceEmit: false,
-			last: false,
-		});
+		// TODO revisit
+		// const c = this.value.rawValue;
+		// const [h, s, v, a] = c.getComponents('hsv');
+		// this.value.setRawValue(new IntColor([h, s, v, a + step], 'hsv'), {
+		// 	forceEmit: false,
+		// 	last: false,
+		// });
 	}
 
 	private onKeyUp_(ev: KeyboardEvent): void {

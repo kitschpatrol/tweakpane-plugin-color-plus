@@ -1,12 +1,11 @@
 import {ClassName, mapRange, Value, View, ViewProps} from '@tweakpane/core';
 
-import {colorToFunctionalRgbaString} from '../converter/color-string.js';
-import {IntColor} from '../model/int-color.js';
+import {ColorValueInternal} from '../plugin.js';
 
 const cn = ClassName('apl');
 
 interface Config {
-	value: Value<IntColor>;
+	value: Value<ColorValueInternal>;
 	viewProps: ViewProps;
 }
 
@@ -15,7 +14,7 @@ interface Config {
  */
 export class APaletteView implements View {
 	public readonly element: HTMLElement;
-	public readonly value: Value<IntColor>;
+	public readonly value: Value<ColorValueInternal>;
 	private readonly colorElem_: HTMLDivElement;
 	private readonly markerElem_: HTMLDivElement;
 	private readonly previewElem_: HTMLDivElement;
@@ -55,26 +54,24 @@ export class APaletteView implements View {
 
 	private update_(): void {
 		const c = this.value.rawValue;
-		const rgbaComps = c.getComponents('rgb');
-		const leftColor = new IntColor(
-			[rgbaComps[0], rgbaComps[1], rgbaComps[2], 0],
-			'rgb',
-		);
-		const rightColor = new IntColor(
-			[rgbaComps[0], rgbaComps[1], rgbaComps[2], 255],
-			'rgb',
-		);
+
+		const leftColor = c.clone().to('srgb');
+		leftColor.alpha = 0;
+
+		const rightColor = c.clone().to('srgb');
+		rightColor.alpha = 1;
+
 		const gradientComps = [
 			'to right',
-			colorToFunctionalRgbaString(leftColor),
-			colorToFunctionalRgbaString(rightColor),
+			leftColor.toString({format: 'rgba'}),
+			rightColor.toString({format: 'rgba'}),
 		];
 		this.colorElem_.style.background = `linear-gradient(${gradientComps.join(
 			',',
 		)})`;
 
-		this.previewElem_.style.backgroundColor = colorToFunctionalRgbaString(c);
-		const left = mapRange(rgbaComps[3], 0, 1, 0, 100);
+		this.previewElem_.style.backgroundColor = c.toString({format: 'rgba'});
+		const left = mapRange(c.alpha, 0, 1, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
 	}
 

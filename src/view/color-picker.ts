@@ -1,7 +1,8 @@
 import {ClassName, NumberTextView, View, ViewProps} from '@tweakpane/core';
 
 import {APaletteView} from './a-palette.js';
-import {ColorTextsView} from './color-texts.js';
+// TODO revisit
+// import {ColorTextsView} from './color-texts.js';
 import {HPaletteView} from './h-palette.js';
 import {SvPaletteView} from './sv-palette.js';
 
@@ -15,7 +16,8 @@ interface Config {
 	hPaletteView: HPaletteView;
 	supportsAlpha: boolean;
 	svPaletteView: SvPaletteView;
-	textsView: ColorTextsView;
+	// TODO revisit
+	// textsView: ColorTextsView;
 	viewProps: ViewProps;
 }
 
@@ -30,7 +32,8 @@ export class ColorPickerView implements View {
 	} | null = null;
 	private readonly hPaletteView_: HPaletteView;
 	private readonly svPaletteView_: SvPaletteView;
-	private readonly textsView_: ColorTextsView;
+	// TODO revisit
+	// private readonly textsView_: ColorTextsView;
 
 	constructor(doc: Document, config: Config) {
 		this.element = doc.createElement('div');
@@ -53,11 +56,12 @@ export class ColorPickerView implements View {
 		hsvElem.appendChild(hElem);
 		this.element.appendChild(hsvElem);
 
-		const rgbElem = doc.createElement('div');
-		rgbElem.classList.add(cn('rgb'));
-		this.textsView_ = config.textsView;
-		rgbElem.appendChild(this.textsView_.element);
-		this.element.appendChild(rgbElem);
+		// TODO revisit
+		// const rgbElem = doc.createElement('div');
+		// rgbElem.classList.add(cn('rgb'));
+		// this.textsView_ = config.textsView;
+		// rgbElem.appendChild(this.textsView_.element);
+		// this.element.appendChild(rgbElem);
 
 		if (config.alphaViews) {
 			this.alphaViews_ = {
@@ -86,8 +90,9 @@ export class ColorPickerView implements View {
 		const elems = [
 			this.svPaletteView_.element,
 			this.hPaletteView_.element,
-			this.textsView_.modeSelectElement,
-			...this.textsView_.inputViews.map((v) => v.inputElement),
+			// TODO revisit
+			// this.textsView_.modeSelectElement,
+			// ...this.textsView_.inputViews.map((v) => v.inputElement),
 		];
 		if (this.alphaViews_) {
 			elems.push(

@@ -1,10 +1,10 @@
 import {Value, ValueController, ViewProps} from '@tweakpane/core';
 
-import {IntColor} from '../model/int-color.js';
+import {ColorValueInternal} from '../plugin.js';
 import {ColorSwatchView} from '../view/color-swatch.js';
 
 interface Config {
-	value: Value<IntColor>;
+	value: Value<ColorValueInternal>;
 	viewProps: ViewProps;
 }
 
@@ -12,9 +12,9 @@ interface Config {
  * @hidden
  */
 export class ColorSwatchController
-	implements ValueController<IntColor, ColorSwatchView>
+	implements ValueController<ColorValueInternal, ColorSwatchView>
 {
-	public readonly value: Value<IntColor>;
+	public readonly value: Value<ColorValueInternal>;
 	public readonly view: ColorSwatchView;
 	public readonly viewProps: ViewProps;
 

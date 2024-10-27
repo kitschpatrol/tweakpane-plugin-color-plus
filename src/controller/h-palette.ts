@@ -12,12 +12,12 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {IntColor} from '../model/int-color.js';
+import {ColorValueInternal} from '../plugin.js';
 import {getKeyScaleForColor} from '../util.js';
 import {HPaletteView} from '../view/h-palette.js';
 
 interface Config {
-	value: Value<IntColor>;
+	value: Value<ColorValueInternal>;
 	viewProps: ViewProps;
 }
 
@@ -25,9 +25,9 @@ interface Config {
  * @hidden
  */
 export class HPaletteController
-	implements ValueController<IntColor, HPaletteView>
+	implements ValueController<ColorValueInternal, HPaletteView>
 {
-	public readonly value: Value<IntColor>;
+	public readonly value: Value<ColorValueInternal>;
 	public readonly view: HPaletteView;
 	public readonly viewProps: ViewProps;
 	private readonly ptHandler_: PointerHandler;
@@ -69,9 +69,10 @@ export class HPaletteController
 			360,
 		);
 
-		const c = this.value.rawValue;
-		const [, s, v, a] = c.getComponents('hsv');
-		this.value.setRawValue(new IntColor([hue, s, v, a], 'hsv'), opts);
+		const c = this.value.rawValue.to('hsv');
+		c.h = hue;
+
+		this.value.setRawValue(c, opts);
 	}
 
 	private onPointerDown_(ev: PointerHandlerEvents['down']): void {
@@ -104,9 +105,9 @@ export class HPaletteController
 			return;
 		}
 
-		const c = this.value.rawValue;
-		const [h, s, v, a] = c.getComponents('hsv');
-		this.value.setRawValue(new IntColor([h + step, s, v, a], 'hsv'), {
+		const c = this.value.rawValue.to('hsv');
+		c.h += step;
+		this.value.setRawValue(c, {
 			forceEmit: false,
 			last: false,
 		});

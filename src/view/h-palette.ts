@@ -1,12 +1,11 @@
 import {ClassName, mapRange, Value, View, ViewProps} from '@tweakpane/core';
 
-import {colorToFunctionalRgbString} from '../converter/color-string.js';
-import {IntColor} from '../model/int-color.js';
+import {ColorValueInternal} from '../plugin';
 
 const cn = ClassName('hpl');
 
 interface Config {
-	value: Value<IntColor>;
+	value: Value<ColorValueInternal>;
 	viewProps: ViewProps;
 }
 
@@ -15,7 +14,7 @@ interface Config {
  */
 export class HPaletteView implements View {
 	public readonly element: HTMLElement;
-	public readonly value: Value<IntColor>;
+	public readonly value: Value<ColorValueInternal>;
 	private readonly markerElem_: HTMLDivElement;
 
 	constructor(doc: Document, config: Config) {
@@ -42,12 +41,14 @@ export class HPaletteView implements View {
 	}
 
 	private update_(): void {
-		const c = this.value.rawValue;
-		const [h] = c.getComponents('hsv');
-		this.markerElem_.style.backgroundColor = colorToFunctionalRgbString(
-			new IntColor([h, 100, 100], 'hsv'),
-		);
-		const left = mapRange(h, 0, 360, 0, 100);
+		const c = this.value.rawValue.to('hsv');
+		c.s = 100;
+		c.v = 100;
+
+		this.markerElem_.style.backgroundColor = c.toString({
+			format: 'rgba',
+		});
+		const left = mapRange(c.h, 0, 360, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
 	}
 

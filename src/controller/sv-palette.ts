@@ -13,12 +13,12 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {IntColor} from '../model/int-color.js';
+import {ColorValueInternal} from '../plugin.js';
 import {getKeyScaleForColor} from '../util.js';
 import {SvPaletteView} from '../view/sv-palette.js';
 
 interface Config {
-	value: Value<IntColor>;
+	value: Value<ColorValueInternal>;
 	viewProps: ViewProps;
 }
 
@@ -26,9 +26,9 @@ interface Config {
  * @hidden
  */
 export class SvPaletteController
-	implements ValueController<IntColor, SvPaletteView>
+	implements ValueController<ColorValueInternal, SvPaletteView>
 {
-	public readonly value: Value<IntColor>;
+	public readonly value: Value<ColorValueInternal>;
 	public readonly view: SvPaletteView;
 	public readonly viewProps: ViewProps;
 	private readonly ptHandler_: PointerHandler;
@@ -65,11 +65,11 @@ export class SvPaletteController
 		const saturation = mapRange(d.point.x, 0, d.bounds.width, 0, 100);
 		const value = mapRange(d.point.y, 0, d.bounds.height, 100, 0);
 
-		const [h, , , a] = this.value.rawValue.getComponents('hsv');
-		this.value.setRawValue(
-			new IntColor([h, saturation, value, a], 'hsv'),
-			opts,
-		);
+		const c = this.value.rawValue.to('hsv');
+		c.s = saturation;
+		c.v = value;
+
+		this.value.setRawValue(c, opts);
 	}
 
 	private onPointerDown_(ev: PointerHandlerEvents['down']): void {
@@ -98,7 +98,7 @@ export class SvPaletteController
 			ev.preventDefault();
 		}
 
-		const [h, s, v, a] = this.value.rawValue.getComponents('hsv');
+		const c = this.value.rawValue.to('hsv');
 		const keyScale = getKeyScaleForColor(false);
 		const ds = getStepForKey(keyScale, getHorizontalStepKeys(ev));
 		const dv = getStepForKey(keyScale, getVerticalStepKeys(ev));
@@ -106,7 +106,10 @@ export class SvPaletteController
 			return;
 		}
 
-		this.value.setRawValue(new IntColor([h, s + ds, v + dv, a], 'hsv'), {
+		c.s += ds;
+		c.v += dv;
+
+		this.value.setRawValue(c, {
 			forceEmit: false,
 			last: false,
 		});

@@ -1,16 +1,5 @@
 // Import both the plugins and their types
-import {
-	type NumberColorPlusInputParams,
-	NumberColorPlusInputPlugin,
-} from './plugin-number.js';
-import {
-	type ObjectColorPlusInputParams,
-	ObjectColorPlusInputPlugin,
-} from './plugin-object.js';
-import {
-	type StringColorPlusInputParams,
-	StringColorPlusInputPlugin,
-} from './plugin-string.js';
+import {type ColorPlusInputParams, ColorPlusInputPlugin} from './plugin.js';
 
 // The identifier of the plugin bundle
 export const id = 'color-plus';
@@ -19,15 +8,7 @@ export const id = 'color-plus';
 export const css = '__css__';
 
 // Re-export the parameter types
-export type {
-	NumberColorPlusInputParams,
-	ObjectColorPlusInputParams,
-	StringColorPlusInputParams,
-};
+export type {ColorPlusInputParams};
 
 // Export plugins array with explicit typing
-export const plugins = [
-	NumberColorPlusInputPlugin,
-	StringColorPlusInputPlugin,
-	ObjectColorPlusInputPlugin,
-] as const;
+export const plugins = [ColorPlusInputPlugin] as const;

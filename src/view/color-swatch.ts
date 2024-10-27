@@ -1,10 +1,9 @@
 import {ClassName, Value, View, ViewProps} from '@tweakpane/core';
 
-import {colorToHexRgbaString} from '../converter/color-string.js';
-import {IntColor} from '../model/int-color.js';
+import {ColorValueInternal} from '../plugin';
 
 interface Config {
-	value: Value<IntColor>;
+	value: Value<ColorValueInternal>;
 	viewProps: ViewProps;
 }
 
@@ -15,7 +14,7 @@ const cn = ClassName('colsw');
  */
 export class ColorSwatchView implements View {
 	public readonly element: HTMLElement;
-	public readonly value: Value<IntColor>;
+	public readonly value: Value<ColorValueInternal>;
 	public readonly buttonElement: HTMLButtonElement;
 	private readonly swatchElem_: HTMLDivElement;
 
@@ -45,7 +44,7 @@ export class ColorSwatchView implements View {
 
 	private update_(): void {
 		const value = this.value.rawValue;
-		this.swatchElem_.style.backgroundColor = colorToHexRgbaString(value);
+		this.swatchElem_.style.backgroundColor = value.toString({format: 'rgba'});
 	}
 
 	private onValueChange_(): void {

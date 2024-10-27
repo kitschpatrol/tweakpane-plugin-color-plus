@@ -11,18 +11,16 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {ColorType} from '../model/color-model.js';
-import {IntColor} from '../model/int-color.js';
+import {ColorValueInternal} from '../plugin.js';
 import {ColorPickerView} from '../view/color-picker.js';
 import {APaletteController} from './a-palette.js';
-import {ColorTextsController} from './color-texts.js';
+// TODO revisit
+// import {ColorTextsController} from './color-texts.js';
 import {HPaletteController} from './h-palette.js';
 import {SvPaletteController} from './sv-palette.js';
 
 interface Config {
-	colorType: ColorType;
-	supportsAlpha: boolean;
-	value: Value<IntColor>;
+	value: Value<ColorValueInternal>;
 	viewProps: ViewProps;
 }
 
@@ -30,9 +28,9 @@ interface Config {
  * @hidden
  */
 export class ColorPickerController
-	implements ValueController<IntColor, ColorPickerView>
+	implements ValueController<ColorValueInternal, ColorPickerView>
 {
-	public readonly value: Value<IntColor>;
+	public readonly value: Value<ColorValueInternal>;
 	public readonly view: ColorPickerView;
 	public readonly viewProps: ViewProps;
 	private readonly alphaIcs_: {
@@ -41,7 +39,8 @@ export class ColorPickerController
 	} | null;
 	private readonly hPaletteC_: HPaletteController;
 	private readonly svPaletteC_: SvPaletteController;
-	private readonly textsC_: ColorTextsController;
+	// TODO revisit
+	// private readonly textsC_: ColorTextsController;
 
 	constructor(doc: Document, config: Config) {
 		this.value = config.value;
@@ -55,43 +54,47 @@ export class ColorPickerController
 			value: this.value,
 			viewProps: this.viewProps,
 		});
-		this.alphaIcs_ = config.supportsAlpha
-			? {
-					palette: new APaletteController(doc, {
-						value: this.value,
-						viewProps: this.viewProps,
-					}),
-					text: new NumberTextController(doc, {
-						parser: parseNumber,
-						props: ValueMap.fromObject({
-							pointerScale: 0.01,
-							keyScale: 0.1,
-							formatter: createNumberFormatter(2),
+		this.alphaIcs_ =
+			// TODO determine alpha support from the color type
+			this.value.rawValue.alpha !== 0
+				? {
+						palette: new APaletteController(doc, {
+							value: this.value,
+							viewProps: this.viewProps,
 						}),
-						value: createValue(0, {
-							constraint: new DefiniteRangeConstraint({min: 0, max: 1}),
+						text: new NumberTextController(doc, {
+							parser: parseNumber,
+							props: ValueMap.fromObject({
+								pointerScale: 0.01,
+								keyScale: 0.1,
+								formatter: createNumberFormatter(2),
+							}),
+							value: createValue(0, {
+								constraint: new DefiniteRangeConstraint({min: 0, max: 1}),
+							}),
+							viewProps: this.viewProps,
 						}),
-						viewProps: this.viewProps,
-					}),
-				}
-			: null;
+					}
+				: null;
 		if (this.alphaIcs_) {
 			connectValues({
 				primary: this.value,
 				secondary: this.alphaIcs_.text.value,
-				forward: (p) => p.getComponents()[3],
+				// TODO vet this
+				forward: (p) => p.a,
+				// TODO vet this
 				backward: (p, s) => {
-					const comps = p.getComponents();
-					comps[3] = s;
-					return new IntColor(comps, p.mode);
+					p.alpha = s;
+					return p;
 				},
 			});
 		}
-		this.textsC_ = new ColorTextsController(doc, {
-			colorType: config.colorType,
-			value: this.value,
-			viewProps: this.viewProps,
-		});
+
+		// TODO revisit
+		// this.textsC_ = new ColorTextsController(doc, {
+		// 	value: this.value,
+		// 	viewProps: this.viewProps,
+		// });
 
 		this.view = new ColorPickerView(doc, {
 			alphaViews: this.alphaIcs_
@@ -101,14 +104,16 @@ export class ColorPickerController
 					}
 				: null,
 			hPaletteView: this.hPaletteC_.view,
-			supportsAlpha: config.supportsAlpha,
+			supportsAlpha: true, // TODO revisit
 			svPaletteView: this.svPaletteC_.view,
-			textsView: this.textsC_.view,
+			// TODO revisit
+			// textsView: this.textsC_.view,
 			viewProps: this.viewProps,
 		});
 	}
 
-	get textsController(): ColorTextsController {
-		return this.textsC_;
-	}
+	// TODO revisit
+	// get textsController(): ColorTextsController {
+	// 	return this.textsC_;
+	// }
 }

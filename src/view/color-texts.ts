@@ -1,5 +1,4 @@
 import {
-	bindValue,
 	ClassName,
 	createSvgIconElement,
 	InputView,
@@ -9,9 +8,8 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {ColorMode} from '../model/color-model.js';
-
-export type ColorTextsMode = ColorMode | 'hex';
+// TODO
+export type ColorTextsMode = 'hex' | 'rgb' | 'hsl' | 'hsv';
 
 interface Config {
 	inputViews: InputView[];
@@ -77,9 +75,10 @@ export class ColorTextsView implements View {
 		this.inputViews_ = config.inputViews;
 		this.applyInputViews_();
 
-		bindValue(config.mode, (mode) => {
-			this.modeElem_.value = mode;
-		});
+		// TODO re-expose mode...
+		// bindValue(config.mode, (mode) => {
+		// 	this.modeElem_.value = mode;
+		// });
 	}
 
 	get modeSelectElement(): HTMLSelectElement {
