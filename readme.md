@@ -70,7 +70,7 @@
 ### Implementation notes
 
 - [CSS Color Module Level 4](https://drafts.csswg.org/css-color/)
-- https://github.com/color-js/color.js (By the CSS color people)
+- https://github.com/color-js/color.js (By the CSS color people... version 6 has critical features like "parseMeta" which stores and reserializes strings in the format they were parsed in)
 - https://github.com/Evercoder/culori (Used in https://lch.oklch.com/)
 - https://github.com/iamlite/color-core (Too anemic)
 

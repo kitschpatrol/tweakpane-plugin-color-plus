@@ -74,6 +74,7 @@
 		"@typescript-eslint/parser": "^8.11.0",
 		"autoprefixer": "^10.4.20",
 		"bumpp": "^9.7.1",
+		"colorjs.io": "link:../color.js",
 		"culori": "^4.0.1",
 		"eslint": "^9.13.0",
 		"eslint-config-prettier": "^9.1.0",
