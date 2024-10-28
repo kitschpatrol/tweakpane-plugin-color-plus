@@ -33,10 +33,14 @@
 			pane.registerPlugin(TweakpanePluginColorPlus);
 
 			// TODO: Update parameters for your plugin
-			pane.addBinding(params, 'stringColor', {
-				label: 'String Color',
-				view: 'color-plus',
-			});
+			pane
+				.addBinding(params, 'stringColor', {
+					label: 'String Color',
+					view: 'color-plus',
+				})
+				.on('change', (event) => {
+					console.log(event);
+				});
 			// pane.addBinding(params, 'numberColor', {
 			// 	label: 'Number Color',
 			// 	view: 'color-plus',

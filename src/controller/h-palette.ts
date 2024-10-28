@@ -12,12 +12,12 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {ColorValueInternal} from '../plugin.js';
+import {ColorPlus} from '../model/color-plus.js';
 import {getKeyScaleForColor} from '../util.js';
 import {HPaletteView} from '../view/h-palette.js';
 
 interface Config {
-	value: Value<ColorValueInternal>;
+	value: Value<ColorPlus>;
 	viewProps: ViewProps;
 }
 
@@ -25,9 +25,9 @@ interface Config {
  * @hidden
  */
 export class HPaletteController
-	implements ValueController<ColorValueInternal, HPaletteView>
+	implements ValueController<ColorPlus, HPaletteView>
 {
-	public readonly value: Value<ColorValueInternal>;
+	public readonly value: Value<ColorPlus>;
 	public readonly view: HPaletteView;
 	public readonly viewProps: ViewProps;
 	private readonly ptHandler_: PointerHandler;
@@ -69,9 +69,8 @@ export class HPaletteController
 			360,
 		);
 
-		const c = this.value.rawValue.to('hsv');
-		c.h = hue;
-
+		const c = this.value.rawValue.clone();
+		c.set('h', hue, 'hsv');
 		this.value.setRawValue(c, opts);
 	}
 
@@ -105,8 +104,8 @@ export class HPaletteController
 			return;
 		}
 
-		const c = this.value.rawValue.to('hsv');
-		c.h += step;
+		const c = this.value.rawValue.clone();
+		c.set('h', (value) => value + step, 'hsv');
 		this.value.setRawValue(c, {
 			forceEmit: false,
 			last: false,

@@ -1,11 +1,11 @@
 import {ClassName, mapRange, Value, View, ViewProps} from '@tweakpane/core';
 
-import {ColorValueInternal} from '../plugin';
+import {ColorPlus} from '../model/color-plus.js';
 
 const cn = ClassName('hpl');
 
 interface Config {
-	value: Value<ColorValueInternal>;
+	value: Value<ColorPlus>;
 	viewProps: ViewProps;
 }
 
@@ -14,7 +14,7 @@ interface Config {
  */
 export class HPaletteView implements View {
 	public readonly element: HTMLElement;
-	public readonly value: Value<ColorValueInternal>;
+	public readonly value: Value<ColorPlus>;
 	private readonly markerElem_: HTMLDivElement;
 
 	constructor(doc: Document, config: Config) {
@@ -41,14 +41,13 @@ export class HPaletteView implements View {
 	}
 
 	private update_(): void {
-		const c = this.value.rawValue.to('hsv');
-		c.s = 100;
-		c.v = 100;
+		const h = this.value.rawValue.get('h', 'hsv');
+		this.value.rawValue.setAll([h, 100, 100], 'hsv');
 
-		this.markerElem_.style.backgroundColor = c.toString({
-			format: 'rgba',
-		});
-		const left = mapRange(c.h, 0, 360, 0, 100);
+		const backgroundColor = this.value.rawValue.clone('srgb');
+
+		this.markerElem_.style.backgroundColor = backgroundColor.serialize('rgba');
+		const left = mapRange(h, 0, 360, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
 	}
 

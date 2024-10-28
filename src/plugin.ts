@@ -4,16 +4,15 @@ import {
 	type InputBindingPlugin,
 	writePrimitive,
 } from '@tweakpane/core';
-import Color from 'colorjs.io';
 
 import {ColorController} from './controller/color.js';
+import {ColorPlus} from './model/color-plus.js';
 
-export type ColorValueInternal = Color;
 export type ColorValueExternal = string; // only strings for now...
 export type ColorPlusInputParams = ColorInputParams;
 
 export const ColorPlusInputPlugin: InputBindingPlugin<
-	ColorValueInternal,
+	ColorPlus,
 	ColorValueExternal,
 	ColorPlusInputParams
 > = createPlugin({
@@ -31,28 +30,28 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			return null;
 		}
 
-		try {
-			new Color(value);
-			console.log('ColorPlusInputPlugin can parse string');
-			// Return the parsed color
-			return {
-				initialValue: value as ColorValueExternal,
-				params: {},
-			};
-		} catch {
+		const color = ColorPlus.create(value);
+
+		if (color === undefined) {
 			console.warn('ColorPlusInputPlugin could not parse string');
 			return null;
 		}
+
+		return {
+			initialValue: value as ColorValueExternal,
+			params: {},
+		};
 	},
 	binding: {
 		// External to internal
 		reader: () => {
 			// Todo factor in args...
 			return (value: unknown) => {
-				if (typeof value !== 'string') {
-					throw new Error('ColorPlusInputPlugin reader only supports strings');
+				const newColor = ColorPlus.create(value);
+				if (newColor === undefined) {
+					throw new Error('Could not create color');
 				}
-				return new Color(value);
+				return newColor;
 			};
 		},
 		equals: (a, b) => {
@@ -69,8 +68,10 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 	controller: (args) => {
 		return new ColorController(args.document, {
 			expanded: args.params.expanded ?? false,
-			formatter: (value: Color) => value.toString(),
-			parser: (text: string) => new Color(text),
+			formatter: (value: ColorPlus) => value.serialize(),
+			parser: (text: string) => {
+				return ColorPlus.create(text) ?? null;
+			},
 			pickerLayout: args.params.picker ?? 'popup',
 			supportsAlpha: true,
 			value: args.value,

@@ -16,32 +16,30 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {ColorValueInternal} from '../plugin.js';
+import {ColorPlus} from '../model/color-plus.js';
 import {ColorView} from '../view/color.js';
 import {ColorPickerController} from './color-picker.js';
 import {ColorSwatchController} from './color-swatch.js';
 
 interface Config {
 	expanded: boolean;
-	formatter: Formatter<ColorValueInternal>;
-	parser: Parser<ColorValueInternal>;
+	formatter: Formatter<ColorPlus>;
+	parser: Parser<ColorPlus>;
 	supportsAlpha: boolean;
 	pickerLayout: PickerLayout;
-	value: Value<ColorValueInternal>;
+	value: Value<ColorPlus>;
 	viewProps: ViewProps;
 }
 
 /**
  * @hidden
  */
-export class ColorController
-	implements ValueController<ColorValueInternal, ColorView>
-{
-	public readonly value: Value<ColorValueInternal>;
+export class ColorController implements ValueController<ColorPlus, ColorView> {
+	public readonly value: Value<ColorPlus>;
 	public readonly view: ColorView;
 	public readonly viewProps: ViewProps;
 	private readonly swatchC_: ColorSwatchController;
-	private readonly textC_: TextController<ColorValueInternal>;
+	private readonly textC_: TextController<ColorPlus>;
 	private readonly pickerC_: ColorPickerController;
 	private readonly popC_: PopupController | null;
 	private readonly foldable_: Foldable;
@@ -115,7 +113,7 @@ export class ColorController
 		}
 	}
 
-	get textController(): TextController<ColorValueInternal> {
+	get textController(): TextController<ColorPlus> {
 		return this.textC_;
 	}
 

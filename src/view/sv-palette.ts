@@ -7,12 +7,12 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {ColorValueInternal} from '../plugin';
+import {ColorPlus} from '../model/color-plus';
 
 const cn = ClassName('svp');
 
 interface Config {
-	value: Value<ColorValueInternal>;
+	value: Value<ColorPlus>;
 	viewProps: ViewProps;
 }
 
@@ -23,7 +23,7 @@ const CANVAS_RESOL = 64;
  */
 export class SvPaletteView implements View {
 	public readonly element: HTMLElement;
-	public readonly value: Value<ColorValueInternal>;
+	public readonly value: Value<ColorPlus>;
 	public readonly canvasElement: HTMLCanvasElement;
 	private readonly markerElem_: HTMLDivElement;
 
@@ -59,7 +59,7 @@ export class SvPaletteView implements View {
 			return;
 		}
 
-		const c = this.value.rawValue.to('hsv');
+		const c = this.value.rawValue.clone('hsv');
 		const width = this.canvasElement.width;
 		const height = this.canvasElement.height;
 		const imgData = ctx.getImageData(0, 0, width, height);
@@ -68,22 +68,25 @@ export class SvPaletteView implements View {
 		// TODO faster way?
 		for (let iy = 0; iy < height; iy++) {
 			for (let ix = 0; ix < width; ix++) {
-				c.s = mapRange(ix, 0, width, 0, 100);
-				c.v = mapRange(iy, 0, height, 100, 0);
+				c.set('s', mapRange(ix, 0, width, 0, 100));
+				c.set('v', mapRange(iy, 0, height, 100, 0));
 
-				const rgb = c.to('srgb');
+				const [r, g, b] = c.getAll('srgb');
+
 				const i = (iy * width + ix) * 4;
-				data[i] = rgb.r;
-				data[i + 1] = rgb.g;
-				data[i + 2] = rgb.b;
+				data[i] = r * 255;
+				data[i + 1] = g * 255;
+				data[i + 2] = b * 255;
 				data[i + 3] = 255;
 			}
 		}
 		ctx.putImageData(imgData, 0, 0);
 
-		const left = mapRange(c.s, 0, 100, 0, 100);
+		const [, s, v] = this.value.rawValue.getAll('hsv');
+
+		const left = mapRange(s, 0, 100, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
-		const top = mapRange(c.v, 0, 100, 100, 0);
+		const top = mapRange(v, 0, 100, 100, 0);
 		this.markerElem_.style.top = `${top}%`;
 	}
 

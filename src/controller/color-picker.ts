@@ -11,7 +11,7 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {ColorValueInternal} from '../plugin.js';
+import {ColorPlus} from '../model/color-plus.js';
 import {ColorPickerView} from '../view/color-picker.js';
 import {APaletteController} from './a-palette.js';
 // TODO revisit
@@ -20,7 +20,7 @@ import {HPaletteController} from './h-palette.js';
 import {SvPaletteController} from './sv-palette.js';
 
 interface Config {
-	value: Value<ColorValueInternal>;
+	value: Value<ColorPlus>;
 	viewProps: ViewProps;
 }
 
@@ -28,9 +28,9 @@ interface Config {
  * @hidden
  */
 export class ColorPickerController
-	implements ValueController<ColorValueInternal, ColorPickerView>
+	implements ValueController<ColorPlus, ColorPickerView>
 {
-	public readonly value: Value<ColorValueInternal>;
+	public readonly value: Value<ColorPlus>;
 	public readonly view: ColorPickerView;
 	public readonly viewProps: ViewProps;
 	private readonly alphaIcs_: {
@@ -81,10 +81,12 @@ export class ColorPickerController
 				primary: this.value,
 				secondary: this.alphaIcs_.text.value,
 				// TODO vet this
-				forward: (p) => p.a,
+				forward: (p) => p.alpha,
 				// TODO vet this
 				backward: (p, s) => {
+					console.log('backwards', s);
 					p.alpha = s;
+					console.log('updated', p.alpha);
 					return p;
 				},
 			});

@@ -17,12 +17,12 @@
 // 	ViewProps,
 // } from '@tweakpane/core';
 
-// import type {ColorValueInternal} from '../plugin.js';
+// import type {ColorPlus} from '../plugin.js';
 // import {getKeyScaleForColor} from '../util.js';
 // import {ColorTextsMode, ColorTextsView} from '../view/color-texts.js';
 
 // interface Config {
-// 	value: Value<ColorValueInternal>;
+// 	value: Value<ColorPlus>;
 // 	viewProps: ViewProps;
 // }
 

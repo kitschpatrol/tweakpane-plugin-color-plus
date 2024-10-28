@@ -1,11 +1,18 @@
-import {ClassName, mapRange, Value, View, ViewProps} from '@tweakpane/core';
+import {
+	ClassName,
+	constrainRange,
+	mapRange,
+	Value,
+	View,
+	ViewProps,
+} from '@tweakpane/core';
 
-import {ColorValueInternal} from '../plugin.js';
+import {ColorPlus} from '../model/color-plus.js';
 
 const cn = ClassName('apl');
 
 interface Config {
-	value: Value<ColorValueInternal>;
+	value: Value<ColorPlus>;
 	viewProps: ViewProps;
 }
 
@@ -14,7 +21,7 @@ interface Config {
  */
 export class APaletteView implements View {
 	public readonly element: HTMLElement;
-	public readonly value: Value<ColorValueInternal>;
+	public readonly value: Value<ColorPlus>;
 	private readonly colorElem_: HTMLDivElement;
 	private readonly markerElem_: HTMLDivElement;
 	private readonly previewElem_: HTMLDivElement;
@@ -53,25 +60,24 @@ export class APaletteView implements View {
 	}
 
 	private update_(): void {
-		const c = this.value.rawValue;
-
-		const leftColor = c.clone().to('srgb');
+		const activeColor = this.value.rawValue.clone('srgb');
+		const leftColor = activeColor.clone();
 		leftColor.alpha = 0;
 
-		const rightColor = c.clone().to('srgb');
+		const rightColor = leftColor.clone();
 		rightColor.alpha = 1;
 
 		const gradientComps = [
 			'to right',
-			leftColor.toString({format: 'rgba'}),
-			rightColor.toString({format: 'rgba'}),
+			leftColor.serialize('rgba'),
+			rightColor.serialize('rgba'),
 		];
 		this.colorElem_.style.background = `linear-gradient(${gradientComps.join(
 			',',
 		)})`;
 
-		this.previewElem_.style.backgroundColor = c.toString({format: 'rgba'});
-		const left = mapRange(c.alpha, 0, 1, 0, 100);
+		this.previewElem_.style.backgroundColor = activeColor.serialize('rgba');
+		const left = mapRange(activeColor.alpha, 0, 1, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
 	}
 

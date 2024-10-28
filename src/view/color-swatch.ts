@@ -1,9 +1,9 @@
 import {ClassName, Value, View, ViewProps} from '@tweakpane/core';
 
-import {ColorValueInternal} from '../plugin';
+import {ColorPlus} from '../model/color-plus.js';
 
 interface Config {
-	value: Value<ColorValueInternal>;
+	value: Value<ColorPlus>;
 	viewProps: ViewProps;
 }
 
@@ -14,7 +14,7 @@ const cn = ClassName('colsw');
  */
 export class ColorSwatchView implements View {
 	public readonly element: HTMLElement;
-	public readonly value: Value<ColorValueInternal>;
+	public readonly value: Value<ColorPlus>;
 	public readonly buttonElement: HTMLButtonElement;
 	private readonly swatchElem_: HTMLDivElement;
 
@@ -44,7 +44,7 @@ export class ColorSwatchView implements View {
 
 	private update_(): void {
 		const value = this.value.rawValue;
-		this.swatchElem_.style.backgroundColor = value.toString({format: 'rgba'});
+		this.swatchElem_.style.backgroundColor = value.serialize('rgba');
 	}
 
 	private onValueChange_(): void {
