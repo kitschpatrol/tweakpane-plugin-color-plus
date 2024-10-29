@@ -1,3 +1,4 @@
+import {constrainRange} from '@tweakpane/core';
 import type {ColorConstructor as ColorObject, Coords, Ref} from 'colorjs.io';
 import {
 	ColorSpace,
@@ -13,10 +14,7 @@ import {
 	setAll as colorJsSetAll,
 	sRGB,
 	to as colorJsConvert,
-	// toGamut,
 } from 'colorjs.io/fn';
-
-import {constrainRange} from '@tweakpane/core';
 
 ColorSpace.register(sRGB);
 ColorSpace.register(P3);

@@ -53,6 +53,12 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 		this.value = config.value;
 		this.viewProps = config.viewProps;
 
+		// this.value.emitter.on('change', (event) => {
+		// 	console.log('----------------------------------');
+		// 	console.log('value changed');
+		// 	console.log(event);
+		// });
+
 		this.foldable_ = Foldable.create(config.expanded);
 
 		this.swatchC_ = new ColorSwatchController(doc, {

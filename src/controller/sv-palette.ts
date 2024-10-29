@@ -1,4 +1,5 @@
 import {
+	constrainRange,
 	getHorizontalStepKeys,
 	getStepForKey,
 	getVerticalStepKeys,
@@ -62,12 +63,28 @@ export class SvPaletteController
 			return;
 		}
 
-		const saturation = mapRange(d.point.x, 0, d.bounds.width, 0, 100);
-		const value = mapRange(d.point.y, 0, d.bounds.height, 100, 0);
+		const saturation = constrainRange(
+			mapRange(d.point.x, 0, d.bounds.width, 0, 100),
+			0,
+			100,
+		);
+		const value = constrainRange(
+			mapRange(d.point.y, 0, d.bounds.height, 100, 0),
+			0,
+			100,
+		);
 
-		const c = this.value.rawValue;
+		console.log('----------------------------------');
+		console.log(`saturation: ${saturation}`);
+		console.log(`value: ${value}`);
+
+		const c = this.value.rawValue.clone();
 		const h = c.get('h', 'hsv');
+
 		c.setAll([h, saturation, value], 'hsv');
+
+		console.log(`post saturation: ${c.get('s', 'hsv')}`);
+		console.log(`post value: ${c.get('v', 'hsv')}`);
 
 		this.value.setRawValue(c.clone(), opts);
 	}

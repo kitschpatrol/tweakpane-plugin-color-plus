@@ -86,8 +86,7 @@ export class ColorPickerController
 				backward: (p, s) => {
 					console.log('backwards', s);
 					p.alpha = s;
-					console.log('updated', p.alpha);
-					return p;
+					return p.clone();
 				},
 			});
 		}
