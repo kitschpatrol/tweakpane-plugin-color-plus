@@ -14,9 +14,10 @@ import {ColorPlus} from './model/color-plus';
 
 // console.log(q.toString());
 
-const c = ColorPlus.create('#f00', 'always')!;
+const c = ColorPlus.create('#f00')!;
+const f = ColorPlus.getFormat('#f00');
 
-console.log(c.serialize());
+console.log(c.serialize(f!));
 console.log(c.get('h', 'hsv'));
 c.set('h', 180, 'hsv');
 
@@ -32,7 +33,7 @@ c.set(
 c.alpha = 0.5;
 
 console.log(c?.get('h', 'hsv'));
-console.log(c?.serialize('rgba'));
+console.log(c?.serialize({format: 'rgba', alpha: true, space: 'srgb'}));
 
 // console.log(ColorPlus.create('#f00c', 'never')?.serialize());
 // console.log(ColorPlus.create('#ff0000')?.serialize());
@@ -41,7 +42,7 @@ console.log(c?.serialize('rgba'));
 // console.log(ColorPlus.create('rgb(255, 0, 255)', 'auto')?.serialize());
 // console.log(ColorPlus.create('rgba(255, 0, 255, 1)')?.serialize());
 // console.log(ColorPlus.create('#ff00ffcc')?.serialize());
-// console.log(ColorPlus.create('rgb(255 1 1)', 'always')?.serialize());
+// console.log(ColorPlus.create('rgb(255 1 1)')?.serialize());
 // console.log(ColorPlus.create('rgb(255 255 255 / 1)', 'never')?.serialize());
 // console.log(ColorPlus.create('rgb(255 255 255 / 10%)')?.serialize());
 // console.log(ColorPlus.create('rgb(255, 255, 255)', 'auto')?.serialize());

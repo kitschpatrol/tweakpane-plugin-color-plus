@@ -59,7 +59,8 @@ export class SvPaletteView implements View {
 			return;
 		}
 
-		const c = this.value.rawValue.clone('hsv');
+		const c = this.value.rawValue.clone();
+		c.convert('hsv');
 		const width = this.canvasElement.width;
 		const height = this.canvasElement.height;
 		const imgData = ctx.getImageData(0, 0, width, height);

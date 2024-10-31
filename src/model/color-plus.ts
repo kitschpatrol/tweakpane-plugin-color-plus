@@ -1,14 +1,19 @@
+// import {constrainRange} from '@tweakpane/core';
+
 import {constrainRange} from '@tweakpane/core';
-import type {ColorConstructor as ColorObject, Coords, Ref} from 'colorjs.io';
 import {
-	ColorSpace,
-	equals as colorJsEquals,
+	type ColorConstructor as ColorJsConstructor,
+	ColorSpace as ColorJsColorSpace,
+	type Coords,
 	get as colorJsGet,
 	getAll as colorJsGetAll,
 	HSV,
 	LCH,
+	OKLCH,
 	P3,
 	parse as colorJsParse,
+	type PlainColorObject as PlainColorJsObject,
+	type Ref,
 	serialize as colorJsSerialize,
 	set as colorJsSet,
 	setAll as colorJsSetAll,
@@ -16,10 +21,19 @@ import {
 	to as colorJsConvert,
 } from 'colorjs.io/fn';
 
-ColorSpace.register(sRGB);
-ColorSpace.register(P3);
-ColorSpace.register(HSV);
-ColorSpace.register(LCH);
+ColorJsColorSpace.register(sRGB);
+ColorJsColorSpace.register(P3);
+ColorJsColorSpace.register(HSV);
+ColorJsColorSpace.register(LCH);
+ColorJsColorSpace.register(OKLCH);
+
+type AlphaMode =
+	/* Strip the alpha channel, even if initially present */
+	| 'never'
+	/* Always include alpha channel, even if initially missing */
+	| 'always'
+	/* Include alpha channel if it's initially present */
+	| 'auto';
 
 // TODO Subset
 export type ColorSpaceId =
@@ -67,6 +81,12 @@ export type ColorSpaceId =
 	| 'xyz-d65'
 	| string;
 
+type ColorPlusObject = {
+	spaceId: ColorSpaceId;
+	coords: [number, number, number];
+	alpha: number;
+};
+
 // Not yet correctly typed in colorjs.io
 // This is a partial type based on inspection of the code
 type ParseMeta = {
@@ -89,118 +109,78 @@ type ParseMeta = {
 	};
 };
 
-type AlphaMode =
-	/* Strip the alpha channel, even if initially present */
-	| 'never'
-	/* Always include alpha channel, even if initially missing */
-	| 'always'
-	/* Include alpha channel if it's initially present */
-	| 'auto';
+/**
+ * Original format and alpha state inferred from the user-provided value
+ */
+export type ColorFormat = {
+	format: ParseMeta | string; // Todo object types etc.
+	alpha?: boolean;
+	space?: ColorSpaceId;
+};
 
 export class ColorPlus {
-	private alphaMode: AlphaMode;
-	private parseMeta: ParseMeta;
-	private color: ColorObject;
-	private hasAlpha: boolean;
+	private color: ColorPlusObject;
 
-	private constructor(
-		color: ColorObject,
-		parseMeta: ParseMeta,
-		alphaMode: AlphaMode,
-		hasAlpha: boolean,
-	) {
+	private constructor(color: ColorPlusObject) {
 		this.color = color;
-		this.parseMeta = parseMeta;
-		this.alphaMode = alphaMode;
-		this.hasAlpha = hasAlpha;
 	}
 
-	public static create(
-		value: unknown,
-		alphaMode: AlphaMode = 'auto',
-	): ColorPlus | undefined {
-		if (typeof value !== 'string') {
-			console.warn('ColorPlus only supports string values for now');
-			return undefined;
-		}
-		// TODO other types...
-		try {
-			const parseMetaInOut: Partial<ParseMeta> = {};
-			const color = colorJsParse(value, {
-				// @ts-expect-error - Type definition inconsistencies
-				parseMeta: parseMetaInOut,
-			});
-
-			// Is parseMetaInOut ever actually undefined?
-			const parseMeta =
-				parseMetaInOut.formatId === undefined
-					? undefined
-					: (parseMetaInOut as ParseMeta);
-
-			if (parseMeta === undefined) {
-				console.warn('Could not parse meta');
-				return undefined;
-			}
-
-			if (
-				parseMeta.format.alpha !== undefined &&
-				typeof parseMeta.format.alpha !== 'boolean'
-			) {
-				console.warn('Alpha metadata is not boolean?');
-				return undefined;
-			}
-
-			// console.log(parseMeta);
-			const hasAlpha =
-				parseMeta.format.alpha ||
-				parseMeta.alphaType !== undefined ||
-				(parseMeta.formatId === 'hex' && hexHasAlpha(value));
-
-			color.alpha = alphaMode === 'never' ? 1 : color.alpha;
-
-			return new ColorPlus(color, parseMeta, alphaMode, hasAlpha);
-		} catch (error) {
-			console.warn(`Could not parse color string: ${String(error)}`);
-			return undefined;
-		}
+	public static getFormat(value: unknown): ColorFormat | undefined {
+		return parseColorAndFormat(value)?.format;
 	}
 
-	/**
-	 *
-	 * @param formatId If undefined, uses the initial string format as the output format
-	 * @returns
-	 */
-	public serialize(formatId?: string): string {
-		// Bypass ColorPlus serialization persistence
-		if (formatId !== undefined) {
-			return colorJsSerialize(this.color, {format: formatId});
+	public static create(value: unknown): ColorPlus | undefined {
+		const parsed = parseColorAndFormat(value);
+		if (parsed === undefined) {
+			console.warn('Could not parse color');
+			return undefined;
+		}
+		return new ColorPlus(parsed.color);
+	}
+
+	public clone(): ColorPlus {
+		return new ColorPlus(copyColorPlusObject(this.color));
+	}
+
+	public convert(spaceId: ColorSpaceId): void {
+		this.color = convert(this.color, spaceId) ?? this.color;
+	}
+
+	public serialize(format: ColorFormat, alphaMode: AlphaMode = 'auto'): string {
+		const convertedColor =
+			convert(this.color, format.space ?? this.color.spaceId) ?? this.color;
+
+		// Custom serialization...
+		if (typeof format.format === 'string') {
+			// TODO other types
+			return colorJsSerialize(convertedColor, {format: format.format});
 		}
 
 		// See color.js/src/serialize.js
-		const result = colorJsSerialize(this.color, {
+		const result = colorJsSerialize(convertedColor, {
 			inGamut: true, // TODO expose? Overrides inGamut in the format object
-			commas: this.parseMeta.commas,
+			commas: format.format.commas,
 			// precision: 4, // TODO expose?
 			// @ts-expect-error - Type definition inconsistencies
 			alpha:
 				// Erase alpha from output
-				this.alphaMode === 'never'
+				alphaMode === 'never'
 					? false
 					: // Hex can't take object, so return boolean
-						this.parseMeta.formatId === 'hex'
-						? this.alphaMode === 'always' || this.hasAlpha
+						format.format.formatId === 'hex'
+						? alphaMode === 'always' || format.alpha
 						: // Other formats need to know their original alpha format (e.g. <number> vs <percentage>)
 							{
-								include: this.alphaMode === 'always' || this.hasAlpha,
-								type: this.parseMeta.alphaType,
+								include: alphaMode === 'always' || format.alpha,
+								type: format.format.alphaType,
 							},
 			// @ts-expect-error - Type definition inconsistencies
-			coords: this.parseMeta.types,
+			coords: format.format.types,
 			// @ts-expect-error - Type definition inconsistencies
-			format: this.parseMeta.format,
+			format: format.format.format,
 		});
 
-		if (this.parseMeta.formatId === 'hex') {
+		if (format.format.formatId === 'hex') {
 			return expandHex(result);
 		} else {
 			return result;
@@ -208,27 +188,36 @@ export class ColorPlus {
 	}
 
 	public equals(other: ColorPlus): boolean {
-		return colorJsEquals(this.color, other.color);
+		return (
+			this.color.spaceId === other.color.spaceId &&
+			this.color.alpha === other.color.alpha &&
+			this.color.coords.every((c, i) => c === other.color.coords[i])
+		);
 	}
 
 	public set alpha(value: number) {
-		this.set('alpha', constrainRange(value, 0, 1));
+		// This provides no additional safety?
+		// colorJsSet(this.color, 'alpha', constrainRange(value, 0, 1));
+		this.color.alpha = constrainRange(value, 0, 1);
 	}
 
 	public get alpha(): number {
-		return this.color.alpha ?? 1;
+		return this.color.alpha;
 	}
 
-	// TODO constrain space
-	// TODO disallow 'none' values
-	public getAll(space?: ColorSpaceId): number[] {
+	public get(prop: Ref, space?: ColorSpaceId): number {
+		return colorJsGet(
+			convert(this.color, space ?? this.color.spaceId) ?? this.color,
+			prop,
+		);
+	}
+
+	public getAll(space?: ColorSpaceId): [number, number, number] {
+		// TODO constrain space
+		// TODO check for 'none' values?
 		return colorJsGetAll(this.color, {
 			space,
-		}) as number[];
-	}
-
-	public setAll(coords: Coords, space?: ColorSpaceId): void {
-		colorJsSetAll(this.color, space ?? this.color.spaceId, coords);
+		}) as [number, number, number];
 	}
 
 	public set(
@@ -236,54 +225,82 @@ export class ColorPlus {
 		value: number | ((coord: number) => number),
 		space?: ColorSpaceId,
 	): void {
-		if (space !== undefined && space !== this.color.spaceId) {
-			const converted = convert(this.color, space);
-			colorJsSet(converted, prop, value);
-
-			this.color = convert(converted, this.color.spaceId);
-		} else {
-			colorJsSet(this.color, prop, value);
-		}
+		// TODO constrain space?
 		if (prop === 'alpha') {
-			this.color.alpha = constrainRange(this.color.alpha ?? 1, 0, 1);
-		}
-	}
-
-	public clone(colorSpace?: ColorSpaceId): ColorPlus {
-		const colorCopy = convert(this.color, colorSpace ?? this.color.spaceId);
-
-		return new ColorPlus(
-			colorCopy,
-			this.parseMeta, // TODO structuredClone?
-			this.alphaMode,
-			this.hasAlpha,
-		);
-	}
-
-	public get(prop: Ref, space?: ColorSpaceId): number {
-		if (space !== undefined && space !== this.color.spaceId) {
-			return colorJsGet(convert(this.color, space), prop);
+			this.alpha = typeof value === 'number' ? value : value(this.alpha);
 		} else {
-			return colorJsGet(this.color, prop);
+			// TODO room to optimize here? What does colorJsSet do to the class color object?
+			const converted =
+				convert(this.color, space ?? this.color.spaceId) ??
+				copyColorPlusObject(this.color);
+			colorJsSet(converted, prop, value);
+			setFromColorPlusObject(
+				this.color,
+				getColorPlusObjectFromColorJsObject(converted),
+			);
 		}
+	}
+
+	public setAll(coords: [number, number, number], space?: ColorSpaceId): void {
+		// TODO constrain space
+		// TODO room to optimize here? What does colorJsSet do to the class color object?
+		const targetColor = copyColorPlusObject(this.color);
+		colorJsSetAll(targetColor, space ?? this.color.spaceId, coords);
+		setFromColorPlusObject(
+			this.color,
+			getColorPlusObjectFromColorJsObject(targetColor),
+		);
 	}
 }
 
-// Wrapped because convert returns a ColorSpace object instead of a ColorSpaceId?
-function convert(color: ColorObject, spaceId: ColorSpaceId): ColorObject {
-	if (spaceId === color.spaceId) {
-		return {
-			coords: [...color.coords],
-			alpha: color.alpha,
-			spaceId: color.spaceId,
-		};
+/** Returns a new color object only if conversion is needed, otherwise returns undefined */
+function convert(
+	color: ColorPlusObject,
+	spaceId: ColorSpaceId,
+): ColorPlusObject | undefined {
+	if (color.spaceId === spaceId) {
+		return undefined;
 	}
 
-	const {coords, alpha} = colorJsConvert(color, spaceId);
+	return getColorPlusObjectFromColorJsObject(colorJsConvert(color, spaceId));
+}
+
+function setFromColorPlusObject(
+	targetColor: ColorPlusObject,
+	sourceColor: ColorPlusObject,
+): void {
+	targetColor.spaceId = sourceColor.spaceId;
+	targetColor.coords[0] = sourceColor.coords[0];
+	targetColor.coords[1] = sourceColor.coords[1];
+	targetColor.coords[2] = sourceColor.coords[2];
+	targetColor.alpha = sourceColor.alpha;
+}
+
+function validateColorJsObject(
+	colorJs: PlainColorJsObject | ColorJsConstructor,
+): boolean {
+	if (colorJs.coords.some((c) => c === null)) {
+		return false;
+	}
+	return true;
+}
+
+/** Does not validate! */
+function getColorPlusObjectFromColorJsObject(
+	colorJs: PlainColorJsObject | ColorJsConstructor,
+): ColorPlusObject {
 	return {
-		coords,
-		alpha,
-		spaceId: spaceId,
+		spaceId: 'spaceId' in colorJs ? colorJs.spaceId : colorJs.space.id,
+		coords: [...(colorJs.coords as [number, number, number])],
+		alpha: colorJs.alpha ?? 1,
+	};
+}
+
+function copyColorPlusObject(color: ColorPlusObject): ColorPlusObject {
+	return {
+		spaceId: color.spaceId,
+		coords: [...color.coords],
+		alpha: color.alpha,
 	};
 }
 
@@ -302,4 +319,62 @@ function expandHex(hex: string): string {
 		return result;
 	}
 	return hex;
+}
+
+function parseColorAndFormat(
+	value: unknown,
+): undefined | {format: ColorFormat; color: ColorPlusObject} {
+	if (typeof value !== 'string') {
+		console.warn('ColorPlus only supports string values for now');
+		return undefined;
+		// TODO other types...
+	}
+
+	try {
+		const parseMetaInOut: Partial<ParseMeta> = {};
+		const colorJs = colorJsParse(value, {
+			// @ts-expect-error - Type definition inconsistencies
+			parseMeta: parseMetaInOut,
+		});
+
+		// Is parseMetaInOut ever actually undefined?
+		const parseMeta =
+			parseMetaInOut.formatId === undefined
+				? undefined
+				: (parseMetaInOut as ParseMeta);
+
+		if (parseMeta === undefined) {
+			console.warn('Could not parse meta');
+			return undefined;
+		}
+
+		if (
+			parseMeta.format.alpha !== undefined &&
+			typeof parseMeta.format.alpha !== 'boolean'
+		) {
+			console.warn('Alpha metadata is not boolean?');
+			return undefined;
+		}
+
+		// console.log(parseMeta);
+		const hasAlpha =
+			parseMeta.format.alpha ||
+			parseMeta.alphaType !== undefined ||
+			(parseMeta.formatId === 'hex' && hexHasAlpha(value));
+
+		if (!validateColorJsObject(colorJs)) {
+			console.warn("Can't handle null coords");
+			return undefined;
+		}
+
+		const color = getColorPlusObjectFromColorJsObject(colorJs);
+
+		return {
+			format: {format: parseMeta, alpha: hasAlpha, space: color.spaceId},
+			color: color,
+		};
+	} catch (error) {
+		console.warn(`Could not parse color string: ${String(error)}`);
+		return undefined;
+	}
 }

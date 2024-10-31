@@ -60,7 +60,8 @@ export class APaletteView implements View {
 	}
 
 	private update_(): void {
-		const activeColor = this.value.rawValue.clone('srgb');
+		const activeColor = this.value.rawValue.clone();
+		activeColor.convert('srgb');
 		const leftColor = activeColor.clone();
 		leftColor.alpha = 0;
 
@@ -69,14 +70,16 @@ export class APaletteView implements View {
 
 		const gradientComps = [
 			'to right',
-			leftColor.serialize('rgba'),
-			rightColor.serialize('rgba'),
+			leftColor.serialize({format: 'rgba'}),
+			rightColor.serialize({format: 'rgba'}),
 		];
 		this.colorElem_.style.background = `linear-gradient(${gradientComps.join(
 			',',
 		)})`;
 
-		this.previewElem_.style.backgroundColor = activeColor.serialize('rgba');
+		this.previewElem_.style.backgroundColor = activeColor.serialize({
+			format: 'rgba',
+		});
 		const left = mapRange(activeColor.alpha, 0, 1, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
 	}

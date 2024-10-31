@@ -26,16 +26,30 @@
 					g: 0,
 					b: 255,
 				},
+				objectColorAlpha: {
+					r: 255,
+					g: 0,
+					b: 255,
+					a: 0.5,
+				},
 			};
 
 			const pane = new Pane();
 			// Register plugin
 			pane.registerPlugin(TweakpanePluginColorPlus);
 
+			pane.addBinding(params, 'objectColorAlpha', {
+				label: 'Object Color Alpha Original',
+				view: 'color',
+				color: {
+					alpha: true,
+				},
+			});
+
 			// TODO: Update parameters for your plugin
 			pane
 				.addBinding(params, 'stringColor', {
-					label: 'String Color',
+					label: 'String Color Plus',
 					view: 'color-plus',
 				})
 				.on('change', (event) => {

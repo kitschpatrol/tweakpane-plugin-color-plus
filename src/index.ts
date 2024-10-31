@@ -1,10 +1,9 @@
-// Import both the plugins and their types
 import {type ColorPlusInputParams, ColorPlusInputPlugin} from './plugin.js';
 
 // The identifier of the plugin bundle
 export const id = 'color-plus';
 
-// CSS injection
+// Replaced by Rollup with compiled SASS
 export const css = '__css__';
 
 // Re-export the parameter types
