@@ -12,7 +12,7 @@
 		"url": "https://ericmika.com"
 	},
 	"license": "MIT",
-	"packageManager": "pnpm@9.12.2",
+	"packageManager": "pnpm@9.12.3",
 	"engines": {
 		"node": ">=18.0.0",
 		"pnpm": ">=9.0.0"
@@ -51,7 +51,7 @@
 		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
 		"server": "http-server -c-1 -o /test/browser.html",
 		"start": "run-p watch server",
-		"test": "eslint \"src/**/*.ts\"",
+		"test": "vitest",
 		"watch": "run-p watch:*",
 		"watch:sass": "onchange --initial --kill \"src/sass/**/*.scss\" -- npm run build:dev",
 		"watch:ts": "onchange --initial --kill \"src/**/*.ts\" -- rollup --config rollup.config.js"
@@ -68,10 +68,10 @@
 		"@rollup/plugin-replace": "^6.0.1",
 		"@rollup/plugin-terser": "^0.4.4",
 		"@rollup/plugin-typescript": "^12.1.1",
-		"@typescript-eslint/eslint-plugin": "^8.11.0",
-		"@typescript-eslint/parser": "^8.11.0",
+		"@typescript-eslint/eslint-plugin": "^8.12.2",
+		"@typescript-eslint/parser": "^8.12.2",
 		"autoprefixer": "^10.4.20",
-		"bumpp": "^9.7.1",
+		"bumpp": "^9.8.0",
 		"colorjs.io": "link:../color.js",
 		"eslint": "^9.13.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -84,10 +84,11 @@
 		"prettier": "^3.3.3",
 		"prettier-plugin-pkg": "^0.18.1",
 		"rimraf": "^6.0.1",
-		"rollup": "^4.24.0",
+		"rollup": "^4.24.3",
 		"rollup-plugin-cleanup": "^3.2.1",
-		"sass": "^1.80.4",
-		"typescript": "^5.6.3"
+		"sass": "^1.80.5",
+		"typescript": "^5.6.3",
+		"vitest": "^2.1.4"
 	},
 	"publishConfig": {
 		"access": "public"
