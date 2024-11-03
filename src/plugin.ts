@@ -44,6 +44,9 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			return null;
 		}
 
+		// Use OKLCH as the internal representation
+		color.convert('hsv');
+
 		return {
 			initialValue: color.serialize(format),
 			params: {
@@ -61,6 +64,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				if (newColor === undefined) {
 					throw new Error('Could not create color');
 				}
+				newColor.convert('hsv');
 				return newColor;
 			};
 		},

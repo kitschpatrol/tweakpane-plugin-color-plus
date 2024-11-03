@@ -42,13 +42,14 @@ export class HPaletteView implements View {
 
 	private update_(): void {
 		const backgroundColor = this.value.rawValue.clone();
-		backgroundColor.convert('srgb');
 		const h = backgroundColor.get('h', 'hsv');
 		backgroundColor.setAll([h, 100, 100], 'hsv');
 
 		this.markerElem_.style.backgroundColor = backgroundColor.serialize({
 			format: 'rgba',
+			space: 'srgb',
 		});
+
 		const left = mapRange(h, 0, 360, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
 	}

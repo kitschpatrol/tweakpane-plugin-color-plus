@@ -74,10 +74,6 @@ export class SvPaletteController
 			100,
 		);
 
-		console.log('----------------------------------');
-		console.log(`saturation: ${saturation}`);
-		console.log(`value: ${value}`);
-
 		const c = this.value.rawValue.clone();
 		const h = c.get('h', 'hsv');
 

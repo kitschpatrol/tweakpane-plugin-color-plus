@@ -105,7 +105,7 @@ export class HPaletteController
 		}
 
 		const c = this.value.rawValue.clone();
-		c.set('h', (value) => value + step, 'hsv');
+		c.set('h', (value) => constrainRange(value + step, 0, 360), 'hsv');
 		this.value.setRawValue(c, {
 			forceEmit: false,
 			last: false,

@@ -19,6 +19,7 @@ import {
 	setAll as colorJsSetAll,
 	sRGB,
 	to as colorJsConvert,
+	toGamut,
 } from 'colorjs.io/fn';
 
 ColorJsColorSpace.register(sRGB);
@@ -142,6 +143,14 @@ export class ColorPlus {
 		return new ColorPlus(copyColorPlusObject(this.color));
 	}
 
+	public toString(): string {
+		return `ColorPlus(${this.color.spaceId}, [${this.color.coords.map((c) => toPrecision(c, 4))}], ${this.color.alpha})`;
+	}
+
+	public toJSON(): ColorPlusObject {
+		return this.color;
+	}
+
 	public convert(spaceId: ColorSpaceId): void {
 		this.color = convert(this.color, spaceId) ?? this.color;
 	}
@@ -196,8 +205,6 @@ export class ColorPlus {
 	}
 
 	public set alpha(value: number) {
-		// This provides no additional safety?
-		// colorJsSet(this.color, 'alpha', constrainRange(value, 0, 1));
 		this.color.alpha = constrainRange(value, 0, 1);
 	}
 
@@ -205,47 +212,89 @@ export class ColorPlus {
 		return this.color.alpha;
 	}
 
-	public get(prop: Ref, space?: ColorSpaceId): number {
-		return colorJsGet(
-			convert(this.color, space ?? this.color.spaceId) ?? this.color,
-			prop,
+	public get(prop: Ref, space?: ColorSpaceId, precision?: number): number {
+		return toPrecision(
+			colorJsGet(
+				convert(this.color, space ?? this.color.spaceId) ?? this.color,
+				prop,
+			),
+			precision,
 		);
 	}
 
-	public getAll(space?: ColorSpaceId): [number, number, number] {
+	public getAll(
+		space?: ColorSpaceId,
+		precision?: number,
+	): [number, number, number] {
 		// TODO constrain space
 		// TODO check for 'none' values?
 		return colorJsGetAll(this.color, {
 			space,
+			precision,
 		}) as [number, number, number];
+
+		// TODO copy check?
+		// return colorJsGetAll(
+		// 	space === undefined || space === this.color.spaceId
+		// 		? this.color
+		// 		: copyColorPlusObject(this.color),
+		// 	{
+		// 		space,
+		// 	},
+		// ) as [number, number, number];
 	}
 
 	public set(
 		prop: Ref,
 		value: number | ((coord: number) => number),
 		space?: ColorSpaceId,
+		clip?: boolean,
 	): void {
-		// TODO constrain space?
+		// Alpha always constrained to [0, 1]
 		if (prop === 'alpha') {
-			this.alpha = typeof value === 'number' ? value : value(this.alpha);
+			this.alpha = constrainRange(
+				typeof value === 'number' ? value : value(this.alpha),
+				0,
+				1,
+			);
 		} else {
 			// TODO room to optimize here? What does colorJsSet do to the class color object?
-			const converted =
+
+			// Convert to target color space
+			let converted =
 				convert(this.color, space ?? this.color.spaceId) ??
 				copyColorPlusObject(this.color);
 			colorJsSet(converted, prop, value);
-			setFromColorPlusObject(
-				this.color,
-				getColorPlusObjectFromColorJsObject(converted),
-			);
+
+			// Convert back to original color space
+			converted = convert(converted, this.color.spaceId) ?? converted;
+
+			if (clip !== false) {
+				toGamut(converted, {
+					method: 'clip',
+				});
+			}
+
+			setFromColorPlusObject(this.color, converted);
 		}
 	}
 
-	public setAll(coords: [number, number, number], space?: ColorSpaceId): void {
+	public setAll(
+		coords: [number, number, number],
+		space?: ColorSpaceId,
+		clip?: boolean,
+	): void {
 		// TODO constrain space
 		// TODO room to optimize here? What does colorJsSet do to the class color object?
 		const targetColor = copyColorPlusObject(this.color);
 		colorJsSetAll(targetColor, space ?? this.color.spaceId, coords);
+
+		if (clip !== false) {
+			toGamut(targetColor, {
+				method: 'clip',
+			});
+		}
+
 		setFromColorPlusObject(
 			this.color,
 			getColorPlusObjectFromColorJsObject(targetColor),
@@ -378,3 +427,38 @@ function parseColorAndFormat(
 		return undefined;
 	}
 }
+
+/**
+ * From https://github.com/color-js/color.js/blob/b6984aa2e0d2c1b2f0863979d41b47df6f568894/src/util.js#L65
+ * Round a number to a certain number of significant digits
+ * @param {number} n - The number to round
+ * @param {number} precision - Number of significant digits
+ */
+function toPrecision(n: number, precision: number | undefined): number {
+	if (precision === undefined) {
+		return n;
+	}
+	if (n === 0) {
+		return 0;
+	}
+	const integer = ~~n;
+	let digits = 0;
+	if (integer && precision) {
+		digits = ~~Math.log10(Math.abs(integer)) + 1;
+	}
+	const multiplier = 10.0 ** (precision - digits);
+	return Math.floor(n * multiplier + 0.5) / multiplier;
+}
+
+// TODO needed?
+// function colorJsApplyPrecision(
+// 	targetColor: ColorPlusObject,
+// 	precision: number | undefined,
+// ): void {
+// 	if (precision === undefined) {
+// 		return;
+// 	}
+// 	targetColor.coords[0] = toPrecision(targetColor.coords[0], precision);
+// 	targetColor.coords[1] = toPrecision(targetColor.coords[1], precision);
+// 	targetColor.coords[2] = toPrecision(targetColor.coords[2], precision);
+// }

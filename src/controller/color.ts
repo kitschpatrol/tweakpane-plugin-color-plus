@@ -53,11 +53,10 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 		this.value = config.value;
 		this.viewProps = config.viewProps;
 
-		// this.value.emitter.on('change', (event) => {
-		// 	console.log('----------------------------------');
-		// 	console.log('value changed');
-		// 	console.log(event);
-		// });
+		this.value.emitter.on('change', (event) => {
+			console.log('----------------------------------');
+			console.log(String(event.rawValue));
+		});
 
 		this.foldable_ = Foldable.create(config.expanded);
 

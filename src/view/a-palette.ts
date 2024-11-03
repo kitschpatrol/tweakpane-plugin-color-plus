@@ -1,11 +1,4 @@
-import {
-	ClassName,
-	constrainRange,
-	mapRange,
-	Value,
-	View,
-	ViewProps,
-} from '@tweakpane/core';
+import {ClassName, mapRange, Value, View, ViewProps} from '@tweakpane/core';
 
 import {ColorPlus} from '../model/color-plus.js';
 

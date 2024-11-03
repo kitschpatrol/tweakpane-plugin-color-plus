@@ -1,4 +1,5 @@
-// import Color from 'colorjs.io';
+import Color from 'colorjs.io';
+
 import {ColorPlus} from './model/color-plus';
 // const color = new Color('#ff00ff');
 
@@ -19,7 +20,9 @@ const f = ColorPlus.getFormat('#f00');
 
 console.log(c.serialize(f!));
 console.log(c.get('h', 'hsv'));
-c.set('h', 180, 'hsv');
+c.set('h', 361, 'hsv');
+console.log('h');
+console.log(c.get('h', 'hsv'));
 
 c.set(
 	'h',
@@ -30,9 +33,10 @@ c.set(
 	'hsv',
 );
 
+console.log(c.get('h', 'hsv'));
+
 c.alpha = 0.5;
 
-console.log(c?.get('h', 'hsv'));
 console.log(c?.serialize({format: 'rgba', alpha: true, space: 'srgb'}));
 
 // console.log(ColorPlus.create('#f00c', 'never')?.serialize());
@@ -46,3 +50,24 @@ console.log(c?.serialize({format: 'rgba', alpha: true, space: 'srgb'}));
 // console.log(ColorPlus.create('rgb(255 255 255 / 1)', 'never')?.serialize());
 // console.log(ColorPlus.create('rgb(255 255 255 / 10%)')?.serialize());
 // console.log(ColorPlus.create('rgb(255, 255, 255)', 'auto')?.serialize());
+
+console.log('----------------------------------');
+const d = ColorPlus.create('rgb(300, 300, 300 / .5)')!;
+const df = ColorPlus.getFormat('rgb(300, 300, 300 / .5)');
+d.set('r', 800);
+
+console.log(d.getAll());
+console.log(d.serialize(df!));
+
+console.log('----------------------------------');
+let e = new Color('rgb(900, 300, 300 / .5)');
+
+e = e.to('hsl');
+e.h = 370;
+e.toGamut({
+	method: 'clip',
+});
+
+console.log(e.h);
+console.log(e.getAll());
+console.log(e.toString());
