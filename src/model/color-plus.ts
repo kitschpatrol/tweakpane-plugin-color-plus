@@ -19,7 +19,7 @@ import {
 	setAll as colorJsSetAll,
 	sRGB,
 	to as colorJsConvert,
-	toGamut,
+	// toGamut,
 } from 'colorjs.io/fn';
 
 ColorJsColorSpace.register(sRGB);
@@ -248,7 +248,7 @@ export class ColorPlus {
 		prop: Ref,
 		value: number | ((coord: number) => number),
 		space?: ColorSpaceId,
-		clip?: boolean,
+		// clip?: boolean,
 	): void {
 		// Alpha always constrained to [0, 1]
 		if (prop === 'alpha') {
@@ -269,11 +269,11 @@ export class ColorPlus {
 			// Convert back to original color space
 			converted = convert(converted, this.color.spaceId) ?? converted;
 
-			if (clip !== false) {
-				toGamut(converted, {
-					method: 'clip',
-				});
-			}
+			// if (clip !== false) {
+			// 	toGamut(converted, {
+			// 		method: 'css',
+			// 	});
+			// }
 
 			setFromColorPlusObject(this.color, converted);
 		}
@@ -282,18 +282,18 @@ export class ColorPlus {
 	public setAll(
 		coords: [number, number, number],
 		space?: ColorSpaceId,
-		clip?: boolean,
+		// clip?: boolean,
 	): void {
 		// TODO constrain space
 		// TODO room to optimize here? What does colorJsSet do to the class color object?
 		const targetColor = copyColorPlusObject(this.color);
 		colorJsSetAll(targetColor, space ?? this.color.spaceId, coords);
 
-		if (clip !== false) {
-			toGamut(targetColor, {
-				method: 'clip',
-			});
-		}
+		// if (clip !== false) {
+		// 	toGamut(targetColor, {
+		// 		method: 'css',
+		// 	});
+		// }
 
 		setFromColorPlusObject(
 			this.color,

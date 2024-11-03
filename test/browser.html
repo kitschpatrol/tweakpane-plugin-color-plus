@@ -12,6 +12,15 @@
 				}
 			}
 		</script>
+		<style>
+			:root {
+				--tp-blade-value-width: 260px;
+			}
+
+			div.tp-dfwv {
+				width: 410px;
+			}
+		</style>
 	</head>
 	<body>
 		<script type="module">
@@ -20,6 +29,7 @@
 
 			const params = {
 				stringColor: '#ff00ff',
+				stringColorOklch: 'oklch(66.62% 0.296 2.47deg / 50%)',
 				numberColor: 0xff00ff,
 				objectColor: {
 					r: 255,
@@ -38,19 +48,29 @@
 			// Register plugin
 			pane.registerPlugin(TweakpanePluginColorPlus);
 
-			pane.addBinding(params, 'objectColorAlpha', {
-				label: 'Object Color Alpha Original',
+			pane.addBinding(params, 'stringColor', {
+				label: 'String Color Original',
 				view: 'color',
 				color: {
 					alpha: true,
 				},
+				expanded: true,
+				picker: 'inline',
+			});
+
+			pane.addBinding(params, 'objectColorAlpha', {
+				label: 'Object Color Alpha Original',
+				view: 'color',
 			});
 
 			// TODO: Update parameters for your plugin
 			pane
-				.addBinding(params, 'stringColor', {
+				.addBinding(params, 'stringColorOklch', {
 					label: 'String Color Plus',
 					view: 'color-plus',
+					color: {
+						formatLocked: false,
+					},
 				})
 				.on('change', (event) => {
 					console.log(event);

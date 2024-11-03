@@ -1,28 +1,37 @@
 import {
-	type ColorInputParams,
+	type BaseInputParams,
 	createPlugin,
 	type InputBindingPlugin,
+	type PickerLayout,
+	TpError,
 	writePrimitive,
 } from '@tweakpane/core';
 
 import {ColorController} from './controller/color.js';
 import {type ColorFormat, ColorPlus} from './model/color-plus.js';
+import {parseColorInputParams} from './util.js';
 
 export type ColorValueExternal = string; // only strings for now...
-export interface ColorPlusInputParams extends ColorInputParams {
+export interface ColorPlusInputParams extends BaseInputParams {
+	color?: {
+		// Boolean is legacy... true is always, false is never
+		alpha?: boolean | 'always' | 'never' | 'auto';
+		type?: 'int' | 'float';
+		formatLocked?: boolean;
+		wideGamut?: 'always' | 'never' | 'auto';
+	};
+	expanded?: boolean;
+	picker?: PickerLayout;
+}
+
+interface ColorPlusInputParamsInternal extends ColorPlusInputParams {
 	format: ColorFormat;
 }
-//  {
-// 	color?: {
-// 		lockFormat: boolean;
-// 		lockColorSpace: boolean;
-// 	};
-// }
 
 export const ColorPlusInputPlugin: InputBindingPlugin<
 	ColorPlus,
 	ColorValueExternal,
-	ColorPlusInputParams
+	ColorPlusInputParamsInternal
 > = createPlugin({
 	id: 'input-color-plus',
 	type: 'input',
@@ -44,15 +53,30 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			return null;
 		}
 
-		// Use OKLCH as the internal representation
+		// TODO Use OKLCH as the internal representation for extended gamut?
 		color.convert('hsv');
 
-		return {
-			initialValue: color.serialize(format),
-			params: {
-				format,
-			},
-		};
+		const result = parseColorInputParams(params);
+
+		console.log('----------------------------------');
+		console.log(result);
+		const resolvedResult = result
+			? {
+					initialValue: color.serialize(format),
+					params: {
+						color: {
+							alpha: result.color?.alpha ?? 'auto',
+							type: result.color?.type ?? 'int',
+							formatLocked: result.color?.formatLocked ?? true,
+							wideGamut: result.color?.wideGamut ?? 'auto',
+						},
+						format: format,
+					},
+				}
+			: null;
+
+		console.log(resolvedResult);
+		return resolvedResult;
 	},
 	binding: {
 		// External to internal
@@ -62,7 +86,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				// TODO recreate format?
 				const newColor = ColorPlus.create(value);
 				if (newColor === undefined) {
-					throw new Error('Could not create color');
+					throw TpError.notBindable();
 				}
 				newColor.convert('hsv');
 				return newColor;
@@ -84,11 +108,19 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			expanded: args.params.expanded ?? false,
 			formatter: (value: ColorPlus) => value.serialize(args.params.format),
 			parser: (text: string) => {
-				// TODO checks for format lock
 				const parsedColor = ColorPlus.create(text);
 				if (parsedColor === undefined) {
 					return null;
 				}
+
+				if (args.params.color?.formatLocked === false) {
+					const newFormat = ColorPlus.getFormat(text);
+					if (newFormat === undefined) {
+						return null;
+					}
+					args.params.format = newFormat;
+				}
+
 				return parsedColor;
 			},
 			pickerLayout: args.params.picker ?? 'popup',
