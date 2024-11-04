@@ -9,15 +9,23 @@ import {
 
 import {ColorController} from './controller/color.js';
 import {AlphaMode, type ColorFormat, ColorPlus} from './model/color-plus.js';
-import {legacyAlphaModeToAlphaMode, parseColorInputParams} from './util.js';
+import {
+	alphaEnabled,
+	legacyAlphaModeToAlphaMode,
+	parseColorInputParams,
+} from './util.js';
 
 export type ColorValueExternal = string | number; // only strings for now...
 export interface ColorPlusInputParams extends BaseInputParams {
 	color?: {
 		// Boolean is legacy... true is always, false is never
+		// In the original tweakpane installation, this only applied to number values
 		alpha?: boolean | AlphaMode;
+		// In the original tweakpane implementation, this only applied to ojbect values
 		type?: 'int' | 'float';
+		// TODO sort of works
 		formatLocked?: boolean;
+		// TODO
 		wideGamut?: 'always' | 'never' | 'auto';
 	};
 	expanded?: boolean;
@@ -26,6 +34,9 @@ export interface ColorPlusInputParams extends BaseInputParams {
 
 interface ColorPlusInputParamsInternal extends ColorPlusInputParams {
 	format: ColorFormat;
+	// Misuse parameters to prevent rounding-related jitter on pane.refresh()
+	lastInternalValue: ColorPlus;
+	lastExternalValue: ColorValueExternal;
 }
 
 export const ColorPlusInputPlugin: InputBindingPlugin<
@@ -58,27 +69,37 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 
 		const result = parseColorInputParams(params);
 
-		const resolvedResult = result
-			? {
-					initialValue: value as string | number,
-					params: {
-						// Set some defaults...
-						color: {
-							alpha: legacyAlphaModeToAlphaMode(result.color?.alpha) ?? 'auto',
-							type: result.color?.type ?? 'int',
-							formatLocked: result.color?.formatLocked ?? true,
-							wideGamut: result.color?.wideGamut ?? 'auto',
-						},
-						format: format,
-					},
-				}
-			: null;
+		if (!result) {
+			return null;
+		}
 
-		return resolvedResult;
+		const initalValue = color.toValue(
+			format,
+			legacyAlphaModeToAlphaMode(result.color?.alpha),
+		);
+
+		return {
+			initialValue: initalValue,
+			params: {
+				// Set some defaults...
+				color: {
+					alpha: legacyAlphaModeToAlphaMode(result.color?.alpha),
+					type: result.color?.type ?? 'int',
+					formatLocked: result.color?.formatLocked ?? true,
+					wideGamut: result.color?.wideGamut ?? 'auto',
+				},
+				lastExternalValue: initalValue,
+				lastInternalValue: color,
+				format: format,
+				expanded: result.expanded,
+				picker: result.picker,
+				readonly: result.readonly,
+			},
+		};
 	},
 	binding: {
 		// External to internal
-		reader: () => {
+		reader: (args) => {
 			// Todo factor in args...
 			return (value: unknown) => {
 				// TODO recreate format?
@@ -87,31 +108,45 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 					throw TpError.notBindable();
 				}
 				newColor.convert('hsv');
+
+				const newExternalValue = newColor.toValue(
+					args.params.format,
+					legacyAlphaModeToAlphaMode(args.params.color?.alpha),
+				);
+
+				if (args.params.lastExternalValue === newExternalValue) {
+					return args.params.lastInternalValue;
+				}
+
 				return newColor;
 			};
 		},
 		equals: (a, b) => {
-			return a.equals(b);
+			const eq = a.equals(b);
+			return eq;
 		},
 		// Internal to external
 		writer: (args) => {
 			// Todo factor in args...
 			return (target, inValue) => {
-				const alphaMode =
-					args.params.color?.alpha === true
-						? 'always'
-						: args.params.color?.alpha === false
-							? 'never'
-							: args.params.color?.alpha;
+				args.params.lastInternalValue = inValue;
+				args.params.lastExternalValue = inValue.toValue(
+					args.params.format,
+					legacyAlphaModeToAlphaMode(args.params.color?.alpha),
+				);
 
-				writePrimitive(target, inValue.toValue(args.params.format, alphaMode));
+				writePrimitive(target, args.params.lastExternalValue);
 			};
 		},
 	},
 	controller: (args) => {
 		return new ColorController(args.document, {
 			expanded: args.params.expanded ?? false,
-			formatter: (value: ColorPlus) => value.serialize(args.params.format),
+			formatter: (value: ColorPlus) =>
+				value.serialize(
+					args.params.format,
+					legacyAlphaModeToAlphaMode(args.params.color?.alpha),
+				),
 			parser: (text: string) => {
 				const parsedColor = ColorPlus.create(text);
 				if (parsedColor === undefined) {
@@ -130,7 +165,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				return parsedColor;
 			},
 			pickerLayout: args.params.picker ?? 'popup',
-			supportsAlpha: false, // args.params.format.alpha ?? false,
+			supportsAlpha: alphaEnabled(args.params.format, args.params.color?.alpha), // args.params.format.alpha ?? false,
 			value: args.value,
 			viewProps: args.viewProps,
 		});

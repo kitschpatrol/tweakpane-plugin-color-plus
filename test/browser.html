@@ -18,7 +18,7 @@
 			}
 
 			div.tp-dfwv {
-				width: 410px;
+				width: 450px;
 			}
 		</style>
 	</head>
@@ -28,9 +28,12 @@
 			import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus';
 
 			const params = {
-				stringColor: '#ff00ff',
-				stringColorOklch: 'oklch(66.62% 0.296 2.47deg / 50%)',
-				numberColor: 0xff00ffcc,
+				stringColorHex: '#ff00ff',
+				stringColorHexAlpha: '#ff00ffcc',
+				stringColorOklch: 'oklch(66.62% 0.296 2.47deg)',
+				stringColorOklchAlpha: 'oklch(66.62% 0.296 2.47deg / 50%)',
+				numberColor: 0xff00ff,
+				numberColorAlpha: 0xff00ffcc,
 				objectColor: {
 					r: 255,
 					g: 0,
@@ -45,57 +48,54 @@
 			};
 
 			const pane = new Pane();
-			// Register plugin
 			pane.registerPlugin(TweakpanePluginColorPlus);
 
-			pane.addBinding(params, 'stringColor', {
-				label: 'String Color Original',
-				view: 'color',
-				color: {
-					alpha: true,
-				},
-				expanded: true,
+			// Tweakpane Classic Color
+			pane.addBinding(params, 'stringColorHex', {
 				picker: 'inline',
+				expanded: true,
 			});
-
-			pane.addBinding(params, 'objectColorAlpha', {
-				label: 'Object Color Alpha Original',
+			pane.addBinding(params, 'stringColorHexAlpha');
+			pane.addBinding(params, 'numberColor', {view: 'color'});
+			pane.addBinding(params, 'numberColorAlpha', {
 				view: 'color',
+				color: {alpha: true},
+			});
+			pane.addBinding(params, 'objectColor');
+			pane.addBinding(params, 'objectColorAlpha');
+
+			// Tweakpane Color Plus
+			pane.addBlade({
+				view: 'separator',
 			});
 
-			// TODO: Update parameters for your plugin
-			pane
-				.addBinding(params, 'numberColor', {
-					label: 'Number Color Plus',
-					view: 'color-plus',
-				})
-				.on('change', (event) => {
-					console.log(params.numberColor);
-				});
+			pane.addBinding(params, 'stringColorHex', {
+				view: 'color-plus',
+				picker: 'inline',
+				expanded: true,
+			});
+			// .on('change', (ev) => {
+			// 	console.log(ev);
+			// 	pane.refresh();
+			// });
+			// pane.addBinding(params, 'stringColorHex', {
+			// 	view: 'color-plus',
+			// 	color: {alpha: 'always'},
+			// });
 
-			// TODO: Update parameters for your plugin
-			pane
-				.addBinding(params, 'stringColorOklch', {
-					label: 'String Color Plus',
-					view: 'color-plus',
-					color: {
-						// breaks with 'red' or other color strings
-						formatLocked: true,
-					},
-				})
-				.on('change', (event) => {
-					// console.log(event);
-				});
-			// pane.addBinding(params, 'numberColor', {
-			// 	label: 'Number Color',
-			// 	view: 'color-plus',
-			// });
-			// pane.addBinding(params, 'objectColor', {
-			// 	label: 'Object Color',
-			// 	view: 'color-plus',
-			// });
+			// pane.addBinding(params, 'stringColorHexAlpha', {view: 'color-plus'});
+			// pane.addBinding(params, 'stringColorOklch', {view: 'color-plus'});
+			// pane.addBinding(params, 'stringColorOklchAlpha', {view: 'color-plus'});
+			// pane.addBinding(params, 'numberColor', {view: 'color-plus'});
+			// pane.addBinding(params, 'numberColorAlpha', {view: 'color-plus'});
 
 			window.pane = pane;
+
+			function refresh() {
+				pane.refresh();
+				requestAnimationFrame(refresh);
+			}
+			refresh();
 		</script>
 	</body>
 </html>

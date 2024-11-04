@@ -53,9 +53,7 @@ export function parseColorFormat(value: unknown): ColorFormat | undefined {
 	return value as ColorFormat;
 }
 
-export function legacyAlphaModeToAlphaMode(
-	value: unknown,
-): AlphaMode | undefined {
+export function legacyAlphaModeToAlphaMode(value: unknown): AlphaMode {
 	if (typeof value === 'boolean') {
 		return value ? 'always' : 'never';
 	}
@@ -67,5 +65,19 @@ export function legacyAlphaModeToAlphaMode(
 		return value;
 	}
 
-	return undefined;
+	return 'auto';
+}
+
+export function alphaEnabled(
+	format: ColorFormat,
+	alphaMode: AlphaMode | boolean | undefined,
+): boolean {
+	const alphaModeNarrowed = legacyAlphaModeToAlphaMode(alphaMode);
+	if (alphaModeNarrowed === 'always') {
+		return true;
+	}
+	if (alphaModeNarrowed === 'never') {
+		return false;
+	}
+	return format.alpha ?? false;
 }

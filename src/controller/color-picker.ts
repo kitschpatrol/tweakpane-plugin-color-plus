@@ -55,28 +55,26 @@ export class ColorPickerController
 			value: this.value,
 			viewProps: this.viewProps,
 		});
-		this.alphaIcs_ =
-			// TODO determine alpha support from the color type
-			this.value.rawValue.alpha !== 0
-				? {
-						palette: new APaletteController(doc, {
-							value: this.value,
-							viewProps: this.viewProps,
+		this.alphaIcs_ = config.supportsAlpha
+			? {
+					palette: new APaletteController(doc, {
+						value: this.value,
+						viewProps: this.viewProps,
+					}),
+					text: new NumberTextController(doc, {
+						parser: parseNumber,
+						props: ValueMap.fromObject({
+							pointerScale: 0.01,
+							keyScale: 0.1,
+							formatter: createNumberFormatter(2),
 						}),
-						text: new NumberTextController(doc, {
-							parser: parseNumber,
-							props: ValueMap.fromObject({
-								pointerScale: 0.01,
-								keyScale: 0.1,
-								formatter: createNumberFormatter(2),
-							}),
-							value: createValue(0, {
-								constraint: new DefiniteRangeConstraint({min: 0, max: 1}),
-							}),
-							viewProps: this.viewProps,
+						value: createValue(0, {
+							constraint: new DefiniteRangeConstraint({min: 0, max: 1}),
 						}),
-					}
-				: null;
+						viewProps: this.viewProps,
+					}),
+				}
+			: null;
 		if (this.alphaIcs_) {
 			connectValues({
 				primary: this.value,
@@ -105,7 +103,7 @@ export class ColorPickerController
 					}
 				: null,
 			hPaletteView: this.hPaletteC_.view,
-			supportsAlpha: false,
+			supportsAlpha: config.supportsAlpha,
 			svPaletteView: this.svPaletteC_.view,
 			// TODO revisit
 			// textsView: this.textsC_.view,
