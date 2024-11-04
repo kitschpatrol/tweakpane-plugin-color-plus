@@ -3,13 +3,13 @@
 import Alias from '@rollup/plugin-alias';
 import {nodeResolve} from '@rollup/plugin-node-resolve';
 import Replace from '@rollup/plugin-replace';
+import terser from '@rollup/plugin-terser';
 import Typescript from '@rollup/plugin-typescript';
 import Autoprefixer from 'autoprefixer';
+import fs from 'fs';
 import Postcss from 'postcss';
 import Cleanup from 'rollup-plugin-cleanup';
-import terser from '@rollup/plugin-terser';
 import * as Sass from 'sass';
-import fs from 'fs';
 
 const Package = JSON.parse(fs.readFileSync('./package.json'));
 

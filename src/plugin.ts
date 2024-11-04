@@ -21,7 +21,7 @@ export interface ColorPlusInputParams extends BaseInputParams {
 		// Boolean is legacy... true is always, false is never
 		// In the original tweakpane installation, this only applied to number values
 		alpha?: boolean | AlphaMode;
-		// In the original tweakpane implementation, this only applied to ojbect values
+		// In the original tweakpane implementation, this only applied to object values
 		type?: 'int' | 'float';
 		// TODO sort of works
 		formatLocked?: boolean;
@@ -109,6 +109,9 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				}
 				newColor.convert('hsv');
 
+				// Reuse old HSV value if the new one doesn't change its
+				// value representation... deals with having more precision
+				// internally than externally
 				const newExternalValue = newColor.toValue(
 					args.params.format,
 					legacyAlphaModeToAlphaMode(args.params.color?.alpha),
