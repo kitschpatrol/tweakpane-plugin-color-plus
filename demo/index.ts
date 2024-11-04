@@ -28,6 +28,9 @@ pane.registerPlugin(TweakpanePluginColorPlus);
 pane.addBinding(params, 'stringColorHex', {
 	picker: 'inline',
 	expanded: true,
+	color: {
+		float: true,
+	},
 });
 pane.addBinding(params, 'stringColorHexAlpha');
 pane.addBinding(params, 'numberColor', {view: 'color'});
@@ -49,10 +52,11 @@ pane.addBinding(params, 'stringColorHex', {
 	expanded: true,
 });
 
-// pane.addBinding(params, 'stringColorHex', {
-// 	view: 'color-plus',
-// 	color: {alpha: 'always'},
-// });
+pane.addBinding(params, 'stringColorHexAlpha', {
+	view: 'color-plus',
+	picker: 'inline',
+	expanded: true,
+});
 
 // pane.addBinding(params, 'stringColorHexAlpha', {view: 'color-plus'});
 // pane.addBinding(params, 'stringColorOklch', {view: 'color-plus'});
@@ -60,9 +64,9 @@ pane.addBinding(params, 'stringColorHex', {
 // pane.addBinding(params, 'numberColor', {view: 'color-plus'});
 // pane.addBinding(params, 'numberColorAlpha', {view: 'color-plus'});
 
-pane.on('change', () => {
-	pane.refresh();
-});
+// pane.on('change', () => {
+// 	pane.refresh();
+// });
 
 // function refresh() {
 // 	pane.refresh();

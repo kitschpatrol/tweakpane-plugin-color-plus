@@ -1,4 +1,5 @@
 import {
+	bindValue,
 	ClassName,
 	createSvgIconElement,
 	InputView,
@@ -8,8 +9,7 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-// TODO
-export type ColorTextsMode = 'hex' | 'rgb' | 'hsl' | 'hsv';
+export type ColorTextsMode = 'hex' | 'srgb' | 'hsl' | 'hsv';
 
 interface Config {
 	inputViews: InputView[];
@@ -22,10 +22,11 @@ const cn = ClassName('coltxt');
 function createModeSelectElement(doc: Document): HTMLSelectElement {
 	const selectElem = doc.createElement('select');
 	const items = [
-		{text: 'RGB', value: 'rgb'},
+		{text: 'RGB', value: 'srgb'},
 		{text: 'HSL', value: 'hsl'},
 		{text: 'HSV', value: 'hsv'},
 		{text: 'HEX', value: 'hex'},
+		// {text: 'OKLCH', value: 'oklch'},
 	];
 	selectElem.appendChild(
 		items.reduce((frag, item) => {
@@ -75,10 +76,9 @@ export class ColorTextsView implements View {
 		this.inputViews_ = config.inputViews;
 		this.applyInputViews_();
 
-		// TODO re-expose mode...
-		// bindValue(config.mode, (mode) => {
-		// 	this.modeElem_.value = mode;
-		// });
+		bindValue(config.mode, (mode) => {
+			this.modeElem_.value = mode;
+		});
 	}
 
 	get modeSelectElement(): HTMLSelectElement {

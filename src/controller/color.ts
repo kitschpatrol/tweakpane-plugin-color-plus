@@ -15,6 +15,7 @@ import {
 	ValueMap,
 	ViewProps,
 } from '@tweakpane/core';
+import {ColorType} from '@tweakpane/core/dist/input-binding/color/model/color-model.js';
 
 import {ColorPlus} from '../model/color-plus.js';
 import {ColorView} from '../view/color.js';
@@ -22,6 +23,7 @@ import {ColorPickerController} from './color-picker.js';
 import {ColorSwatchController} from './color-swatch.js';
 
 interface Config {
+	colorType: ColorType;
 	expanded: boolean;
 	formatter: Formatter<ColorPlus>;
 	parser: Parser<ColorPlus>;
@@ -53,10 +55,10 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 		this.value = config.value;
 		this.viewProps = config.viewProps;
 
-		// this.value.emitter.on('change', (event) => {
-		// 	console.log('----------------------------------');
-		// 	console.log(String(event.rawValue));
-		// });
+		this.value.emitter.on('change', (event) => {
+			console.log('----------------------------------');
+			console.log(String(event.rawValue));
+		});
 
 		this.foldable_ = Foldable.create(config.expanded);
 
@@ -92,6 +94,7 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 				: null;
 
 		const pickerC = new ColorPickerController(doc, {
+			colorType: config.colorType,
 			value: this.value,
 			viewProps: this.viewProps,
 			supportsAlpha: config.supportsAlpha,

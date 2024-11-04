@@ -1,6 +1,6 @@
 import Color from 'colorjs.io';
 
-import {ColorPlus} from './model/color-plus';
+import {ColorPlus, getRangeForChannel} from './model/color-plus';
 // const color = new Color('#ff00ff');
 
 // console.log(color);
@@ -93,3 +93,7 @@ p?.convert('srgb');
 console.log(p?.toValue(pf!));
 
 console.log(p?.serialize(pf!));
+
+console.log('----------------------------------');
+console.log(getRangeForChannel('hsv', 0));
+console.log(getRangeForChannel('hsl', 0));

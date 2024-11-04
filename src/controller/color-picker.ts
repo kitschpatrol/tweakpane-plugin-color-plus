@@ -10,16 +10,17 @@ import {
 	ValueMap,
 	ViewProps,
 } from '@tweakpane/core';
+import {ColorType} from '@tweakpane/core/dist/input-binding/color/model/color-model.js';
 
 import {ColorPlus} from '../model/color-plus.js';
 import {ColorPickerView} from '../view/color-picker.js';
 import {APaletteController} from './a-palette.js';
-// TODO revisit
-// import {ColorTextsController} from './color-texts.js';
+import {ColorTextsController} from './color-texts.js';
 import {HPaletteController} from './h-palette.js';
 import {SvPaletteController} from './sv-palette.js';
 
 interface Config {
+	colorType: ColorType;
 	value: Value<ColorPlus>;
 	viewProps: ViewProps;
 	supportsAlpha: boolean;
@@ -40,8 +41,7 @@ export class ColorPickerController
 	} | null;
 	private readonly hPaletteC_: HPaletteController;
 	private readonly svPaletteC_: SvPaletteController;
-	// TODO revisit
-	// private readonly textsC_: ColorTextsController;
+	private readonly textsC_: ColorTextsController;
 
 	constructor(doc: Document, config: Config) {
 		this.value = config.value;
@@ -89,11 +89,11 @@ export class ColorPickerController
 			});
 		}
 
-		// TODO revisit
-		// this.textsC_ = new ColorTextsController(doc, {
-		// 	value: this.value,
-		// 	viewProps: this.viewProps,
-		// });
+		this.textsC_ = new ColorTextsController(doc, {
+			colorType: config.colorType,
+			value: this.value,
+			viewProps: this.viewProps,
+		});
 
 		this.view = new ColorPickerView(doc, {
 			alphaViews: this.alphaIcs_
@@ -105,14 +105,12 @@ export class ColorPickerController
 			hPaletteView: this.hPaletteC_.view,
 			supportsAlpha: config.supportsAlpha,
 			svPaletteView: this.svPaletteC_.view,
-			// TODO revisit
-			// textsView: this.textsC_.view,
+			textsView: this.textsC_.view,
 			viewProps: this.viewProps,
 		});
 	}
 
-	// TODO revisit
-	// get textsController(): ColorTextsController {
-	// 	return this.textsC_;
-	// }
+	get textsController(): ColorTextsController {
+		return this.textsC_;
+	}
 }

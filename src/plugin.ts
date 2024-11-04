@@ -167,6 +167,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				parsedColor.convert('hsv');
 				return parsedColor;
 			},
+			colorType: args.params.color?.type ?? 'int',
 			pickerLayout: args.params.picker ?? 'popup',
 			supportsAlpha: alphaEnabled(args.params.format, args.params.color?.alpha), // args.params.format.alpha ?? false,
 			value: args.value,

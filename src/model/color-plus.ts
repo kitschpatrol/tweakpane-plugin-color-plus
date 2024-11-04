@@ -7,6 +7,7 @@ import {
 	type Coords,
 	get as colorJsGet,
 	getAll as colorJsGetAll,
+	HSL,
 	HSV,
 	LCH,
 	OKLCH,
@@ -25,6 +26,7 @@ import {
 ColorJsColorSpace.register(sRGB);
 ColorJsColorSpace.register(P3);
 ColorJsColorSpace.register(HSV);
+ColorJsColorSpace.register(HSL);
 ColorJsColorSpace.register(LCH);
 ColorJsColorSpace.register(OKLCH);
 
@@ -186,7 +188,17 @@ export class ColorPlus {
 		// Generic color IDs
 		if (typeof format.format === 'string') {
 			// Must be string
-			return colorJsSerialize(convertedColor, {format: format.format});
+			const result = colorJsSerialize(convertedColor, {
+				format: format.format,
+				alpha: format.alpha,
+			});
+
+			// Special case for hex to avoid #0f0-style truncation
+			if (format.format === 'hex') {
+				return expandHex(result);
+			} else {
+				return result;
+			}
 		}
 
 		// Fancy format objects
@@ -214,6 +226,7 @@ export class ColorPlus {
 			format: format.format.format,
 		});
 
+		// Special case for hex to avoid #0f0-style truncation
 		if (format.format.formatId === 'hex') {
 			return expandHex(result);
 		} else {
@@ -530,4 +543,37 @@ function toParsableColorString(value: unknown):
 
 	//TODO objects and so forth
 	return undefined;
+}
+
+function getColorJsColorSpaceById(
+	spaceId: ColorSpaceId,
+): ColorJsColorSpace | undefined {
+	try {
+		const space = ColorJsColorSpace.get(spaceId);
+		return space;
+	} catch {
+		console.warn(`Unknown color space: ${spaceId}`);
+		return undefined;
+	}
+}
+
+export function getRangeForChannel(
+	spaceId: ColorSpaceId,
+	channelIndex: number,
+): [number, number] {
+	const space = getColorJsColorSpaceById(spaceId);
+	if (space === undefined) {
+		throw new Error(`Unknown color space: ${spaceId}`);
+	}
+
+	// Assumes correctly ordered channels...
+	// Not sure how to get channel name to index map from color space
+	const coordMeta = Object.values(space.coords).at(channelIndex);
+	const range = coordMeta?.range ?? coordMeta?.refRange ?? undefined;
+
+	if (range === undefined) {
+		throw new Error(`Unknown range for channel: ${channelIndex}`);
+	}
+
+	return range;
 }
