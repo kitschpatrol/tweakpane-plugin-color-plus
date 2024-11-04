@@ -125,7 +125,8 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			};
 		},
 		equals: (a, b) => {
-			const eq = a.equals(b);
+			// require object identity equality as well
+			const eq = a.equals(b) && a === b;
 			return eq;
 		},
 		// Internal to external
