@@ -68,6 +68,28 @@ e.toGamut({
 	method: 'clip',
 });
 
-console.log(e.h);
-console.log(e.getAll());
-console.log(e.toString());
+console.log('----------------------------------');
+console.log('----------------------------------');
+const nv = 0xff00ff;
+const n = ColorPlus.create(nv);
+const nf = ColorPlus.getFormat(nv);
+
+console.log(nv);
+console.log('----------------------------------');
+const v = n?.toValue(nf!);
+console.log(n?.serialize(nf!));
+console.log(v);
+console.log(typeof n?.serialize(nf!));
+console.log(typeof n?.toValue(nf!));
+
+const p = ColorPlus.create(0xff00ffcc);
+const pf = ColorPlus.getFormat(0xff00ffcc);
+console.log(p);
+
+console.log(p?.toValue(pf!));
+p?.convert('hsv');
+console.log(p?.toValue(pf!));
+p?.convert('srgb');
+console.log(p?.toValue(pf!));
+
+console.log(p?.serialize(pf!));

@@ -28,7 +28,7 @@ ColorJsColorSpace.register(HSV);
 ColorJsColorSpace.register(LCH);
 ColorJsColorSpace.register(OKLCH);
 
-type AlphaMode =
+export type AlphaMode =
 	/* Strip the alpha channel, even if initially present */
 	| 'never'
 	/* Always include alpha channel, even if initially missing */
@@ -114,7 +114,7 @@ type ParseMeta = {
  * Original format and alpha state inferred from the user-provided value
  */
 export type ColorFormat = {
-	format: ParseMeta | string; // Todo object types etc.
+	format: ParseMeta | string | 'number'; // Todo object types etc.
 	alpha?: boolean;
 	space?: ColorSpaceId;
 };
@@ -155,16 +155,41 @@ export class ColorPlus {
 		this.color = convert(this.color, spaceId) ?? this.color;
 	}
 
-	public serialize(format: ColorFormat, alphaMode: AlphaMode = 'auto'): string {
+	public toValue(
+		format: ColorFormat,
+		alphaMode: AlphaMode = 'auto',
+	): number | string {
 		const convertedColor =
 			convert(this.color, format.space ?? this.color.spaceId) ?? this.color;
 
-		// Custom serialization...
+		// Special case for numbers
+		if (format.format === 'number') {
+			// Always SRGB
+			const converted = convert(convertedColor, 'srgb') ?? convertedColor;
+
+			const includeAlpha = alphaMode !== 'never' && format.alpha;
+			const [r, g, b] = converted.coords;
+
+			// Convert from 0-1 range to 0-255 range and round to integers
+			const ri = Math.round(r * 255);
+			const gi = Math.round(g * 255);
+			const bi = Math.round(b * 255);
+
+			if (includeAlpha) {
+				const a = Math.round(this.color.alpha * 255);
+				return ((ri << 24) | (gi << 16) | (bi << 8) | a) >>> 0;
+			} else {
+				return ((ri << 16) | (gi << 8) | bi) >>> 0;
+			}
+		}
+
+		// Generic color IDs
 		if (typeof format.format === 'string') {
-			// TODO other types
+			// Must be string
 			return colorJsSerialize(convertedColor, {format: format.format});
 		}
 
+		// Fancy format objects
 		// See color.js/src/serialize.js
 		const result = colorJsSerialize(convertedColor, {
 			inGamut: true, // TODO expose? Overrides inGamut in the format object
@@ -194,6 +219,20 @@ export class ColorPlus {
 		} else {
 			return result;
 		}
+	}
+
+	public serialize(format: ColorFormat, alphaMode: AlphaMode = 'auto'): string {
+		const value = this.toValue(format, alphaMode);
+
+		if (typeof value === 'string') {
+			return value;
+		} else if (typeof value === 'number') {
+			// Alpha already factored in toValue
+			const includeAlpha = alphaMode !== 'never' && format.alpha;
+			return '0x' + value.toString(16).padStart(includeAlpha ? 8 : 6, '0');
+		}
+
+		throw new Error('Unexpected value type');
 	}
 
 	public equals(other: ColorPlus): boolean {
@@ -373,15 +412,18 @@ function expandHex(hex: string): string {
 function parseColorAndFormat(
 	value: unknown,
 ): undefined | {format: ColorFormat; color: ColorPlusObject} {
-	if (typeof value !== 'string') {
+	const parsableString = toParsableColorString(value);
+	if (parsableString === undefined) {
 		console.warn('ColorPlus only supports string values for now');
 		return undefined;
 		// TODO other types...
 	}
 
+	const {colorString: valueString, colorFormat: valueFormat} = parsableString;
+
 	try {
 		const parseMetaInOut: Partial<ParseMeta> = {};
-		const colorJs = colorJsParse(value, {
+		const colorJs = colorJsParse(valueString, {
 			// @ts-expect-error - Type definition inconsistencies
 			parseMeta: parseMetaInOut,
 		});
@@ -409,7 +451,7 @@ function parseColorAndFormat(
 		const hasAlpha =
 			parseMeta.format.alpha ||
 			parseMeta.alphaType !== undefined ||
-			(parseMeta.formatId === 'hex' && hexHasAlpha(value));
+			(parseMeta.formatId === 'hex' && hexHasAlpha(valueString));
 
 		if (!validateColorJsObject(colorJs)) {
 			console.warn("Can't handle null coords");
@@ -419,7 +461,11 @@ function parseColorAndFormat(
 		const color = getColorPlusObjectFromColorJsObject(colorJs);
 
 		return {
-			format: {format: parseMeta, alpha: hasAlpha, space: color.spaceId},
+			format: {
+				format: valueFormat ?? parseMeta,
+				alpha: hasAlpha,
+				space: color.spaceId,
+			},
 			color: color,
 		};
 	} catch (error) {
@@ -462,3 +508,26 @@ function toPrecision(n: number, precision: number | undefined): number {
 // 	targetColor.coords[1] = toPrecision(targetColor.coords[1], precision);
 // 	targetColor.coords[2] = toPrecision(targetColor.coords[2], precision);
 // }
+
+function toParsableColorString(value: unknown):
+	| {
+			colorString: string;
+			colorFormat: 'number' | undefined;
+	  }
+	| undefined {
+	if (typeof value === 'string') {
+		return {
+			colorString: value.replace('0x', '#'),
+			colorFormat: undefined,
+		};
+	}
+	if (typeof value === 'number') {
+		return {
+			colorString: '#' + value.toString(16),
+			colorFormat: 'number',
+		};
+	}
+
+	//TODO objects and so forth
+	return undefined;
+}

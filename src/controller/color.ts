@@ -53,10 +53,10 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 		this.value = config.value;
 		this.viewProps = config.viewProps;
 
-		this.value.emitter.on('change', (event) => {
-			console.log('----------------------------------');
-			console.log(String(event.rawValue));
-		});
+		// this.value.emitter.on('change', (event) => {
+		// 	console.log('----------------------------------');
+		// 	console.log(String(event.rawValue));
+		// });
 
 		this.foldable_ = Foldable.create(config.expanded);
 
@@ -94,6 +94,7 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 		const pickerC = new ColorPickerController(doc, {
 			value: this.value,
 			viewProps: this.viewProps,
+			supportsAlpha: config.supportsAlpha,
 		});
 		pickerC.view.allFocusableElements.forEach((elem) => {
 			elem.addEventListener('blur', this.onPopupChildBlur_);

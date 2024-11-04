@@ -8,14 +8,14 @@ import {
 } from '@tweakpane/core';
 
 import {ColorController} from './controller/color.js';
-import {type ColorFormat, ColorPlus} from './model/color-plus.js';
-import {parseColorInputParams} from './util.js';
+import {AlphaMode, type ColorFormat, ColorPlus} from './model/color-plus.js';
+import {legacyAlphaModeToAlphaMode, parseColorInputParams} from './util.js';
 
-export type ColorValueExternal = string; // only strings for now...
+export type ColorValueExternal = string | number; // only strings for now...
 export interface ColorPlusInputParams extends BaseInputParams {
 	color?: {
 		// Boolean is legacy... true is always, false is never
-		alpha?: boolean | 'always' | 'never' | 'auto';
+		alpha?: boolean | AlphaMode;
 		type?: 'int' | 'float';
 		formatLocked?: boolean;
 		wideGamut?: 'always' | 'never' | 'auto';
@@ -58,14 +58,13 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 
 		const result = parseColorInputParams(params);
 
-		console.log('----------------------------------');
-		console.log(result);
 		const resolvedResult = result
 			? {
-					initialValue: color.serialize(format),
+					initialValue: value as string | number,
 					params: {
+						// Set some defaults...
 						color: {
-							alpha: result.color?.alpha ?? 'auto',
+							alpha: legacyAlphaModeToAlphaMode(result.color?.alpha) ?? 'auto',
 							type: result.color?.type ?? 'int',
 							formatLocked: result.color?.formatLocked ?? true,
 							wideGamut: result.color?.wideGamut ?? 'auto',
@@ -75,7 +74,6 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				}
 			: null;
 
-		console.log(resolvedResult);
 		return resolvedResult;
 	},
 	binding: {
@@ -99,7 +97,14 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 		writer: (args) => {
 			// Todo factor in args...
 			return (target, inValue) => {
-				writePrimitive(target, inValue.serialize(args.params.format));
+				const alphaMode =
+					args.params.color?.alpha === true
+						? 'always'
+						: args.params.color?.alpha === false
+							? 'never'
+							: args.params.color?.alpha;
+
+				writePrimitive(target, inValue.toValue(args.params.format, alphaMode));
 			};
 		},
 	},
@@ -121,10 +126,11 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 					args.params.format = newFormat;
 				}
 
+				parsedColor.convert('hsv');
 				return parsedColor;
 			},
 			pickerLayout: args.params.picker ?? 'popup',
-			supportsAlpha: true,
+			supportsAlpha: false, // args.params.format.alpha ?? false,
 			value: args.value,
 			viewProps: args.viewProps,
 		});

@@ -76,11 +76,7 @@ export class SvPaletteController
 
 		const c = this.value.rawValue.clone();
 		const h = c.get('h', 'hsv');
-
 		c.setAll([h, saturation, value], 'hsv');
-
-		console.log(`post saturation: ${c.get('s', 'hsv')}`);
-		console.log(`post value: ${c.get('v', 'hsv')}`);
 
 		this.value.setRawValue(c.clone(), opts);
 	}

@@ -22,6 +22,7 @@ import {SvPaletteController} from './sv-palette.js';
 interface Config {
 	value: Value<ColorPlus>;
 	viewProps: ViewProps;
+	supportsAlpha: boolean;
 }
 
 /**
@@ -84,7 +85,6 @@ export class ColorPickerController
 				forward: (p) => p.alpha,
 				// TODO vet this
 				backward: (p, s) => {
-					console.log('backwards', s);
 					p.alpha = s;
 					return p.clone();
 				},
@@ -105,7 +105,7 @@ export class ColorPickerController
 					}
 				: null,
 			hPaletteView: this.hPaletteC_.view,
-			supportsAlpha: true, // TODO revisit
+			supportsAlpha: false,
 			svPaletteView: this.svPaletteC_.view,
 			// TODO revisit
 			// textsView: this.textsC_.view,

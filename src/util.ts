@@ -1,6 +1,6 @@
 import {parsePickerLayout, parseRecord} from '@tweakpane/core';
 
-import {ColorFormat} from './model/color-plus';
+import {AlphaMode, ColorFormat} from './model/color-plus';
 import {ColorPlusInputParams} from './plugin';
 
 type ColorType = 'float' | 'int';
@@ -40,16 +40,8 @@ function parseColorWideGamut(
 				: undefined;
 }
 
-function parseColorAlpha(
-	value: unknown,
-): 'always' | 'never' | 'auto' | undefined {
-	return value === 'always' || value === true
-		? 'always'
-		: value === 'never' || value === false
-			? 'never'
-			: value === 'auto' || value === undefined
-				? 'auto'
-				: undefined;
+function parseColorAlpha(value: unknown): AlphaMode | undefined {
+	return legacyAlphaModeToAlphaMode(value);
 }
 
 function parseColorType(value: unknown): ColorType | undefined {
@@ -59,4 +51,21 @@ function parseColorType(value: unknown): ColorType | undefined {
 export function parseColorFormat(value: unknown): ColorFormat | undefined {
 	// TODO: validate format
 	return value as ColorFormat;
+}
+
+export function legacyAlphaModeToAlphaMode(
+	value: unknown,
+): AlphaMode | undefined {
+	if (typeof value === 'boolean') {
+		return value ? 'always' : 'never';
+	}
+
+	if (
+		typeof value === 'string' &&
+		(value === 'always' || value === 'never' || value === 'auto')
+	) {
+		return value;
+	}
+
+	return undefined;
 }

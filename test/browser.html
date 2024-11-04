@@ -30,7 +30,7 @@
 			const params = {
 				stringColor: '#ff00ff',
 				stringColorOklch: 'oklch(66.62% 0.296 2.47deg / 50%)',
-				numberColor: 0xff00ff,
+				numberColor: 0xff00ffcc,
 				objectColor: {
 					r: 255,
 					g: 0,
@@ -65,15 +65,26 @@
 
 			// TODO: Update parameters for your plugin
 			pane
+				.addBinding(params, 'numberColor', {
+					label: 'Number Color Plus',
+					view: 'color-plus',
+				})
+				.on('change', (event) => {
+					console.log(params.numberColor);
+				});
+
+			// TODO: Update parameters for your plugin
+			pane
 				.addBinding(params, 'stringColorOklch', {
 					label: 'String Color Plus',
 					view: 'color-plus',
 					color: {
-						formatLocked: false,
+						// breaks with 'red' or other color strings
+						formatLocked: true,
 					},
 				})
 				.on('change', (event) => {
-					console.log(event);
+					// console.log(event);
 				});
 			// pane.addBinding(params, 'numberColor', {
 			// 	label: 'Number Color',
