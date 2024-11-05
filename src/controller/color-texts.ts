@@ -15,9 +15,12 @@ import {
 	ValueMap,
 	ViewProps,
 } from '@tweakpane/core';
-import {ColorType} from '@tweakpane/core/dist/input-binding/color/model/color-model.js';
 
-import {ColorPlus, getRangeForChannel} from '../model/color-plus.js';
+import {
+	ColorPlus,
+	type ColorType,
+	getRangeForChannel,
+} from '../model/color-plus.js';
 // import {getKeyScaleForColor} from '../util.js';
 import {ColorTextsMode, ColorTextsView} from '../view/color-texts.js';
 
@@ -64,7 +67,7 @@ function createComponentController(
 		props: ValueMap.fromObject({
 			formatter: createFormatter(config.colorType),
 			keyScale: 1, //, getKeyScaleForColor(false),
-			pointerScale: 1, //0.0001, //config.colorType === 'float' ? 0.01 : 1,
+			pointerScale: config.colorType === 'float' ? 0.01 : 1,
 		}),
 		value: createValue(0, {
 			constraint: createConstraint(config.colorMode, config.colorType, index),
@@ -148,8 +151,9 @@ function createHexController(
 			formatter: (value: ColorPlus): string => {
 				console.log('formatter hex');
 				const serialized = value.serialize(
-					{format: 'hex', alpha: false},
-					'never',
+					{format: 'hex'},
+					// Never show alpha in text field, since we have the slider below
+					false,
 				);
 				console.log(serialized);
 				return serialized;

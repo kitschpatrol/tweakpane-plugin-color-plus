@@ -30,13 +30,7 @@ ColorJsColorSpace.register(HSL);
 ColorJsColorSpace.register(LCH);
 ColorJsColorSpace.register(OKLCH);
 
-export type AlphaMode =
-	/* Strip the alpha channel, even if initially present */
-	| 'never'
-	/* Always include alpha channel, even if initially missing */
-	| 'always'
-	/* Include alpha channel if it's initially present */
-	| 'auto';
+export type ColorType = 'int' | 'float';
 
 // TODO Subset
 export type ColorSpaceId =
@@ -159,7 +153,7 @@ export class ColorPlus {
 
 	public toValue(
 		format: ColorFormat,
-		alphaMode: AlphaMode = 'auto',
+		alphaOverride?: boolean,
 	): number | string {
 		const convertedColor =
 			convert(this.color, format.space ?? this.color.spaceId) ?? this.color;
@@ -169,7 +163,7 @@ export class ColorPlus {
 			// Always SRGB
 			const converted = convert(convertedColor, 'srgb') ?? convertedColor;
 
-			const includeAlpha = alphaMode !== 'never' && format.alpha;
+			const includeAlpha = alphaOverride ?? format.alpha;
 			const [r, g, b] = converted.coords;
 
 			// Convert from 0-1 range to 0-255 range and round to integers
@@ -190,15 +184,11 @@ export class ColorPlus {
 			// Must be string
 			const result = colorJsSerialize(convertedColor, {
 				format: format.format,
-				alpha: format.alpha,
+				alpha: alphaOverride ?? format.alpha,
 			});
 
 			// Special case for hex to avoid #0f0-style truncation
-			if (format.format === 'hex') {
-				return expandHex(result);
-			} else {
-				return result;
-			}
+			return format.format === 'hex' ? expandHex(result) : result;
 		}
 
 		// Fancy format objects
@@ -210,14 +200,14 @@ export class ColorPlus {
 			// @ts-expect-error - Type definition inconsistencies
 			alpha:
 				// Erase alpha from output
-				alphaMode === 'never'
+				alphaOverride === false
 					? false
 					: // Hex can't take object, so return boolean
 						format.format.formatId === 'hex'
-						? alphaMode === 'always' || format.alpha
+						? (alphaOverride ?? format.alpha)
 						: // Other formats need to know their original alpha format (e.g. <number> vs <percentage>)
 							{
-								include: alphaMode === 'always' || format.alpha,
+								include: alphaOverride ?? format.alpha,
 								type: format.format.alphaType,
 							},
 			// @ts-expect-error - Type definition inconsistencies
@@ -234,14 +224,14 @@ export class ColorPlus {
 		}
 	}
 
-	public serialize(format: ColorFormat, alphaMode: AlphaMode = 'auto'): string {
-		const value = this.toValue(format, alphaMode);
+	public serialize(format: ColorFormat, alphaOverride?: boolean): string {
+		const value = this.toValue(format, alphaOverride);
 
 		if (typeof value === 'string') {
 			return value;
 		} else if (typeof value === 'number') {
 			// Alpha already factored in toValue
-			const includeAlpha = alphaMode !== 'never' && format.alpha;
+			const includeAlpha = alphaOverride ?? format.alpha;
 			return '0x' + value.toString(16).padStart(includeAlpha ? 8 : 6, '0');
 		}
 

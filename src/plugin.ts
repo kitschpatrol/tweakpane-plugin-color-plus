@@ -8,25 +8,18 @@ import {
 } from '@tweakpane/core';
 
 import {ColorController} from './controller/color.js';
-import {AlphaMode, type ColorFormat, ColorPlus} from './model/color-plus.js';
-import {
-	alphaEnabled,
-	legacyAlphaModeToAlphaMode,
-	parseColorInputParams,
-} from './util.js';
+import {type ColorFormat, ColorPlus} from './model/color-plus.js';
+import {parseColorInputParams, validateColorInputParams} from './util.js';
 
 export type ColorValueExternal = string | number; // only strings for now...
 export interface ColorPlusInputParams extends BaseInputParams {
 	color?: {
-		// Boolean is legacy... true is always, false is never
 		// In the original tweakpane installation, this only applied to number values
-		alpha?: boolean | AlphaMode;
+		alpha?: boolean;
 		// In the original tweakpane implementation, this only applied to object values
 		type?: 'int' | 'float';
 		// TODO sort of works
 		formatLocked?: boolean;
-		// TODO
-		wideGamut?: 'always' | 'never' | 'auto';
 	};
 	expanded?: boolean;
 	picker?: PickerLayout;
@@ -67,33 +60,30 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 		// TODO Use OKLCH as the internal representation for extended gamut?
 		color.convert('hsv');
 
-		const result = parseColorInputParams(params);
-
-		if (!result) {
+		const parsedParams = parseColorInputParams(params);
+		if (!parsedParams) {
 			return null;
 		}
 
-		const initalValue = color.toValue(
-			format,
-			legacyAlphaModeToAlphaMode(result.color?.alpha),
-		);
+		const validParams = validateColorInputParams(params, value);
+		const initalValue = color.toValue(format, validParams.color?.alpha);
 
 		return {
 			initialValue: initalValue,
 			params: {
 				// Set some defaults...
 				color: {
-					alpha: legacyAlphaModeToAlphaMode(result.color?.alpha),
-					type: result.color?.type ?? 'int',
-					formatLocked: result.color?.formatLocked ?? true,
-					wideGamut: result.color?.wideGamut ?? 'auto',
+					alpha: parsedParams.color?.alpha, // Typically undefined
+					type: parsedParams.color?.type ?? 'int',
+					formatLocked: parsedParams.color?.formatLocked ?? true,
 				},
+				expanded: parsedParams.expanded,
+				picker: parsedParams.picker,
+				readonly: parsedParams.readonly,
+				// Internal
 				lastExternalValue: initalValue,
 				lastInternalValue: color,
 				format: format,
-				expanded: result.expanded,
-				picker: result.picker,
-				readonly: result.readonly,
 			},
 		};
 	},
@@ -114,7 +104,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				// internally than externally
 				const newExternalValue = newColor.toValue(
 					args.params.format,
-					legacyAlphaModeToAlphaMode(args.params.color?.alpha),
+					args.params.color?.alpha,
 				);
 
 				if (args.params.lastExternalValue === newExternalValue) {
@@ -136,7 +126,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				args.params.lastInternalValue = inValue;
 				args.params.lastExternalValue = inValue.toValue(
 					args.params.format,
-					legacyAlphaModeToAlphaMode(args.params.color?.alpha),
+					args.params.color?.alpha,
 				);
 
 				writePrimitive(target, args.params.lastExternalValue);
@@ -147,10 +137,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 		return new ColorController(args.document, {
 			expanded: args.params.expanded ?? false,
 			formatter: (value: ColorPlus) =>
-				value.serialize(
-					args.params.format,
-					legacyAlphaModeToAlphaMode(args.params.color?.alpha),
-				),
+				value.serialize(args.params.format, args.params.color?.alpha),
 			parser: (text: string) => {
 				const parsedColor = ColorPlus.create(text);
 				if (parsedColor === undefined) {
@@ -170,7 +157,8 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			},
 			colorType: args.params.color?.type ?? 'int',
 			pickerLayout: args.params.picker ?? 'popup',
-			supportsAlpha: alphaEnabled(args.params.format, args.params.color?.alpha), // args.params.format.alpha ?? false,
+			supportsAlpha:
+				args.params.format.alpha || args.params.color?.alpha === true,
 			value: args.value,
 			viewProps: args.viewProps,
 		});

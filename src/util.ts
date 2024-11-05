@@ -1,21 +1,18 @@
-import {parsePickerLayout, parseRecord} from '@tweakpane/core';
+import {isObject, parsePickerLayout, parseRecord} from '@tweakpane/core';
 
-import {AlphaMode, ColorFormat} from './model/color-plus';
+import {ColorFormat, type ColorType} from './model/color-plus';
 import {ColorPlusInputParams} from './plugin';
-
-type ColorType = 'float' | 'int';
 
 export function parseColorInputParams(
 	params: Record<string, unknown>,
 ): ColorPlusInputParams | undefined {
 	return parseRecord<ColorPlusInputParams>(params, (p) => ({
 		color: p.optional.object({
-			// Legacy with modifications
-			alpha: p.optional.custom(parseColorAlpha),
-			// Legacy
+			// Legacy, only applies to number values
+			alpha: p.optional.boolean,
+			// Legacy, only applies to object values?
 			type: p.optional.custom(parseColorType),
 			formatLocked: p.optional.boolean,
-			wideGamut: p.optional.custom(parseColorWideGamut),
 		}),
 		expanded: p.optional.boolean,
 		picker: p.optional.custom(parsePickerLayout),
@@ -23,25 +20,8 @@ export function parseColorInputParams(
 	}));
 }
 
-// TODO Wut
 export function getKeyScaleForColor(forAlpha: boolean): number {
 	return forAlpha ? 0.1 : 1;
-}
-
-function parseColorWideGamut(
-	value: unknown,
-): 'always' | 'never' | 'auto' | undefined {
-	return value === 'always'
-		? 'always'
-		: value === 'never'
-			? 'never'
-			: value === 'auto' || value === undefined
-				? 'auto'
-				: undefined;
-}
-
-function parseColorAlpha(value: unknown): AlphaMode | undefined {
-	return legacyAlphaModeToAlphaMode(value);
 }
 
 function parseColorType(value: unknown): ColorType | undefined {
@@ -53,31 +33,36 @@ export function parseColorFormat(value: unknown): ColorFormat | undefined {
 	return value as ColorFormat;
 }
 
-export function legacyAlphaModeToAlphaMode(value: unknown): AlphaMode {
-	if (typeof value === 'boolean') {
-		return value ? 'always' : 'never';
+export function alphaEnabled(
+	format: ColorFormat,
+	alphaMode: boolean | undefined,
+): boolean {
+	if (typeof alphaMode === 'boolean') {
+		return alphaMode;
+	}
+	return format.alpha ?? false;
+}
+
+export function validateColorInputParams(
+	params: ColorPlusInputParams,
+	colorValue: unknown,
+): ColorPlusInputParams {
+	if (params.color?.alpha !== undefined && typeof colorValue !== 'number') {
+		console.warn(
+			'ColorPlus: alpha mode is only supported for number values... ignoring',
+		);
+		params.color.alpha = undefined;
 	}
 
 	if (
-		typeof value === 'string' &&
-		(value === 'always' || value === 'never' || value === 'auto')
+		params.color?.type === 'float' &&
+		!(isObject(colorValue) || Array.isArray(colorValue))
 	) {
-		return value;
+		console.warn(
+			'ColorPlus: float mode is only supported for object or array values... ignoring',
+		);
+		params.color.type = 'int';
 	}
 
-	return 'auto';
-}
-
-export function alphaEnabled(
-	format: ColorFormat,
-	alphaMode: AlphaMode | boolean | undefined,
-): boolean {
-	const alphaModeNarrowed = legacyAlphaModeToAlphaMode(alphaMode);
-	if (alphaModeNarrowed === 'always') {
-		return true;
-	}
-	if (alphaModeNarrowed === 'never') {
-		return false;
-	}
-	return format.alpha ?? false;
+	return params;
 }
