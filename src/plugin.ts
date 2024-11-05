@@ -14,7 +14,7 @@ import {parseColorInputParams, validateColorInputParams} from './util.js';
 export type ColorValueExternal = string | number; // only strings for now...
 export interface ColorPlusInputParams extends BaseInputParams {
 	color?: {
-		// In the original tweakpane installation, this only applied to number values
+		// In the original tweakpane installation, this is only applied to number values
 		alpha?: boolean;
 		// In the original tweakpane implementation, this only applied to object values
 		type?: 'int' | 'float';
@@ -153,6 +153,12 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				}
 
 				parsedColor.convert('hsv');
+
+				// Discard alpha if it wasn't present originally
+				if (!(args.params.format.alpha || args.params.color?.alpha === true)) {
+					parsedColor.alpha = 1;
+				}
+
 				return parsedColor;
 			},
 			colorType: args.params.color?.type ?? 'int',
