@@ -26,6 +26,7 @@ export class SvPaletteView implements View {
 	public readonly value: Value<ColorPlus>;
 	public readonly canvasElement: HTMLCanvasElement;
 	private readonly markerElem_: HTMLDivElement;
+	private lastHue: number = -1;
 
 	constructor(doc: Document, config: Config) {
 		this.onValueChange_ = this.onValueChange_.bind(this);
@@ -54,41 +55,45 @@ export class SvPaletteView implements View {
 	}
 
 	private update_(): void {
-		const ctx = getCanvasContext(this.canvasElement);
-		if (!ctx) {
-			return;
-		}
-
-		const c = this.value.rawValue.clone();
-		c.convert('hsv');
-		const width = this.canvasElement.width;
-		const height = this.canvasElement.height;
-		const imgData = ctx.getImageData(0, 0, width, height);
-		const data = imgData.data;
-
-		// TODO faster way?
-		for (let iy = 0; iy < height; iy++) {
-			for (let ix = 0; ix < width; ix++) {
-				c.set('s', mapRange(ix, 0, width, 0, 100));
-				c.set('v', mapRange(iy, 0, height, 100, 0));
-
-				const [r, g, b] = c.getAll('srgb');
-
-				const i = (iy * width + ix) * 4;
-				data[i] = (r ?? 0) * 255;
-				data[i + 1] = (g ?? 0) * 255;
-				data[i + 2] = (b ?? 0) * 255;
-				data[i + 3] = 255;
-			}
-		}
-		ctx.putImageData(imgData, 0, 0);
-
-		const [, s, v] = this.value.rawValue.getAll('hsv');
-
+		// Draw the reticle
+		const [h, s, v] = this.value.rawValue.getAll('hsv');
 		const left = mapRange(s ?? 0, 0, 100, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
 		const top = mapRange(v ?? 0, 0, 100, 100, 0);
 		this.markerElem_.style.top = `${top}%`;
+
+		// Optimization, only redraw when the hue changes
+		if (h !== this.lastHue) {
+			const ctx = getCanvasContext(this.canvasElement);
+			if (!ctx) {
+				return;
+			}
+
+			this.lastHue = h ?? 0;
+			const c = this.value.rawValue.clone();
+			c.convert('hsv');
+			const width = this.canvasElement.width;
+			const height = this.canvasElement.height;
+			const imgData = ctx.getImageData(0, 0, width, height);
+			const data = imgData.data;
+
+			// TODO faster way?
+			for (let iy = 0; iy < height; iy++) {
+				c.set('v', mapRange(iy, 0, height, 100, 0));
+
+				for (let ix = 0; ix < width; ix++) {
+					c.set('s', mapRange(ix, 0, width, 0, 100));
+					const [r, g, b] = c.getAll('srgb');
+
+					const i = (iy * width + ix) * 4;
+					data[i] = (r ?? 0) * 255;
+					data[i + 1] = (g ?? 0) * 255;
+					data[i + 2] = (b ?? 0) * 255;
+					data[i + 3] = 255;
+				}
+			}
+			ctx.putImageData(imgData, 0, 0);
+		}
 	}
 
 	private onValueChange_(): void {

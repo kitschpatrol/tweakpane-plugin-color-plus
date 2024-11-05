@@ -49,10 +49,8 @@ export class ColorPlus {
 		hasAlpha?: boolean,
 		colorType?: ColorType,
 	): ColorPlus | undefined {
+		// TODO faster path? TODO memoization?
 		const parsed = parseColorAndFormat(value, hasAlpha, colorType);
-
-		console.log('----------------------------------');
-		console.log(parsed);
 
 		if (parsed === undefined) {
 			console.warn('Could not parse color');
