@@ -63,8 +63,18 @@ export class APaletteView implements View {
 
 		const gradientComps = [
 			'to right',
-			leftColor.serialize({format: 'rgba'}),
-			rightColor.serialize({format: 'rgba'}),
+			leftColor.serialize({
+				format: 'rgba',
+				alpha: true,
+				space: 'srgb',
+				type: 'string',
+			}),
+			rightColor.serialize({
+				format: 'rgba',
+				alpha: true,
+				space: 'srgb',
+				type: 'string',
+			}),
 		];
 		this.colorElem_.style.background = `linear-gradient(${gradientComps.join(
 			',',
@@ -72,6 +82,9 @@ export class APaletteView implements View {
 
 		this.previewElem_.style.backgroundColor = activeColor.serialize({
 			format: 'rgba',
+			alpha: true,
+			space: 'srgb',
+			type: 'string',
 		});
 		const left = mapRange(activeColor.alpha, 0, 1, 0, 100);
 		this.markerElem_.style.left = `${left}%`;

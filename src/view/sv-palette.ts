@@ -75,9 +75,9 @@ export class SvPaletteView implements View {
 				const [r, g, b] = c.getAll('srgb');
 
 				const i = (iy * width + ix) * 4;
-				data[i] = r * 255;
-				data[i + 1] = g * 255;
-				data[i + 2] = b * 255;
+				data[i] = (r ?? 0) * 255;
+				data[i + 1] = (g ?? 0) * 255;
+				data[i + 2] = (b ?? 0) * 255;
 				data[i + 3] = 255;
 			}
 		}
@@ -85,9 +85,9 @@ export class SvPaletteView implements View {
 
 		const [, s, v] = this.value.rawValue.getAll('hsv');
 
-		const left = mapRange(s, 0, 100, 0, 100);
+		const left = mapRange(s ?? 0, 0, 100, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
-		const top = mapRange(v, 0, 100, 100, 0);
+		const top = mapRange(v ?? 0, 0, 100, 100, 0);
 		this.markerElem_.style.top = `${top}%`;
 	}
 

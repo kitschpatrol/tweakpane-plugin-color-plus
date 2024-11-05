@@ -86,10 +86,10 @@ for (const key of Object.keys(params)) {
 	});
 }
 
-paneColorPlus.on('change', () => {
-	paneColorOriginal.refresh();
-});
+// paneColorPlus.on('change', () => {
+// 	paneColorOriginal.refresh();
+// });
 
-paneColorOriginal.on('change', () => {
-	paneColorPlus.refresh();
-});
+// paneColorOriginal.on('change', () => {
+// 	paneColorPlus.refresh();
+// });

@@ -16,11 +16,8 @@ import {
 	ViewProps,
 } from '@tweakpane/core';
 
-import {
-	ColorPlus,
-	type ColorType,
-	getRangeForChannel,
-} from '../model/color-plus.js';
+import {ColorPlus} from '../model/color-plus.js';
+import {ColorType, getRangeForChannel} from '../model/shared.js';
 // import {getKeyScaleForColor} from '../util.js';
 import {ColorTextsMode, ColorTextsView} from '../view/color-texts.js';
 
@@ -143,11 +140,12 @@ function createHexController(
 		},
 		props: ValueMap.fromObject({
 			formatter: (value: ColorPlus): string => {
-				const serialized = value.serialize(
-					{format: 'hex'},
-					// Never show alpha in text field, since we have the slider below
-					false,
-				);
+				const serialized = value.serialize({
+					format: 'hex',
+					alpha: false,
+					space: value.space,
+					type: 'string',
+				});
 				return serialized;
 			},
 		}),

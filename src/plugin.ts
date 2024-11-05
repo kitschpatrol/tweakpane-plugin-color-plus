@@ -8,10 +8,17 @@ import {
 } from '@tweakpane/core';
 
 import {ColorController} from './controller/color.js';
-import {type ColorFormat, ColorPlus} from './model/color-plus.js';
+import {ColorPlus} from './model/color-plus.js';
+import {ColorFormat} from './model/shared.js';
+import {ColorTupleRgb, ColorTupleRgba} from './model/tuple.js';
 import {parseColorInputParams, validateColorInputParams} from './util.js';
 
-export type ColorValueExternal = string | number; // only strings for now...
+export type ColorValueExternal =
+	| string
+	| number
+	| Record<string, number | null>
+	| ColorTupleRgb
+	| ColorTupleRgba; // only strings for now...
 export interface ColorPlusInputParams extends BaseInputParams {
 	color?: {
 		// In the original tweakpane installation, this is only applied to number values
@@ -44,14 +51,33 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			return null;
 		}
 
-		const format = ColorPlus.getFormat(value);
+		const parsedParams = parseColorInputParams(params);
+		if (!parsedParams) {
+			return null;
+		}
+
+		const validParams = validateColorInputParams(params, value);
+
+		const format = ColorPlus.getFormat(
+			value,
+			validParams.color?.alpha,
+			parsedParams.color?.type,
+		);
 
 		if (format === undefined) {
 			console.warn('ColorPlusInputPlugin could not parse and get format');
 			return null;
 		}
 
-		const color = ColorPlus.create(value);
+		console.log('----------------------------------');
+		console.log(value);
+		console.log(validParams.color?.type);
+
+		const color = ColorPlus.create(
+			value,
+			validParams.color?.alpha,
+			parsedParams.color?.type,
+		);
 		if (color === undefined) {
 			console.warn('ColorPlusInputPlugin could not parse');
 			return null;
@@ -61,12 +87,6 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 		color.convert('hsv');
 		color.toGamut('srgb');
 
-		const parsedParams = parseColorInputParams(params);
-		if (!parsedParams) {
-			return null;
-		}
-
-		const validParams = validateColorInputParams(params, value);
 		const initalValue = color.toValue(format, validParams.color?.alpha);
 
 		return {
@@ -94,7 +114,11 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			// Todo factor in args...
 			return (value: unknown) => {
 				// TODO recreate format?
-				const newColor = ColorPlus.create(value);
+				const newColor = ColorPlus.create(
+					value,
+					args.params.color?.alpha,
+					args.params.color?.type,
+				);
 				if (newColor === undefined) {
 					throw TpError.notBindable();
 				}
@@ -130,7 +154,19 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 					args.params.color?.alpha,
 				);
 
-				writePrimitive(target, args.params.lastExternalValue);
+				if (
+					typeof args.params.lastExternalValue === 'number' ||
+					typeof args.params.lastExternalValue === 'string'
+				) {
+					writePrimitive(target, args.params.lastExternalValue);
+				} else if (Array.isArray(args.params.lastExternalValue)) {
+					// TODO hmm
+					target.write(args.params.lastExternalValue);
+				} else {
+					for (const key of Object.keys(args.params.lastExternalValue)) {
+						target.writeProperty(key, args.params.lastExternalValue[key]);
+					}
+				}
 			};
 		},
 	},
@@ -140,13 +176,21 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			formatter: (value: ColorPlus) =>
 				value.serialize(args.params.format, args.params.color?.alpha),
 			parser: (text: string) => {
-				const parsedColor = ColorPlus.create(text);
+				const parsedColor = ColorPlus.create(
+					text,
+					args.params.color?.alpha,
+					args.params.color?.type,
+				);
 				if (parsedColor === undefined) {
 					return null;
 				}
 
 				if (args.params.color?.formatLocked === false) {
-					const newFormat = ColorPlus.getFormat(text);
+					const newFormat = ColorPlus.getFormat(
+						text,
+						args.params.color?.alpha,
+						args.params.color?.type,
+					);
 					if (newFormat === undefined) {
 						return null;
 					}

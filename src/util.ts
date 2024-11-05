@@ -1,6 +1,6 @@
 import {isObject, parsePickerLayout, parseRecord} from '@tweakpane/core';
 
-import {ColorFormat, type ColorType} from './model/color-plus';
+import {ColorFormat, ColorType} from './model/shared';
 import {ColorPlusInputParams} from './plugin';
 
 export function parseColorInputParams(

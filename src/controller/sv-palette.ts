@@ -116,7 +116,7 @@ export class SvPaletteController
 
 		const c = this.value.rawValue;
 		const [h, s, v] = c.getAll('hsv');
-		c.setAll([h, s + ds, v + dv], 'hsv');
+		c.setAll([h, (s ?? 0) + ds, (v ?? 0) + dv], 'hsv');
 		this.value.setRawValue(c.clone(), {
 			forceEmit: false,
 			last: false,

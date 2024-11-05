@@ -49,6 +49,8 @@ export class HPaletteView implements View {
 		this.markerElem_.style.backgroundColor = backgroundColor.serialize({
 			format: 'rgba',
 			space: 'srgb',
+			type: 'string',
+			alpha: false,
 		});
 
 		const left = mapRange(h, 0, 360, 0, 100);

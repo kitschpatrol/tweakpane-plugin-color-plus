@@ -46,6 +46,9 @@ export class ColorSwatchView implements View {
 		const value = this.value.rawValue;
 		this.swatchElem_.style.backgroundColor = value.serialize({
 			format: 'rgba',
+			alpha: true,
+			space: 'srgb',
+			type: 'string',
 		});
 	}
 
