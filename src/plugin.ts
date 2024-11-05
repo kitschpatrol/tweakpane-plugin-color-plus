@@ -3,7 +3,6 @@ import {
 	createPlugin,
 	type InputBindingPlugin,
 	type PickerLayout,
-	TpError,
 	writePrimitive,
 } from '@tweakpane/core';
 
@@ -69,10 +68,6 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			return null;
 		}
 
-		console.log('----------------------------------');
-		console.log(value);
-		console.log(validParams.color?.type);
-
 		const color = ColorPlus.create(
 			value,
 			validParams.color?.alpha,
@@ -113,29 +108,30 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 		reader: (args) => {
 			// Todo factor in args...
 			return (value: unknown) => {
+				// Reuse old HSV value if the new one doesn't change its
+				// value representation... deals with having more precision
+				// internally than externally
+				// TODO deep equals?
+				if (deepEquals(value, args.params.lastExternalValue)) {
+					return args.params.lastInternalValue;
+				}
+
+				// Parse a new internal value from the external representation
 				// TODO recreate format?
 				const newColor = ColorPlus.create(
 					value,
 					args.params.color?.alpha,
 					args.params.color?.type,
 				);
+
 				if (newColor === undefined) {
-					throw TpError.notBindable();
-				}
-				newColor.convert('hsv');
-
-				// Reuse old HSV value if the new one doesn't change its
-				// value representation... deals with having more precision
-				// internally than externally
-				const newExternalValue = newColor.toValue(
-					args.params.format,
-					args.params.color?.alpha,
-				);
-
-				if (args.params.lastExternalValue === newExternalValue) {
+					console.log('ColorPlusInputPlugin could not parse, using last value');
 					return args.params.lastInternalValue;
 				}
 
+				newColor.convert('hsv');
+				// TODO necessary?
+				// newColor.toGamut('srgb');
 				return newColor;
 			};
 		},
@@ -166,10 +162,11 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 						index < args.params.lastExternalValue.length;
 						index++
 					) {
-						target.writeProperty(
-							`${index}`,
-							args.params.lastExternalValue[index],
-						);
+						// target.read()[index] = args.params.lastExternalValue[index];
+						// target.writeProperty(
+						// 	`${index}`,
+						// 	args.params.lastExternalValue[index],
+						// );
 					}
 
 					// Confirmed that this mutates the target array...
@@ -228,3 +225,34 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 		});
 	},
 });
+
+// Optimized for shape of types we're going to see
+function deepEquals(a: unknown, b: unknown): boolean {
+	// Handle primitives and exact equality
+	if (a === b) return true;
+
+	// Handle arrays
+	if (Array.isArray(a) && Array.isArray(b)) {
+		return a.length === b.length && a.every((val, i) => val === b[i]);
+	}
+
+	// Handle objects
+	if (
+		typeof a === 'object' &&
+		a !== null &&
+		typeof b === 'object' &&
+		b !== null
+	) {
+		const keys = Object.keys(a as Record<string, unknown>);
+		return (
+			keys.length === Object.keys(b as Record<string, unknown>).length &&
+			keys.every(
+				(key) =>
+					(a as Record<string, unknown>)[key] ===
+					(b as Record<string, unknown>)[key],
+			)
+		);
+	}
+
+	return false;
+}
