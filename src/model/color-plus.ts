@@ -8,6 +8,8 @@ import {
 	getAll as colorJsGetAll,
 	HSL,
 	HSV,
+	HWB,
+	Lab,
 	LCH,
 	OKLCH,
 	P3,
@@ -27,7 +29,9 @@ ColorJsColorSpace.register(P3);
 ColorJsColorSpace.register(HSV);
 ColorJsColorSpace.register(HSL);
 ColorJsColorSpace.register(LCH);
+ColorJsColorSpace.register(Lab);
 ColorJsColorSpace.register(OKLCH);
+ColorJsColorSpace.register(HWB);
 
 export type ColorType = 'int' | 'float';
 
@@ -79,7 +83,7 @@ export type ColorSpaceId =
 
 type Coords = [number | null, number | null, number | null];
 
-type ColorPlusObject = {
+export type ColorPlusObject = {
 	spaceId: ColorSpaceId;
 	coords: Coords;
 	alpha: number;
@@ -111,6 +115,7 @@ type ParseMeta = {
  * Original format and alpha state inferred from the user-provided value
  */
 export type ColorFormat = {
+	type: 'number' | 'string' | 'object' | 'tuple';
 	format: ParseMeta | string | 'number'; // Todo object types etc.
 	alpha?: boolean;
 	space?: ColorSpaceId;
@@ -549,7 +554,7 @@ function toParsableColorString(value: unknown):
 	return undefined;
 }
 
-function getColorJsColorSpaceById(
+export function getColorJsColorSpaceById(
 	spaceId: ColorSpaceId,
 ): ColorJsColorSpace | undefined {
 	try {
@@ -581,3 +586,13 @@ export function getRangeForChannel(
 
 	return range;
 }
+
+// WIP
+// export function objectToColor(
+// 	value: unknown,
+// 	type: ColorType,
+// ): ColorPlusObject | undefined {
+// 	if (!isObject(value)) {
+// 		return undefined;
+// 	}
+// }
