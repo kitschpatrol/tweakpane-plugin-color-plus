@@ -101,7 +101,7 @@ function createComponentControllers(
 			forward(p) {
 				const coefficient =
 					config.colorType === 'int' && config.colorMode === 'srgb' ? 255 : 1;
-				return p.getAll(config.colorMode)[i] * coefficient;
+				return (p.getAll(config.colorMode)[i] ?? 0) * coefficient;
 			},
 			// Number in text field to ColorPlus model
 			backward(p, s) {
@@ -136,6 +136,7 @@ function createHexController(
 				return null;
 			}
 			parsedColor.convert('hsv');
+			parsedColor.toGamut('srgb');
 			parsedColor.alpha = config.value.rawValue.alpha;
 
 			return parsedColor;

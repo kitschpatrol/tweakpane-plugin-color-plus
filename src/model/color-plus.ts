@@ -4,7 +4,6 @@ import {constrainRange} from '@tweakpane/core';
 import {
 	type ColorConstructor as ColorJsConstructor,
 	ColorSpace as ColorJsColorSpace,
-	type Coords,
 	get as colorJsGet,
 	getAll as colorJsGetAll,
 	HSL,
@@ -20,7 +19,7 @@ import {
 	setAll as colorJsSetAll,
 	sRGB,
 	to as colorJsConvert,
-	// toGamut,
+	toGamutCSS as colorJsToGamutCss,
 } from 'colorjs.io/fn';
 
 ColorJsColorSpace.register(sRGB);
@@ -78,9 +77,11 @@ export type ColorSpaceId =
 	| 'xyz-d65'
 	| string;
 
+type Coords = [number | null, number | null, number | null];
+
 type ColorPlusObject = {
 	spaceId: ColorSpaceId;
-	coords: [number, number, number];
+	coords: Coords;
 	alpha: number;
 };
 
@@ -140,7 +141,7 @@ export class ColorPlus {
 	}
 
 	public toString(): string {
-		return `ColorPlus(${this.color.spaceId}, [${this.color.coords.map((c) => toPrecision(c, 4))}], ${this.color.alpha})`;
+		return `ColorPlus(${this.color.spaceId}, [${this.color.coords.map((c) => (c === null ? 'none' : toPrecision(c, 4)))}], ${this.color.alpha})`;
 	}
 
 	public toJSON(): ColorPlusObject {
@@ -167,9 +168,9 @@ export class ColorPlus {
 			const [r, g, b] = converted.coords;
 
 			// Convert from 0-1 range to 0-255 range and round to integers
-			const ri = Math.round(r * 255);
-			const gi = Math.round(g * 255);
-			const bi = Math.round(b * 255);
+			const ri = Math.round((r ?? 0) * 255);
+			const gi = Math.round((g ?? 0) * 255);
+			const bi = Math.round((b ?? 0) * 255);
 
 			if (includeAlpha) {
 				const a = Math.round(this.color.alpha * 255);
@@ -264,16 +265,13 @@ export class ColorPlus {
 		);
 	}
 
-	public getAll(
-		space?: ColorSpaceId,
-		precision?: number,
-	): [number, number, number] {
+	public getAll(space?: ColorSpaceId, precision?: number): Coords {
 		// TODO constrain space
 		// TODO check for 'none' values?
 		return colorJsGetAll(this.color, {
 			space,
 			precision,
-		}) as [number, number, number];
+		});
 
 		// TODO copy check?
 		// return colorJsGetAll(
@@ -322,7 +320,7 @@ export class ColorPlus {
 	}
 
 	public setAll(
-		coords: [number, number, number],
+		coords: Coords,
 		space?: ColorSpaceId,
 		// clip?: boolean,
 	): void {
@@ -341,6 +339,22 @@ export class ColorPlus {
 			this.color,
 			getColorPlusObjectFromColorJsObject(targetColor),
 		);
+	}
+
+	public toGamut(space?: ColorSpaceId): void {
+		const originalSpace = this.color.spaceId;
+		const gamutSpace = space ?? originalSpace;
+
+		this.color = getColorPlusObjectFromColorJsObject(
+			colorJsToGamutCss(this.color, {space: gamutSpace}),
+		);
+
+		console.log('----------------------------------');
+		console.log(this.toString());
+
+		if (gamutSpace !== originalSpace) {
+			this.convert(originalSpace);
+		}
 	}
 }
 
@@ -367,14 +381,14 @@ function setFromColorPlusObject(
 	targetColor.alpha = sourceColor.alpha;
 }
 
-function validateColorJsObject(
-	colorJs: PlainColorJsObject | ColorJsConstructor,
-): boolean {
-	if (colorJs.coords.some((c) => c === null)) {
-		return false;
-	}
-	return true;
-}
+// function validateColorJsObject(
+// 	colorJs: PlainColorJsObject | ColorJsConstructor,
+// ): boolean {
+// 	if (colorJs.coords.some((c) => c === null)) {
+// 		return false;
+// 	}
+// 	return true;
+// }
 
 /** Does not validate! */
 function getColorPlusObjectFromColorJsObject(
@@ -456,10 +470,10 @@ function parseColorAndFormat(
 			parseMeta.alphaType !== undefined ||
 			(parseMeta.formatId === 'hex' && hexHasAlpha(valueString));
 
-		if (!validateColorJsObject(colorJs)) {
-			console.warn("Can't handle null coords");
-			return undefined;
-		}
+		// if (!validateColorJsObject(colorJs)) {
+		// 	console.warn("Can't handle null coords");
+		// 	return undefined;
+		// }
 
 		const color = getColorPlusObjectFromColorJsObject(colorJs);
 

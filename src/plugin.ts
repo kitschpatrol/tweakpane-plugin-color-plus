@@ -59,6 +59,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 
 		// TODO Use OKLCH as the internal representation for extended gamut?
 		color.convert('hsv');
+		color.toGamut('srgb');
 
 		const parsedParams = parseColorInputParams(params);
 		if (!parsedParams) {
@@ -153,6 +154,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				}
 
 				parsedColor.convert('hsv');
+				parsedColor.toGamut('srgb');
 
 				// Discard alpha if it wasn't present originally
 				if (!(args.params.format.alpha || args.params.color?.alpha === true)) {
