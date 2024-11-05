@@ -6,6 +6,7 @@ export function numberToColor(
 	hasAlpha?: boolean,
 ): {color: ColorPlusObject; format: ColorFormat} | undefined {
 	if (typeof value !== 'number' || !Number.isFinite(value)) {
+		// No need to parse strings here because stringToColor will catch them
 		return undefined;
 	}
 

@@ -268,3 +268,13 @@ export function toPrecision(n: number, precision: number | undefined): number {
 	const multiplier = 10.0 ** (precision - digits);
 	return Math.floor(n * multiplier + 0.5) / multiplier;
 }
+
+export function formatNumber(
+	value: number,
+	digits: number | undefined,
+): string {
+	if (digits === undefined) {
+		return value.toString();
+	}
+	return value.toFixed(Math.max(Math.min(digits, 20), 0));
+}

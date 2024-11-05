@@ -142,6 +142,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 		equals: (a, b) => {
 			// require object identity equality as well
 			const eq = a.equals(b) && a === b;
+			// const eq = a.equals(b);
 			return eq;
 		},
 		// Internal to external
@@ -160,8 +161,19 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				) {
 					writePrimitive(target, args.params.lastExternalValue);
 				} else if (Array.isArray(args.params.lastExternalValue)) {
-					// TODO hmm
-					target.write(args.params.lastExternalValue);
+					for (
+						let index = 0;
+						index < args.params.lastExternalValue.length;
+						index++
+					) {
+						target.writeProperty(
+							`${index}`,
+							args.params.lastExternalValue[index],
+						);
+					}
+
+					// Confirmed that this mutates the target array...
+					// target.write(args.params.lastExternalValue);
 				} else {
 					for (const key of Object.keys(args.params.lastExternalValue)) {
 						target.writeProperty(key, args.params.lastExternalValue[key]);

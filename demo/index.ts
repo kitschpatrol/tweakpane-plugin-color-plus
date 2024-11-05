@@ -30,6 +30,11 @@ const params: Record<string, unknown> = {
 		b: 1,
 		a: 0.5,
 	},
+	tuple: [255, 0, 255],
+	tupleAlpha: [255, 0, 255, 0.25],
+	tupleFloat: [1, 0, 1],
+	tupleFloatAlpha: [1, 0, 1, 0.25],
+	// typedArray: new Float32Array(4).fill(0.5),
 };
 
 // Some params need extra properties
@@ -47,6 +52,16 @@ const extraProps = {
 		},
 	},
 	objectFloatAlpha: {
+		color: {
+			type: 'float',
+		},
+	},
+	tupleFloat: {
+		color: {
+			type: 'float',
+		},
+	},
+	tupleFloatAlpha: {
 		color: {
 			type: 'float',
 		},
@@ -78,12 +93,26 @@ for (const key of Object.keys(params)) {
 		...extraProps[key],
 	});
 
-	paneColorOriginal.addBinding(params, key, {
-		view: 'color',
-		picker: 'inline',
-		label: prettyLabel(key),
-		...extraProps[key],
-	});
+	// Special case for unsupported tuples...
+	if (Array.isArray(params[key])) {
+		paneColorOriginal.addBinding(
+			{
+				value: `${String(params[key])} (Unsupported)`,
+			},
+			'value',
+			{
+				label: prettyLabel(key),
+				readonly: true,
+			},
+		);
+	} else {
+		paneColorOriginal.addBinding(params, key, {
+			view: 'color',
+			picker: 'inline',
+			label: prettyLabel(key),
+			...extraProps[key],
+		});
+	}
 }
 
 // paneColorPlus.on('change', () => {

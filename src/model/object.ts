@@ -6,9 +6,9 @@ import {
 	ColorSpaceId,
 	ColorType,
 	convert,
+	formatNumber,
 	getRangeForChannel,
 	ObjectFormat,
-	toPrecision,
 } from './shared';
 
 const colorObjectKeys: Array<{
@@ -187,13 +187,18 @@ function isNumberRecord(
 	);
 }
 
+/**
+ * @param value Accepts objects or object-like strings, e.g. `'{r: 255, g: 0, b: 0, a: .5 }'`
+ * @param colorType
+ * @returns
+ */
 export function objectToColor(
 	value: unknown,
 	colorType: ColorType,
 ): {color: ColorPlusObject; format: ColorFormat} | undefined {
 	// Handle object-like strings, too
 	const objectValue =
-		typeof value === 'string' ? (parseString(value) ?? value) : value;
+		typeof value === 'string' ? (parseObjectString(value) ?? value) : value;
 
 	if (!isNumberRecord(objectValue)) return undefined;
 
@@ -403,48 +408,50 @@ function stringifyObject(
 	let index = 0;
 	for (const [key, value] of Object.entries(object)) {
 		parts.push(
-			`${key}: ${value === null ? 'null' : String(toPrecision(value, index === 3 ? precisionAlpha : precision))}`,
+			`${key}: ${value === null ? 'null' : formatNumber(value, index === 3 ? precisionAlpha : precision)}`,
 		);
 		index++;
 	}
 	return `{${parts.join(', ')}}`;
 }
 
-export function parseObjectString(
-	value: string,
-	colorType: ColorType,
-): {color: ColorPlusObject; format: ColorFormat} | undefined {
-	const object = parseString(value);
-	if (object === undefined) {
-		return undefined;
-	}
+/**
+ * Takes a semi-naive JSON5-esque color-like string object, and attempts to parse it into an object
+ * If the bespoke parse pass fails, it will try to use `JSON.parse` instead.
+ */
+function parseObjectString(value: string): Record<string, unknown> | undefined {
+	try {
+		return JSON.parse(value);
+	} catch {
+		// Manual parse
+		const parts = value.replace(/[{}:,"']/g, '').split(' ');
 
-	return objectToColor(object, colorType);
-}
-
-function parseString(value: string): Record<string, number | null> | undefined {
-	const parts = value.replace(/[{}:,]/g, '').split(' ');
-
-	const object: Record<string, number | null> = {};
-
-	for (let i = 0; i < parts.length - 1; i += 2) {
-		const key = parts[i];
-		if (typeof key !== 'string') {
+		// Must have even number of parts to parse manually
+		if (parts.length % 2 !== 0) {
 			return undefined;
 		}
 
-		const value = parts[i + 1];
+		const object: Record<string, unknown> = {};
 
-		if (value === 'null') {
-			object[key] = null;
-		} else {
-			const number = parseFloat(value);
-			if (Number.isNaN(number)) {
+		for (let i = 0; i < parts.length - 1; i += 2) {
+			const key = parts[i];
+			if (typeof key !== 'string') {
 				return undefined;
 			}
-			object[key] = number;
-		}
-	}
 
-	return object;
+			const value = parts[i + 1];
+
+			if (value === 'null') {
+				object[key] = null;
+			} else {
+				const number = parseFloat(value);
+				if (Number.isNaN(number)) {
+					return undefined;
+				}
+				object[key] = number;
+			}
+		}
+
+		return object;
+	}
 }
