@@ -99,27 +99,20 @@ function createComponentControllers(
 			secondary: c.value,
 			// From ColorPlus model to number in text field
 			forward(p) {
-				console.log('forward');
-				console.log(p.toString());
 				const coefficient =
 					config.colorType === 'int' && config.colorMode === 'srgb' ? 255 : 1;
 				return p.getAll(config.colorMode)[i] * coefficient;
 			},
 			// Number in text field to ColorPlus model
 			backward(p, s) {
-				console.log('backward');
 				// Number / channel to ColorPlus object
 				// TODO setChannel method on ColorPlus?
-				console.log(config.colorMode);
 				const comps = p.getAll(config.colorMode);
-				console.log(comps);
 				const coefficient =
 					config.colorType === 'int' && config.colorMode === 'srgb' ? 255 : 1;
 
 				comps[i] = s / coefficient;
 				p.setAll(comps, config.colorMode);
-
-				console.log(p.toString());
 
 				return p.clone();
 			},
@@ -149,13 +142,11 @@ function createHexController(
 		},
 		props: ValueMap.fromObject({
 			formatter: (value: ColorPlus): string => {
-				console.log('formatter hex');
 				const serialized = value.serialize(
 					{format: 'hex'},
 					// Never show alpha in text field, since we have the slider below
 					false,
 				);
-				console.log(serialized);
 				return serialized;
 			},
 		}),
@@ -168,14 +159,10 @@ function createHexController(
 		secondary: c.value,
 		// TODO hmm
 		forward: (p) => {
-			console.log('forward hex');
 			return p.clone();
 		},
 		// TODO hmm, s
 		backward: (p, s) => {
-			console.log(`backward hex p ${p.toString()}`);
-			console.log(`backward hex s ${s.toString()}`);
-
 			return s;
 		},
 	});
