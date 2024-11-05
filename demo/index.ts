@@ -4,8 +4,8 @@ import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
 const params: Record<string, unknown> = {
 	hexString: '#ff00ff',
 	hexStringAlpha: '#ff00ffcc',
-	oklchString: 'oklch(65.002% 0.26491 357.74deg)',
-	oklchStringAlpha: 'oklch(65.002% 0.26491 357.74deg / 50%)',
+	oklchString: 'oklch(65% 0.26 357deg)',
+	oklchStringAlpha: 'oklch(65% 0.26 357deg / 50%)',
 	number: 0xff00ff,
 	numberAlpha: 0xff00ffcc,
 	object: {
@@ -101,8 +101,8 @@ for (const key of Object.keys(params)) {
 			},
 			'value',
 			{
+				disabled: true,
 				label: prettyLabel(key),
-				readonly: true,
 			},
 		);
 	} else {
@@ -115,10 +115,10 @@ for (const key of Object.keys(params)) {
 	}
 }
 
-// paneColorPlus.on('change', () => {
-// 	paneColorOriginal.refresh();
-// });
+paneColorPlus.on('change', () => {
+	paneColorOriginal.refresh();
+});
 
-// paneColorOriginal.on('change', () => {
-// 	paneColorPlus.refresh();
-// });
+paneColorOriginal.on('change', () => {
+	paneColorPlus.refresh();
+});
