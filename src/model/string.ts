@@ -108,7 +108,7 @@ export function colorToString(
 	const result = colorJsSerialize(convertedColor, {
 		inGamut: true, // TODO expose? Overrides inGamut in the format object
 		commas: stringformat.commas,
-		// precision: 4, // TODO expose?
+		precision: 2, // TODO expose?
 		// @ts-expect-error - Type definition inconsistencies
 		alpha:
 			// Erase alpha from output
