@@ -1,75 +1,95 @@
 import {Pane} from 'tweakpane';
 import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
 
-const params = {
-	stringColorHex: '#ff00ff',
-	stringColorHexAlpha: '#ff00ffcc',
-	stringColorOklch: 'oklch(66.62% 0.296 2.47deg)',
-	stringColorOklchAlpha: 'oklch(66.62% 0.296 2.47deg / 50%)',
-	numberColor: 0xff00ff,
-	numberColorAlpha: 0xff00ffcc,
-	objectColor: {
+const params: Record<string, unknown> = {
+	hexString: '#ff00ff',
+	hexStringAlpha: '#ff00ffcc',
+	oklchString: 'oklch(66.62% 0.296 2.47deg)',
+	oklchStringAlpha: 'oklch(66.62% 0.296 2.47deg / 50%)',
+	number: 0xff00ff,
+	numberAlpha: 0xff00ffcc,
+	object: {
 		r: 255,
 		g: 0,
 		b: 255,
 	},
-	objectColorAlpha: {
+	objectAlpha: {
 		r: 255,
 		g: 0,
 		b: 255,
 		a: 0.5,
 	},
+	objectFloat: {
+		r: 1,
+		g: 0,
+		b: 1,
+	},
+	objectFloatAlpha: {
+		r: 1,
+		g: 0,
+		b: 1,
+		a: 0.5,
+	},
 };
 
-const pane = new Pane();
-pane.registerPlugin(TweakpanePluginColorPlus);
-
-// Tweakpane Classic Color
-pane.addBinding(params, 'stringColorHex', {
-	picker: 'inline',
-	expanded: true,
-	color: {
-		float: true,
+// Some params need extra properties
+// Tweakpane Plugin Color Plus implements the same
+// properties as Tweakpane's built-in color input binding
+const extraProps = {
+	numberAlpha: {
+		color: {
+			alpha: true,
+		},
 	},
+	objectFloat: {
+		color: {
+			type: 'float',
+		},
+	},
+	objectFloatAlpha: {
+		color: {
+			type: 'float',
+		},
+	},
+};
+
+function prettyLabel(label: string): string {
+	return label
+		.replace(/([A-Z])/g, ' $1')
+		.replace(/^./, (str) => str.toUpperCase());
+}
+
+const paneColorPlus = new Pane({
+	container: document.querySelector<HTMLDivElement>('div#plus')!,
+	title: 'Tweakpane Plugin Color Plus',
 });
-pane.addBinding(params, 'stringColorHexAlpha');
-pane.addBinding(params, 'numberColor', {view: 'color'});
-pane.addBinding(params, 'numberColorAlpha', {
-	view: 'color',
-	color: {alpha: true},
-});
-pane.addBinding(params, 'objectColor');
-pane.addBinding(params, 'objectColorAlpha');
+paneColorPlus.registerPlugin(TweakpanePluginColorPlus);
 
-// Tweakpane Color Plus
-pane.addBlade({
-	view: 'separator',
+const paneColorOriginal = new Pane({
+	container: document.querySelector<HTMLDivElement>('div#integrated')!,
+	title: 'Tweakpane Integrated Color',
 });
 
-pane.addBinding(params, 'stringColorHex', {
-	view: 'color-plus',
-	picker: 'inline',
-	expanded: true,
+for (const key of Object.keys(params)) {
+	paneColorPlus.addBinding(params, key, {
+		view: 'color-plus',
+		picker: 'inline',
+		label: prettyLabel(key),
+		...extraProps[key],
+	});
+
+	paneColorOriginal.addBinding(params, key, {
+		view: 'color',
+		picker: 'inline',
+		label: prettyLabel(key),
+		...extraProps[key],
+	});
+}
+
+paneColorPlus.on('change', () => {
+	paneColorOriginal.refresh();
 });
 
-pane.addBinding(params, 'stringColorHexAlpha', {
-	view: 'color-plus',
-	picker: 'inline',
-	expanded: true,
+paneColorOriginal.on('change', () => {
+	paneColorPlus.refresh();
 });
-
-// pane.addBinding(params, 'stringColorHexAlpha', {view: 'color-plus'});
-// pane.addBinding(params, 'stringColorOklch', {view: 'color-plus'});
-// pane.addBinding(params, 'stringColorOklchAlpha', {view: 'color-plus'});
-// pane.addBinding(params, 'numberColor', {view: 'color-plus'});
-// pane.addBinding(params, 'numberColorAlpha', {view: 'color-plus'});
-
-// pane.on('change', () => {
-// 	pane.refresh();
-// });
-
-// function refresh() {
-// 	pane.refresh();
-// 	requestAnimationFrame(refresh);
-// }
-// refresh();

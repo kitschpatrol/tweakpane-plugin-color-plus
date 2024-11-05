@@ -5,15 +5,35 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Tweakpane Color Plus Demo</title>
 		<style>
+			/* Pane Sizes */
 			:root {
-				--tp-blade-value-width: 260px;
+				--tp-blade-value-width: 65%;
 			}
 
-			div.tp-dfwv {
-				width: 450px;
+			/* Side-by-side */
+			body {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 20px;
+				padding: 20px;
+				margin: 0;
+				min-height: 100vh;
+			}
+
+			.box {
+				flex: 1 1 300px;
+				min-height: 100px;
+				/* padding: 20px; */
 			}
 		</style>
 		<script src="./index.ts" type="module"></script>
 	</head>
-	<body></body>
+	<body>
+		<div class="box">
+			<div id="plus"></div>
+		</div>
+		<div class="box">
+			<div id="integrated"></div>
+		</div>
+	</body>
 </html>
