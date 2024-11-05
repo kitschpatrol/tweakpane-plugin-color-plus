@@ -27,6 +27,7 @@ import {
 ColorJsColorSpace.register(sRGB);
 ColorJsColorSpace.register(P3);
 ColorJsColorSpace.register(HSV);
+ColorJsColorSpace.register(HSV);
 ColorJsColorSpace.register(HSL);
 ColorJsColorSpace.register(LCH);
 ColorJsColorSpace.register(Lab);
@@ -91,7 +92,7 @@ export type ColorPlusObject = {
 
 // Not yet correctly typed in colorjs.io
 // This is a partial type based on inspection of the code
-type ParseMeta = {
+type StringFormat = {
 	alphaType?: string;
 	commas?: boolean;
 	types?: string[];
@@ -111,14 +112,27 @@ type ParseMeta = {
 	};
 };
 
+// TODO internal
+export type ObjectFormat = {
+	colorType: ColorType;
+	coordKeys: [string, string, string];
+	alphaKey: string | undefined; // undefined if no alpha
+};
+
+// TODO internal
+export type TupleFormat = {
+	// Space is always SRGB
+	colorType: ColorType;
+};
+
 /**
  * Original format and alpha state inferred from the user-provided value
  */
 export type ColorFormat = {
 	type: 'number' | 'string' | 'object' | 'tuple';
-	format: ParseMeta | string | 'number'; // Todo object types etc.
-	alpha?: boolean;
-	space?: ColorSpaceId;
+	format: StringFormat | ObjectFormat | TupleFormat | string | undefined;
+	alpha: boolean;
+	space: ColorSpaceId;
 };
 
 export class ColorPlus {
@@ -444,7 +458,7 @@ function parseColorAndFormat(
 	const {colorString: valueString, colorFormat: valueFormat} = parsableString;
 
 	try {
-		const parseMetaInOut: Partial<ParseMeta> = {};
+		const parseMetaInOut: Partial<StringFormat> = {};
 		const colorJs = colorJsParse(valueString, {
 			// @ts-expect-error - Type definition inconsistencies
 			parseMeta: parseMetaInOut,
@@ -454,7 +468,7 @@ function parseColorAndFormat(
 		const parseMeta =
 			parseMetaInOut.formatId === undefined
 				? undefined
-				: (parseMetaInOut as ParseMeta);
+				: (parseMetaInOut as StringFormat);
 
 		if (parseMeta === undefined) {
 			console.warn('Could not parse meta');
@@ -554,7 +568,7 @@ function toParsableColorString(value: unknown):
 	return undefined;
 }
 
-export function getColorJsColorSpaceById(
+function getColorJsColorSpaceById(
 	spaceId: ColorSpaceId,
 ): ColorJsColorSpace | undefined {
 	try {

@@ -1,13 +1,16 @@
 // import Color from 'colorjs.io';
 // import {toGamutCSS} from 'colorjs.io/fn';
 
-import {constrainRange, mapRange} from '@tweakpane/core';
+import {mapRange} from '@tweakpane/core';
 
 import {
+	ColorFormat,
 	ColorPlusObject,
+	ColorSpaceId,
 	ColorType,
-	getColorJsColorSpaceById,
 	getRangeForChannel,
+	ObjectFormat,
+	TupleFormat,
 } from './model/color-plus';
 // // const color = new Color('#ff00ff');
 
@@ -115,34 +118,17 @@ import {
 // console.log(a?.toString());
 // console.log(a?.serialize(f!));
 
-type ObjectColorModes = 'hsl' | 'hsv' | 'hwb' | 'lab' | 'lch' | 'srgb';
-
-type ObjectFormat = {
-	space: ObjectColorModes;
-	colorType: ColorType;
-	coordKeys: [string, string, string];
-	alphaKey: string | undefined; // undefined if no alpha
-};
-
-type Channel = {
-	internalKey: string;
-	externalKeys: string[];
-};
-
-interface ObjectColorFormat {
-	space: ObjectColorModes;
-	channels: Channel[];
-}
-
-const colorObjectFormats: ObjectColorFormat[] = [
+const colorObjectKeys: Array<{
+	spaceId: ColorSpaceId;
+	channels: Array<{internalKey: string; externalKeys: string[]}>;
+}> = [
 	/*
 	 * [HSL](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hsl)
-	 * External int example: `{h: 270 (0-360°), s: 100 (0-100%), l: 80 (0-100%), a: 25 (0-100%)}`
-	 * External float example: `{h: .75, s: 1, l: .8, a: .25}`
-	 * Internal example: `{h: 270 (0-360°), s: 1, l: 0.8, alpha: 0.25}`
+	 * Int example: `{h: 270, s: 100, l: 80, a: .25}`
+	 * Float example: `{h: .75, s: 1, l: .8, a: .25}`
 	 */
 	{
-		space: 'hsl',
+		spaceId: 'hsl',
 		channels: [
 			{
 				internalKey: 'h',
@@ -158,19 +144,18 @@ const colorObjectFormats: ObjectColorFormat[] = [
 			},
 			{
 				internalKey: 'alpha',
-				externalKeys: ['a', 'alpha'],
+				externalKeys: ['a', 'alpha', 'opacity'],
 			},
 		],
 	},
 	/*
-	 * [HSV]()
-	 * Also handles HSV, which is identical to HSB. Photoshop uses HSB.
-	 * External int example: `{h: 270 (0-360°), s: 100 (0-100%), v: 80 (0-100%), a: 25 (0-100%)}`
-	 * External float example: `{h: .75, s: 1, v: .8, a: .25}`
-	 * Internal example: `{h: 270 (0-360°), s: 1, v: 0.8, alpha: 0.25}`
+	 * HSV
+	 * Also handles HSB, which is identical to HSV. Photoshop uses HSB.
+	 * Int example: `{h: 270, s: 100, v: 80, a: .25}`
+	 * Float example: `{h: .75, s: 1, v: .8, a: .25}`
 	 */
 	{
-		space: 'hsv',
+		spaceId: 'hsv',
 		channels: [
 			{
 				internalKey: 'h',
@@ -186,18 +171,17 @@ const colorObjectFormats: ObjectColorFormat[] = [
 			},
 			{
 				internalKey: 'alpha',
-				externalKeys: ['a', 'alpha'],
+				externalKeys: ['a', 'alpha', 'opacity'],
 			},
 		],
 	},
 	/*
 	 * [HWB](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hwb)
-	 * External int example: `{h: 270 (0-360°), w: 100 (0-100%), b: 80 (0-100%), a: 25 (0-100%)}`
-	 * External float example: `{h: 0.75, w: 1, b: 0.8, a: 0.25}`
-	 * Internal example: `{h: 270 (0-360°), w: 1, b: 0.8, alpha: 0.25}`
+	 * Int example: `{h:, w: 100, b: 80, a: .25}`
+	 * Float example: `{h: .75, w: 1, b: .8, a: .25}`
 	 */
 	{
-		space: 'hwb',
+		spaceId: 'hwb',
 		channels: [
 			{
 				internalKey: 'h',
@@ -213,18 +197,17 @@ const colorObjectFormats: ObjectColorFormat[] = [
 			},
 			{
 				internalKey: 'alpha',
-				externalKeys: ['a', 'alpha'],
+				externalKeys: ['a', 'alpha', 'opacity'],
 			},
 		],
 	},
 	/*
 	 * [Lab](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/lab)
-	 * External int example: `{l: 25 (0-100), a: -50 (-125-125), b: 100 (-125-125), a: 25 (0-100%)}`
-	 * External float example: `{l: 0.25, a: 0.3, b: 0.9, a: 0.25}`
-	 * Internal example: `{l: 25, a: -50, b: 100, alpha: 0.25}`
+	 * Int example: `{l: 25, a: -50, b: 100, a: .25}`
+	 * Float example: `{l: .25, a: .3, b: .9, a: .25}`
 	 */
 	{
-		space: 'lab',
+		spaceId: 'lab',
 		channels: [
 			{
 				internalKey: 'l',
@@ -232,26 +215,25 @@ const colorObjectFormats: ObjectColorFormat[] = [
 			},
 			{
 				internalKey: 'a',
-				externalKeys: ['a', 'green-red'],
+				externalKeys: ['a', 'green-red', 'greenred', 'gr'],
 			},
 			{
 				internalKey: 'b',
-				externalKeys: ['b', 'blue-yellow'],
+				externalKeys: ['b', 'blue-yellow', 'blueyellow', 'by'],
 			},
 			{
 				internalKey: 'alpha',
-				externalKeys: ['a', 'alpha'],
+				externalKeys: ['a', 'alpha', 'opacity'],
 			},
 		],
 	},
 	/*
 	 * [LCH](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/lch)
-	 * External int example: `{l: 25 (0-100), c: 50 (0-150), h: 270 (0-360°), a: 25 (0-100%)}`
-	 * External float example: `{l: 0.25, c: 0.5, h: 0.33, a: 0.25}`
-	 * Internal example: `{l: 25, c: 50, h: 270, alpha: 0.5}`
+	 * Int example: `{l: 25, c: 50, h: 270, a: .25}`
+	 * Float example: `{l: .25, c: .5, h: .33, a: .25}`
 	 */
 	{
-		space: 'lch',
+		spaceId: 'lch',
 		channels: [
 			{
 				internalKey: 'l',
@@ -267,18 +249,17 @@ const colorObjectFormats: ObjectColorFormat[] = [
 			},
 			{
 				internalKey: 'alpha',
-				externalKeys: ['a', 'alpha'],
+				externalKeys: ['a', 'alpha', 'opacity'],
 			},
 		],
 	},
 	/*
 	 * [RGB](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb)
-	 * External int example: `{r: 255 (0-255), g: 0 (0-255), b: 0 (0-255), a: 128 (0-255) }`
-	 * External float example: `{r: 1, g: 0, b: 0, a: 0.5}`
-	 * Internal example:  `{r: 1, g: 0, b: 0, a: 0.5}`
+	 * Int example: `{r: 255, g: 0, b: 0, a: .5 }`
+	 * Float example: `{r: 1, g: 0, b: 0, a: .5}`
 	 */
 	{
-		space: 'srgb',
+		spaceId: 'srgb',
 		channels: [
 			{
 				internalKey: 'r',
@@ -294,37 +275,39 @@ const colorObjectFormats: ObjectColorFormat[] = [
 			},
 			{
 				internalKey: 'alpha',
-				externalKeys: ['a', 'alpha'],
+				externalKeys: ['a', 'alpha', 'opacity'],
 			},
 		],
 	},
 ];
 
-function isRecord(obj: unknown): obj is Record<string, unknown> {
-	return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isNumberRecord(obj: unknown): obj is Record<string, number> {
-	if (!isRecord(obj)) return false;
-	return Object.values(obj).every(
+function isNumberRecord(value: unknown): value is Record<string, number> {
+	if (!isRecord(value)) return false;
+	return Object.values(value).every(
 		(v) => typeof v === 'number' && Number.isFinite(v), // This ensures we reject Infinity, -Infinity, and NaN
 	);
 }
 
 function objectToColor(
-	obj: unknown,
-	colorType: ColorType = 'int',
-): {color: ColorPlusObject; format: ObjectFormat} | undefined {
-	if (!isNumberRecord(obj)) return undefined;
+	value: unknown,
+	colorType: ColorType,
+): {color: ColorPlusObject; format: ColorFormat} | undefined {
+	if (!isNumberRecord(value)) return undefined;
 
-	const value = Object.fromEntries(
-		Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]),
+	const lowerCaseValue = Object.fromEntries(
+		Object.entries(value).map(([k, v]) => [k.toLowerCase(), v]),
 	);
 
-	const inputKeys = new Set(Object.keys(value).map((k) => k.toLowerCase()));
+	const inputKeys = new Set(
+		Object.keys(lowerCaseValue).map((k) => k.toLowerCase()),
+	);
 
-	for (const format of colorObjectFormats) {
-		const {space: mode, channels} = format;
+	for (const objectKeys of colorObjectKeys) {
+		const {spaceId, channels} = objectKeys;
 
 		// Split channels into regular and alpha channels
 		const regularChannels = channels.filter((c) => c.internalKey !== 'alpha');
@@ -343,15 +326,19 @@ function objectToColor(
 		);
 
 		if (hasAllRequiredChannels && allInputKeysValid) {
-			const objectFormat: ObjectFormat = {
-				colorType: colorType,
-				coordKeys: ['', '', ''], // Will be overwritten
-				alphaKey: undefined, // May be overwritten
-				space: mode,
+			const colorFormat: ColorFormat = {
+				type: 'object',
+				format: {
+					colorType: colorType,
+					coordKeys: ['', '', ''], // Will be overwritten
+					alphaKey: undefined, // May be overwritten
+				},
+				alpha: false, // May be overwritten
+				space: spaceId,
 			};
 
 			const result: ColorPlusObject = {
-				spaceId: mode,
+				spaceId: spaceId,
 				coords: [0, 0, 0],
 				alpha: 1,
 			};
@@ -363,8 +350,8 @@ function objectToColor(
 				);
 
 				if (matchingKey) {
-					const channelValue = value[matchingKey.toLowerCase()]!;
-					objectFormat.coordKeys[index] = matchingKey;
+					const channelValue = lowerCaseValue[matchingKey.toLowerCase()]!;
+					(colorFormat.format as ObjectFormat).coordKeys[index] = matchingKey;
 					result.coords[index] = channelValue;
 				}
 			});
@@ -377,8 +364,9 @@ function objectToColor(
 
 				if (alphaKey) {
 					// Alpha value provided
-					objectFormat.alphaKey = alphaKey;
-					result.alpha = value[alphaKey.toLowerCase()]!;
+					(colorFormat.format as ObjectFormat).alphaKey = alphaKey;
+					colorFormat.alpha = true;
+					result.alpha = lowerCaseValue[alphaKey.toLowerCase()]!;
 				}
 			}
 
@@ -392,7 +380,7 @@ function objectToColor(
 
 					// SRGB is the only supported space that's represented with 0-1 internally by ColorJS
 					if (result.spaceId === 'srgb') {
-						if (objectFormat.colorType === 'int') {
+						if ((colorFormat.format as ObjectFormat).colorType === 'int') {
 							result.coords[index] = mapRange(
 								value,
 								0,
@@ -401,7 +389,9 @@ function objectToColor(
 								colorJsHigh, // 1
 							);
 						}
-					} else if (objectFormat.colorType === 'float') {
+					} else if (
+						(colorFormat.format as ObjectFormat).colorType === 'float'
+					) {
 						result.coords[index] = mapRange(
 							value,
 							0,
@@ -415,7 +405,7 @@ function objectToColor(
 
 			return {
 				color: result,
-				format: objectFormat,
+				format: colorFormat,
 			};
 		}
 	}
@@ -425,22 +415,31 @@ function objectToColor(
 
 function colorToObject(
 	color: ColorPlusObject,
-	format: ObjectFormat,
-): Record<string, number> {
-	const {space, coordKeys, alphaKey} = format;
-	const {coords, alpha} = color;
+	format: ColorFormat,
+): undefined | Record<string, number> {
+	const objectFormat = format.format as ObjectFormat;
+
+	if (format.type !== 'object') {
+		console.warn(`Invalid format type: ${format.type}`);
+		return undefined;
+	}
+
+	if (!colorObjectKeys.some((keys) => keys.spaceId === format.space)) {
+		console.warn(`Invalid color space for object conversion: ${format.space}`);
+		return undefined;
+	}
 
 	const result: Record<string, number> = {};
 	// TODO convert color space
 
 	// Map between float and int if needed
-	for (const [index, value] of coords.entries()) {
+	for (const [index, value] of color.coords.entries()) {
 		if (value !== null) {
-			const [colorJsLow, colorJsHigh] = getRangeForChannel(space, index);
+			const [colorJsLow, colorJsHigh] = getRangeForChannel(format.space, index);
 
 			if (format.space === 'srgb') {
-				if (format.colorType === 'int') {
-					result[coordKeys[index]] = mapRange(
+				if (objectFormat.colorType === 'int') {
+					result[objectFormat.coordKeys[index]] = mapRange(
 						value,
 						colorJsLow,
 						colorJsHigh,
@@ -448,8 +447,8 @@ function colorToObject(
 						255,
 					);
 				}
-			} else if (format.colorType === 'float') {
-				result[coordKeys[index]] = mapRange(
+			} else if (objectFormat.colorType === 'float') {
+				result[objectFormat.coordKeys[index]] = mapRange(
 					value,
 					colorJsLow,
 					colorJsHigh,
@@ -460,22 +459,170 @@ function colorToObject(
 		}
 	}
 
-	if (alphaKey !== undefined) {
-		result[alphaKey] = alpha;
+	if (format.alpha && objectFormat.alphaKey !== undefined) {
+		result[objectFormat.alphaKey] = color.alpha;
 	}
 
 	return result;
 }
 
-console.log('----------------------------------');
-const {color, format} = objectToColor(
-	{h: 0.1, s: 0.5, v: 0.2, alpha: 0.5},
-	'float',
-)!;
+const {color, format} = objectToColor({r: 255, g: 128, b: 0, a: 0.5}, 'int')!;
 console.log(color);
+console.log(format);
 console.log(colorToObject(color, format));
 
+function tupleToColor(
+	value: unknown,
+	colorType: ColorType,
+):
+	| undefined
+	| {
+			color: ColorPlusObject;
+			format: ColorFormat;
+	  } {
+	if (!Array.isArray(value)) {
+		return undefined;
+	}
+
+	// Ensure all values are numbers or null...
+	if (
+		!value.every(
+			(v) => v === null || (typeof v === 'number' && Number.isFinite(v)),
+		)
+	) {
+		console.warn('Invalid tuple values');
+		return undefined;
+	}
+
+	if (!(value.length === 3 || value.length === 4)) {
+		console.warn(`Invalid tuple length: ${value.length}`);
+	}
+
+	return {
+		color: {
+			spaceId: 'srgb',
+			coords: [
+				value[0] === null
+					? null
+					: colorType === 'int'
+						? value[0] / 255
+						: value[0],
+				value[1] === null
+					? null
+					: colorType === 'int'
+						? value[1] / 255
+						: value[1],
+				value[2] === null
+					? null
+					: colorType === 'int'
+						? value[2] / 255
+						: value[2],
+			],
+			alpha: value.length === 4 ? value[3] : 1,
+		},
+		format: {
+			alpha: value.length === 4,
+			type: 'tuple',
+			space: 'srgb',
+			format: {
+				colorType: colorType,
+			},
+		},
+	};
+}
+
+type ColorTupleRgb = [number | null, number | null, number | null];
+type ColorTupleRgba = [number | null, number | null, number | null, number];
+
+function colorToTuple(
+	color: ColorPlusObject,
+	format: ColorFormat,
+): undefined | ColorTupleRgb | ColorTupleRgba {
+	if (format.type !== 'tuple') {
+		console.warn(`Invalid format type: ${format.type}`);
+		return undefined;
+	}
+
+	const {colorType} = format.format as TupleFormat;
+
+	// TODO convert space
+
+	const result = [
+		color.coords[0] === null
+			? null
+			: color.coords[0] * (colorType === 'int' ? 255 : 1),
+		color.coords[1] === null
+			? null
+			: color.coords[1] * (colorType === 'int' ? 255 : 1),
+		color.coords[2] === null
+			? null
+			: color.coords[2] * (colorType === 'int' ? 255 : 1),
+	];
+
+	if (format.alpha) {
+		return [...result, color.alpha] as ColorTupleRgba;
+	} else {
+		return result as ColorTupleRgb;
+	}
+}
+
+const {color: tupleColor, format: tupleFormat} = tupleToColor(
+	[255, 128, 0, 0.5],
+	'int',
+)!;
+
 console.log('----------------------------------');
+console.log(tupleColor);
+console.log(tupleFormat);
+console.log(colorToTuple(tupleColor, tupleFormat));
+
+function numberToColor(
+	value: unknown,
+	alpha: boolean,
+): {color: ColorPlusObject; format: ColorFormat} | undefined {
+	if (typeof value !== 'number' || !Number.isFinite(value)) {
+		return undefined;
+	}
+
+	if (value < 0 || value > 0xffffffff) {
+		console.warn(`Invalid number value: ${value}`);
+		return undefined;
+	}
+
+	// Determine if number has alpha channel
+	// TODO use string parsing...
+
+	return {
+		color: {
+			spaceId: 'srgb',
+			coords: [colorJs.r, colorJs.g, colorJs.b],
+			alpha: colorJs.alpha,
+		},
+		format: {
+			alpha: colorJs.alpha < 1,
+			type: 'number',
+			space: 'srgb',
+			format: {
+				colorType: colorType,
+			},
+		},
+	};
+}
+
+function colorToNumber(
+	color: ColorPlusObject,
+	format: ColorFormat,
+): undefined | number {
+	if (format.type !== 'number') {
+		console.warn(`Invalid format type: ${format.type}`);
+		return undefined;
+	}
+
+	// TODO convert space
+
+	// TODO
+	return 0;
+}
 
 // function modeForKeys(keys: string[]): ObjectColorModes | undefined {
 // 	const lowerKeys = keys.map((key) => key.toLowerCase());
