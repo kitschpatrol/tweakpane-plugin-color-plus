@@ -84,3 +84,47 @@ _State anyone or anything that significantly helped with the development of your
 <!-- contributing -->
 
 <!-- license -->
+
+// https://drafts.csswg.org/css-color-4/
+
+// Color functions
+color()
+hsl()
+hsla()
+hwb()
+lab()
+lch()
+oklab()
+oklch()
+rgb()
+rgba()
+
+// Predefined Spaces
+a98-rgb
+display-p3
+prophoto-rgb
+rec2020
+srgb
+srgb-linear
+xyz
+xyz-d50
+xyz-d65
+
+// Additional supported spaces?
+hsl
+hwb
+lab
+lab-d50
+lab-d65
+lch
+oklab
+oklch
+
+// Tweakpane legacy
+hsv (--hsv)
+
+// Tweakpane functions
+rgb()
+rgba()
+hsl()
+hsla()

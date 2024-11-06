@@ -1,76 +1,70 @@
 import {
+	A98RGB,
 	type ColorConstructor as ColorJsConstructor,
 	ColorSpace as ColorJsColorSpace,
 	HSL,
 	HSV,
 	HWB,
 	Lab,
+	Lab_D65,
 	LCH,
+	OKLab,
 	OKLCH,
 	P3,
 	type PlainColorObject as PlainColorJsObject,
+	ProPhoto,
+	REC_2020,
 	serialize as colorJsSerialize,
 	sRGB,
+	sRGB_Linear,
 	to as colorJsConvert,
+	XYZ_D50,
+	XYZ_D65,
 } from 'colorjs.io/fn';
 
-ColorJsColorSpace.register(sRGB);
-ColorJsColorSpace.register(P3);
-ColorJsColorSpace.register(HSV);
-ColorJsColorSpace.register(HSV);
-ColorJsColorSpace.register(HSL);
-ColorJsColorSpace.register(LCH);
-ColorJsColorSpace.register(Lab);
-ColorJsColorSpace.register(OKLCH);
-ColorJsColorSpace.register(HWB);
+// Loading color spaces that are either:
+// - In the CSS 4 spec
+// - Availe in CSS function() style colors
+// - Used by Tweakpane's original implementation
+ColorJsColorSpace.register(A98RGB); // a98-rgb
+ColorJsColorSpace.register(HSL); // hsl(), hsla(), hsl,
+ColorJsColorSpace.register(HSV); // --hsv (Tweakpane legacy)
+ColorJsColorSpace.register(HWB); // hwb(), hwb
+ColorJsColorSpace.register(Lab_D65); // lab-d65
+ColorJsColorSpace.register(Lab); // lab(), lab, lab-d50
+ColorJsColorSpace.register(LCH); // lch(), lch
+ColorJsColorSpace.register(OKLab); // oklab(), oklab
+ColorJsColorSpace.register(OKLCH); // oklch(), oklch
+ColorJsColorSpace.register(P3); // display-p3
+ColorJsColorSpace.register(ProPhoto); // prophoto-rgb
+ColorJsColorSpace.register(REC_2020); // rec2020
+ColorJsColorSpace.register(sRGB_Linear); // srgb-linear
+ColorJsColorSpace.register(sRGB); // rgb(), rgba(), srgb
+ColorJsColorSpace.register(XYZ_D50); // xyz-d50
+ColorJsColorSpace.register(XYZ_D65); // xyz, xyz-d65
 
 export type ColorType = 'int' | 'float';
 
-// TODO Subset
+// Subset of the full list to match what's supported / imported
 export type ColorSpaceId =
-	| 'a98rgb-linear'
-	| 'a98rgb'
-	| 'acescc'
-	| 'acescg'
-	| 'cam16'
-	| 'hct'
-	| 'hpluv'
+	| 'a98-rgb'
+	| 'display-p3'
 	| 'hsl'
-	| 'hsluv'
 	| 'hsv'
 	| 'hwb'
-	| 'ictcp'
-	| 'index-fn-hdr'
-	| 'index-fn'
-	| 'index'
-	| 'jzazbz'
-	| 'jzczhz'
+	| 'lab-d50'
 	| 'lab-d65'
 	| 'lab'
 	| 'lch'
-	| 'lchuv'
-	| 'luv'
-	| 'okhsl'
-	| 'okhsv'
 	| 'oklab'
 	| 'oklch'
-	| 'oklrab'
-	| 'oklrch'
-	| 'p3-linear'
-	| 'p3'
-	| 'prophoto-linear'
-	| 'prophoto'
-	| 'rec2020-linear'
+	| 'prophoto-rgb'
 	| 'rec2020'
-	| 'rec2100-hlg'
-	| 'rec2100-linear'
-	| 'rec2100-pq'
 	| 'srgb-linear'
 	| 'srgb'
-	| 'xyz-abs-d65'
 	| 'xyz-d50'
 	| 'xyz-d65'
-	| string;
+	| 'xyz';
 
 export type Coords = [number | null, number | null, number | null];
 
@@ -108,7 +102,6 @@ export type ObjectFormat = {
 	alphaKey: string | undefined; // undefined if no alpha
 };
 
-// TODO internal
 export type TupleFormat = {
 	// Space is always SRGB
 	colorType: ColorType;
@@ -161,7 +154,9 @@ export function getColorPlusObjectFromColorJsObject(
 	colorJs: PlainColorJsObject | ColorJsConstructor,
 ): ColorPlusObject {
 	return {
-		spaceId: 'spaceId' in colorJs ? colorJs.spaceId : colorJs.space.id,
+		spaceId: ('spaceId' in colorJs
+			? colorJs.spaceId
+			: colorJs.space.id) as ColorSpaceId,
 		coords: [...(colorJs.coords as [number, number, number])],
 		alpha: colorJs.alpha ?? 1,
 	};
