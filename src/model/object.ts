@@ -182,9 +182,7 @@ function isNumberRecord(
 	value: unknown,
 ): value is Record<string, number | null> {
 	if (!isRecord(value)) return false;
-	return Object.values(value).every(
-		(v) => v === null || (typeof v === 'number' && Number.isFinite(v)), // This ensures we reject Infinity, -Infinity, and NaN
-	);
+	return Object.values(value).every((v) => v === null || typeof v === 'number');
 }
 
 /**
@@ -424,7 +422,12 @@ function parseObjectString(value: string): Record<string, unknown> | undefined {
 		return JSON.parse(value);
 	} catch {
 		// Manual parse
-		const parts = value.replace(/[{}:,"']/g, '').split(' ');
+		// Strip certain characters and trim whitespace
+		const parts = value
+			.replace(/[%{}:,"']/g, '')
+			.split(' ')
+			.map((part) => part.trim())
+			.filter((part) => part !== '');
 
 		// Must have even number of parts to parse manually
 		if (parts.length % 2 !== 0) {

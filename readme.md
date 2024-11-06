@@ -128,3 +128,10 @@ rgb()
 rgba()
 hsl()
 hsla()
+
+// Tweakpane object forms
+{r: 255, g: 128, b: 0, a: 1}
+{r:0, g:0, b:0, a:0.5}
+
+// Tweakpane object strings...
+"{r: 100%, g: 50%, b: 0%, a: 100%}"

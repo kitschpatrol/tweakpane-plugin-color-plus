@@ -38,11 +38,7 @@ export function tupleToColor(
 	}
 
 	// Ensure all values are numbers or null...
-	if (
-		!tupleValue.every(
-			(v) => v === null || (typeof v === 'number' && Number.isFinite(v)),
-		)
-	) {
+	if (!tupleValue.every((v) => v === null || typeof v === 'number')) {
 		console.warn('Invalid tuple values');
 		return undefined;
 	}
