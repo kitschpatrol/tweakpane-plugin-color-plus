@@ -57,10 +57,10 @@
 		"watch:ts": "onchange --initial --kill \"src/**/*.ts\" -- pnpm run build:dev"
 	},
 	"peerDependencies": {
-		"tweakpane": "^4.0.0-beta.2"
+		"tweakpane": "^4.0.0"
 	},
 	"dependencies": {
-		"@tweakpane/core": "^2.0.4"
+		"@tweakpane/core": "^2.0.0"
 	},
 	"devDependencies": {
 		"@rollup/plugin-alias": "^5.1.1",
@@ -68,28 +68,31 @@
 		"@rollup/plugin-replace": "^6.0.1",
 		"@rollup/plugin-terser": "^0.4.4",
 		"@rollup/plugin-typescript": "^12.1.1",
-		"@types/node": "^22.8.7",
-		"@typescript-eslint/eslint-plugin": "^8.12.2",
-		"@typescript-eslint/parser": "^8.12.2",
+		"@types/node": "^22.9.0",
+		"@typescript-eslint/eslint-plugin": "^8.13.0",
+		"@typescript-eslint/parser": "^8.13.0",
 		"autoprefixer": "^10.4.20",
-		"bumpp": "^9.8.0",
+		"bumpp": "^9.8.1",
 		"colorjs.io": "link:../color.js",
-		"eslint": "^9.13.0",
+		"eslint": "^9.14.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-prettier": "^5.2.1",
 		"eslint-plugin-simple-import-sort": "^12.1.1",
+		"mdat": "^0.8.0",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0",
 		"postcss": "^8.4.47",
 		"prettier": "^3.3.3",
 		"prettier-plugin-pkg": "^0.18.1",
+		"pretty-bytes": "^6.1.1",
 		"rimraf": "^6.0.1",
-		"rollup": "^4.24.3",
+		"rollup": "^4.24.4",
 		"rollup-plugin-cleanup": "^3.2.1",
-		"sass": "^1.80.5",
+		"sass": "^1.80.6",
 		"typescript": "^5.6.3",
 		"vite": "^5.4.10",
-		"vitest": "^2.1.4"
+		"vitest": "^2.1.4",
+		"zod": "^3.23.8"
 	},
 	"publishConfig": {
 		"access": "public"
