@@ -101,13 +101,18 @@ export function colorToString(
 		console.warn('Invalid format type');
 		return undefined;
 	}
-	const stringformat = format.format;
+	const stringFormat = format.format;
+
+	// TODO Special case for keyword formats
+	// if (format.format.formatId === 'keyword') {
+	// 	// Round internal color to nearest keyword
+	// }
 
 	// Fancy format objects
 	// See color.js/src/serialize.js
 	const result = colorJsSerialize(convertedColor, {
 		inGamut: true, // TODO expose? Overrides inGamut in the format object
-		commas: stringformat.commas,
+		commas: stringFormat.commas,
 		precision: 2, // TODO expose?
 		// @ts-expect-error - Type definition inconsistencies
 		alpha:
@@ -115,21 +120,21 @@ export function colorToString(
 			alphaOverride === false
 				? false
 				: // Hex can't take object, so return boolean
-					stringformat.formatId === 'hex'
+					stringFormat.formatId === 'hex'
 					? (alphaOverride ?? format.alpha)
 					: // Other formats need to know their original alpha format (e.g. <number> vs <percentage>)
 						{
 							include: alphaOverride ?? format.alpha,
-							type: stringformat.alphaType,
+							type: stringFormat.alphaType,
 						},
 		// @ts-expect-error - Type definition inconsistencies
-		coords: stringformat.types,
+		coords: stringFormat.types,
 		// @ts-expect-error - Type definition inconsistencies
-		format: stringformat.format,
+		format: stringFormat.format,
 	});
 
 	// Special case for hex to avoid #0f0-style truncation
-	if (stringformat.formatId === 'hex') {
+	if (stringFormat.formatId === 'hex') {
 		return expandHex(result);
 	} else {
 		return result;
