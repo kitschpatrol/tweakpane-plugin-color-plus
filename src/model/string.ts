@@ -26,13 +26,13 @@ export function stringToColor(
 		return undefined;
 	}
 
-	const hexNormalizedValue = value.replace('0x', '#');
+	const normalizedValue = legacyTweakpaneColorStringNormalization(value);
 
 	const stringFormatInOut: Partial<StringFormat> = {};
 	let colorJs: ColorJsConstructor | undefined;
 
 	try {
-		colorJs = colorJsParse(hexNormalizedValue, {
+		colorJs = colorJsParse(normalizedValue, {
 			// @ts-expect-error - Type definition inconsistencies
 			parseMeta: stringFormatInOut,
 		});
@@ -62,7 +62,7 @@ export function stringToColor(
 	const hasAlpha =
 		stringFormat.format.alpha ||
 		stringFormat.alphaType !== undefined ||
-		(stringFormat.formatId === 'hex' && hexHasAlpha(hexNormalizedValue));
+		(stringFormat.formatId === 'hex' && hexHasAlpha(normalizedValue));
 
 	// if (!validateColorJsObject(colorJs)) {
 	// 	console.warn("Can't handle null coords");
@@ -263,4 +263,32 @@ function toDecimalPrecisionForCoordinate(
 
 	console.warn('Unreachable reached?');
 	return value;
+}
+
+/**
+ * Transforms the input string to expand supported import formats
+ * - 0x-prefixed hex string support
+ * - Legacy HSL compatibility: The built-in Tweakpane color input control accepts HSL strings without `%` units, e.g. `hsl(20, 15, 30)`, but color.js and the CSS standard do not.
+ * @param value
+ * @returns
+ */
+function legacyTweakpaneColorStringNormalization(value: string): string {
+	const trimmed = value.trim();
+	if (trimmed.startsWith('0x')) {
+		return trimmed.replace('0x', '#');
+	}
+	if (trimmed.startsWith('hsl')) {
+		let index = 0;
+		return trimmed.replace(/([\d.]+%?)/g, (match) => {
+			if (index === 0 || match.includes('%') || index > 2) {
+				index += 1;
+				return match;
+			} else {
+				index += 1;
+				return `${match}%`;
+			}
+		});
+	}
+
+	return trimmed;
 }
