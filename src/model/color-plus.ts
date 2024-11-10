@@ -16,6 +16,7 @@ import {colorToObject, colorToObjectString, objectToColor} from './object';
 import {
 	ColorFormat,
 	ColorPlusObject,
+	colorPlusObjectsAreEqual,
 	ColorSpaceId,
 	ColorType,
 	convert,
@@ -24,7 +25,7 @@ import {
 	getColorPlusObjectFromColorJsObject,
 	serialize,
 	setFromColorPlusObject,
-	toPrecision,
+	toDecimalPrecision,
 } from './shared';
 import {colorToString, stringToColor} from './string';
 import {colorToTuple, colorToTupleString, tupleToColor} from './tuple';
@@ -64,7 +65,7 @@ export class ColorPlus {
 	}
 
 	public toString(): string {
-		return `ColorPlus(${this.color.spaceId}, [${this.color.coords.map((c) => (c === null ? 'none' : toPrecision(c, 4)))}], ${this.color.alpha})`;
+		return `ColorPlus(${this.color.spaceId}, [${this.color.coords.map((c) => (c === null ? 'none' : toDecimalPrecision(c, 4)))}], ${this.color.alpha})`;
 	}
 
 	public toJSON(): ColorPlusObject {
@@ -109,11 +110,7 @@ export class ColorPlus {
 	}
 
 	public equals(other: ColorPlus): boolean {
-		return (
-			this.color.spaceId === other.color.spaceId &&
-			this.color.alpha === other.color.alpha &&
-			this.color.coords.every((c, i) => c === other.color.coords[i])
-		);
+		return colorPlusObjectsAreEqual(this.color, other.color);
 	}
 
 	public set alpha(value: number) {
@@ -125,8 +122,8 @@ export class ColorPlus {
 	}
 
 	public get(prop: Ref, space?: ColorSpaceId, precision?: number): number {
-		// TODO good idea to toPrecision here?
-		return toPrecision(
+		// TODO good idea to toDecimalPrecision here?
+		return toDecimalPrecision(
 			colorJsGet(
 				convert(this.color, space ?? this.color.spaceId) ?? this.color,
 				prop,
@@ -241,16 +238,3 @@ function parseColorAndFormat(
 		tupleToColor(value, colorType)
 	);
 }
-
-// TODO needed?
-// function colorJsApplyPrecision(
-// 	targetColor: ColorPlusObject,
-// 	precision: number | undefined,
-// ): void {
-// 	if (precision === undefined) {
-// 		return;
-// 	}
-// 	targetColor.coords[0] = toPrecision(targetColor.coords[0], precision);
-// 	targetColor.coords[1] = toPrecision(targetColor.coords[1], precision);
-// 	targetColor.coords[2] = toPrecision(targetColor.coords[2], precision);
-// }

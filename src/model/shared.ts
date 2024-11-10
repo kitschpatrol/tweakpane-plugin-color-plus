@@ -76,17 +76,25 @@ export type ColorPlusObject = {
 
 // Not yet correctly typed in colorjs.io
 // This is a partial type based on inspection of the code
+export type CoordFormat = {
+	type: string;
+	range: [number, number] | undefined;
+	coordRange: [number, number] | undefined;
+};
+
+// Not yet correctly typed in colorjs.io
+// This is a partial type based on inspection of the code
 export type StringFormat = {
 	alphaType?: string;
 	commas?: boolean;
-	types?: string[];
+	types: string[];
 	formatId: string;
 	format: {
 		type: string;
 		name: string;
 		alpha?: boolean | Record<string, unknown> | string;
 		spaceCoords: undefined | number[];
-		coords: undefined | Coords;
+		coords: (CoordFormat | CoordFormat[])[];
 		toGamut?: boolean;
 		// test: [Function: test],
 		// parse: [Function: parse],
@@ -243,25 +251,38 @@ export function getRangeForChannel(
 }
 
 /**
- * From https://github.com/color-js/color.js/blob/b6984aa2e0d2c1b2f0863979d41b47df6f568894/src/util.js#L65
- * Round a number to a certain number of significant digits
+ * Round a number to a certain number of significant digits after the decimal point
  * @param {number} n - The number to round
- * @param {number} precision - Number of significant digits
+ * @param {number} decimalPrecision - Number of digits after the decimal point
+ * @returns {number} The rounded number
+ * @example
+ * toDecimalPrecision(3.14159, 2) // returns 3.14
+ * toDecimalPrecision(10.9999, 1) // returns 11.0
+ * toDecimalPrecision(123.456, 0) // returns 123
  */
-export function toPrecision(n: number, precision: number | undefined): number {
-	if (precision === undefined) {
+export function toDecimalPrecision(
+	n: number,
+	decimalPrecision: number | undefined,
+): number {
+	if (
+		decimalPrecision === undefined ||
+		decimalPrecision === null ||
+		decimalPrecision < 0 ||
+		!Number.isInteger(decimalPrecision) ||
+		!Number.isFinite(n)
+	) {
 		return n;
 	}
-	if (n === 0) {
-		return 0;
+
+	if (decimalPrecision === 0) {
+		return Math.round(n);
 	}
-	const integer = ~~n;
-	let digits = 0;
-	if (integer && precision) {
-		digits = ~~Math.log10(Math.abs(integer)) + 1;
-	}
-	const multiplier = 10.0 ** (precision - digits);
-	return Math.floor(n * multiplier + 0.5) / multiplier;
+
+	// Calculate the multiplier based on decimal precision
+	const multiplier = Math.pow(10, decimalPrecision);
+
+	// Round the number using the multiplier
+	return Math.round(n * multiplier) / multiplier;
 }
 
 export function formatNumber(
@@ -272,4 +293,75 @@ export function formatNumber(
 		return value.toString();
 	}
 	return value.toFixed(Math.max(Math.min(digits, 20), 0));
+}
+
+/**
+ * Type check for string format object type
+ */
+export function isStringFormat(
+	format: ColorFormat['format'],
+): format is StringFormat {
+	return (
+		typeof format === 'object' &&
+		format !== null &&
+		'formatId' in format &&
+		'format' in format &&
+		typeof format.format === 'object' &&
+		format.format !== null &&
+		'type' in format.format &&
+		typeof format.format.type === 'string'
+	);
+}
+
+/**
+ *  Some formats are parseable by Color.js but not serializable, e.g. keyword
+ *  formats like `'blue'`. We can accept these after the format is initialized,
+ *  but not as an initial color value.
+ * @param format
+ * @returns true if the format is serializable
+ */
+export function formatIsSerializable(format: ColorFormat): boolean {
+	// Reimplement canSerialize() from colorjs
+	if (isStringFormat(format.format)) {
+		return (
+			format.format.format.type === 'function' || 'serialize' in format.format
+		);
+	}
+	// Assume all other formats are serializable
+	return true;
+}
+
+export function applyDecimalPrecision(
+	targetColor: ColorPlusObject,
+	decimalPrecision: number,
+	includeAlpha: boolean = true,
+): void {
+	targetColor.coords[0] =
+		targetColor.coords[0] === null
+			? null
+			: toDecimalPrecision(targetColor.coords[0], decimalPrecision);
+	targetColor.coords[1] =
+		targetColor.coords[1] === null
+			? null
+			: toDecimalPrecision(targetColor.coords[1], decimalPrecision);
+	targetColor.coords[2] =
+		targetColor.coords[2] === null
+			? null
+			: toDecimalPrecision(targetColor.coords[2], decimalPrecision);
+	if (includeAlpha) {
+		targetColor.alpha = toDecimalPrecision(targetColor.alpha, decimalPrecision);
+	}
+}
+
+export function colorPlusObjectsAreEqual(
+	a: ColorPlusObject,
+	b: ColorPlusObject,
+): boolean {
+	return (
+		a.spaceId === b.spaceId &&
+		a.alpha === b.alpha &&
+		a.coords[0] === b.coords[0] &&
+		a.coords[1] === b.coords[1] &&
+		a.coords[2] === b.coords[2]
+	);
 }

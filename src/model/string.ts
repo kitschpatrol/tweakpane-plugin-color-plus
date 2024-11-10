@@ -1,3 +1,4 @@
+import {mapRange} from '@tweakpane/core';
 import {
 	type ColorConstructor as ColorJsConstructor,
 	parse as colorJsParse,
@@ -8,24 +9,15 @@ import {
 	ColorFormat,
 	ColorPlusObject,
 	convert,
+	CoordFormat,
+	copyColorPlusObject,
 	expandHex,
 	getColorPlusObjectFromColorJsObject,
 	hexHasAlpha,
+	isStringFormat,
 	StringFormat,
+	toDecimalPrecision,
 } from './shared';
-
-function isStringFormat(format: ColorFormat['format']): format is StringFormat {
-	return (
-		typeof format === 'object' &&
-		format !== null &&
-		'formatId' in format &&
-		'format' in format &&
-		typeof format.format === 'object' &&
-		format.format !== null &&
-		'type' in format.format &&
-		typeof format.format.type === 'string'
-	);
-}
 
 export function stringToColor(
 	value: unknown,
@@ -95,13 +87,22 @@ export function colorToString(
 	format: ColorFormat,
 	alphaOverride?: boolean,
 ): string | undefined {
-	const convertedColor = convert(color, format.space) ?? color;
-
 	if (!isStringFormat(format.format)) {
 		console.warn('Invalid format type');
 		return undefined;
 	}
 	const stringFormat = format.format;
+
+	// Converts if needed, rounds if needed, always returns a copy
+	const convertedColor = toDecimalPrecisionForFormat(
+		convert(color, format.space) ?? color,
+		stringFormat,
+		{
+			number: 0,
+			percentage: 1,
+			unit: 2,
+		},
+	);
 
 	// TODO Special case for keyword formats
 	// if (format.format.formatId === 'keyword') {
@@ -110,10 +111,13 @@ export function colorToString(
 
 	// Fancy format objects
 	// See color.js/src/serialize.js
+	console.log(stringFormat);
+
 	const result = colorJsSerialize(convertedColor, {
-		inGamut: true, // TODO expose? Overrides inGamut in the format object
+		// inGamut: true, // TODO expose? Overrides inGamut in the format object
 		commas: stringFormat.commas,
-		precision: 2, // TODO expose?
+
+		// Precision is total significant digits, not decimal places, so stick with default
 		// @ts-expect-error - Type definition inconsistencies
 		alpha:
 			// Erase alpha from output
@@ -139,4 +143,124 @@ export function colorToString(
 	} else {
 		return result;
 	}
+}
+
+type DecimalPrecision = {
+	/** Percentage values */
+	percentage: number;
+	/** Values between 0 and a larger integer, like 0-255 */
+	number: number;
+	/** Values between 0-1 */
+	unit: number;
+};
+
+/**
+ * Special case for RGB integer-style values
+ * https://github.com/color-js/color.js/issues/203
+ * Returns a new color object */
+function toDecimalPrecisionForFormat(
+	color: ColorPlusObject,
+	stringFormat: StringFormat,
+	precision: DecimalPrecision,
+): ColorPlusObject {
+	const newColor = copyColorPlusObject(color);
+
+	if (stringFormat.types !== undefined) {
+		for (let index = 0; index < newColor.coords.length; index++) {
+			newColor.coords[index] = toDecimalPrecisionForCoordinate(
+				newColor.coords[index],
+				stringFormat,
+				index,
+				precision,
+			);
+		}
+	}
+
+	// Alpha always needs to be rounded
+	console.log(stringFormat.alphaType);
+	// if (stringFormat.alphaType === '<percentage>') {
+	newColor.alpha = toDecimalPrecision(newColor.alpha, 2);
+	// }
+
+	return newColor;
+}
+
+function getCoordFormat(
+	format: StringFormat,
+	index: number,
+): CoordFormat | undefined {
+	if (!Array.isArray(format.format.coords[index])) {
+		return format.format.coords[index];
+	}
+
+	const targetFormat = format.types[index].split('[')[0];
+	return format.format.coords[index].find(
+		(coordFormat) => coordFormat.type === targetFormat,
+	);
+}
+
+function toDecimalPrecisionForCoordinate(
+	value: number | null,
+	format: StringFormat,
+	index: number,
+	precision: DecimalPrecision,
+): number | null {
+	if (value === null) {
+		return value;
+	}
+
+	const coordFormat = getCoordFormat(format, index)!;
+	if (coordFormat === undefined) {
+		console.error('coordFormat undefined');
+		return value;
+	}
+	const {range, coordRange} = coordFormat;
+	if (range === undefined && coordRange === undefined) {
+		console.error('Range and coordRange undefined');
+		return value;
+	}
+
+	const isPercentage = format.types[index] === '<percentage>';
+
+	if (range === undefined && coordRange !== undefined) {
+		// Since range is undefined, there must be no difference between the formatted
+		// value and internal value, so round directly
+		return toDecimalPrecision(
+			value,
+			isPercentage
+				? precision.percentage
+				: coordRange[1] > 1
+					? precision.number
+					: precision.unit,
+		);
+	}
+
+	if (range !== undefined && coordRange !== undefined) {
+		// Convert to range, then round, then convert back to coord range
+		const mappedValue = mapRange(
+			value,
+			coordRange[0],
+			coordRange[1],
+			range[0],
+			range[1],
+		);
+		const roundedMappedValue = toDecimalPrecision(
+			mappedValue,
+			isPercentage
+				? precision.percentage
+				: range[1] > 1
+					? precision.number
+					: precision.unit,
+		);
+		return mapRange(
+			roundedMappedValue,
+			range[0],
+			range[1],
+			coordRange[0],
+			coordRange[1],
+		);
+	}
+
+	console.warn('Unreachable reached?');
+	return value;
 }

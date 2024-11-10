@@ -2,14 +2,13 @@ import {
 	type BaseInputParams,
 	createPlugin,
 	type InputBindingPlugin,
-	isObject,
 	type PickerLayout,
 	writePrimitive,
 } from '@tweakpane/core';
 
 import {ColorController} from './controller/color.js';
 import {ColorPlus} from './model/color-plus.js';
-import {ColorFormat} from './model/shared.js';
+import {ColorFormat, formatIsSerializable} from './model/shared.js';
 import {ColorTupleRgb, ColorTupleRgba} from './model/tuple.js';
 import {parseColorInputParams, validateColorInputParams} from './util.js';
 
@@ -261,19 +260,4 @@ function deepEquals(a: unknown, b: unknown): boolean {
 	}
 
 	return false;
-}
-
-/**
- *  Some formats are parseable by Color.js but not serializable, e.g. keyword
- *  formats like `'blue'`. We can accept these after the format is initialized,
- *  but not as an initial color value.
- * @param format
- * @returns true if the format is serializable
- */
-function formatIsSerializable(format: ColorFormat): boolean {
-	if (isObject(format.format)) {
-		return 'serialize' in format.format;
-	}
-	// Assume all other formats are serializable
-	return true;
 }
