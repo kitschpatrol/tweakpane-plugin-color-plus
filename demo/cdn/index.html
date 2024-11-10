@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<script type="importmap">
+			{
+				"imports": {
+					"tweakpane": "https://cdn.jsdelivr.net/npm/tweakpane",
+					"@tweakpane/core": "https://cdn.jsdelivr.net/npm/@tweakpane/core",
+					"tweakpane-plugin-profiler": "https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus/lite"
+				}
+			}
+		</script>
+		<script type="module">
+			import {Pane} from 'tweakpane';
+			import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
+
+			const params = {
+				color: 'oklch(65% 0.26 357deg)',
+			};
+
+			const pane = new Pane();
+			pane.registerPlugin(TweakpanePluginColorPlus);
+			pane.addBinding(params, 'color', {view: 'color-plus'});
+		</script>
+	</head>
+	<body></body>
+</html>
