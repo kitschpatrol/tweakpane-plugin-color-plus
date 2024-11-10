@@ -115,12 +115,17 @@ export type TupleFormat = {
 	colorType: ColorType;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export type NumberFormat = {
+	// Nothing for now, but important to distinguish from non-object format strings
+};
+
 /**
  * Original format and alpha state inferred from the user-provided value
  */
 export type ColorFormat = {
 	type: 'number' | 'string' | 'object' | 'tuple';
-	format: StringFormat | ObjectFormat | TupleFormat | string;
+	format: StringFormat | ObjectFormat | TupleFormat | NumberFormat | string;
 	alpha: boolean;
 	space: ColorSpaceId;
 };

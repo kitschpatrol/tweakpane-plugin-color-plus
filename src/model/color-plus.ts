@@ -93,6 +93,7 @@ export class ColorPlus {
 	}
 
 	public serialize(format: ColorFormat, alphaOverride?: boolean): string {
+		// String format is used for internal one-offs
 		if (typeof format.format === 'string') {
 			return serialize(this.color, format, alphaOverride)!;
 		}

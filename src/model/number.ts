@@ -1,4 +1,4 @@
-import {ColorFormat, ColorPlusObject, convert} from './shared';
+import {ColorFormat, ColorPlusObject, convert, NumberFormat} from './shared';
 import {stringToColor} from './string';
 
 export function numberToColor(
@@ -28,7 +28,7 @@ export function numberToColor(
 			alpha: hasAlpha === true || stringFormat.alpha,
 			type: 'number',
 			space: 'srgb',
-			format: 'hex',
+			format: {},
 		},
 	};
 }
