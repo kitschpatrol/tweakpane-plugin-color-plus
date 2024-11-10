@@ -111,7 +111,6 @@ export function colorToString(
 
 	// Fancy format objects
 	// See color.js/src/serialize.js
-	console.log(stringFormat);
 
 	const result = colorJsSerialize(convertedColor, {
 		// inGamut: true, // TODO expose? Overrides inGamut in the format object
@@ -176,11 +175,12 @@ function toDecimalPrecisionForFormat(
 		}
 	}
 
+	// TODO
 	// Alpha always needs to be rounded
-	console.log(stringFormat.alphaType);
-	// if (stringFormat.alphaType === '<percentage>') {
-	newColor.alpha = toDecimalPrecision(newColor.alpha, 2);
-	// }
+	// console.log(stringFormat.alphaType);
+	// if (stringFormat.alphaType == undefined) {
+	// newColor.alpha = toDecimalPrecision(newColor.alpha, 2);
+	// // }
 
 	return newColor;
 }

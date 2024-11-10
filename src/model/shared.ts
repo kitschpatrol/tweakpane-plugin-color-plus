@@ -324,7 +324,8 @@ export function formatIsSerializable(format: ColorFormat): boolean {
 	// Reimplement canSerialize() from colorjs
 	if (isStringFormat(format.format)) {
 		return (
-			format.format.format.type === 'function' || 'serialize' in format.format
+			format.format.format.type === 'function' ||
+			'serialize' in format.format.format
 		);
 	}
 	// Assume all other formats are serializable
