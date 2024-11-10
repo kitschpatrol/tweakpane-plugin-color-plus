@@ -216,8 +216,9 @@ function toDecimalPrecisionForCoordinate(
 	}
 	const {range, coordRange} = coordFormat;
 	if (range === undefined && coordRange === undefined) {
-		console.error('Range and coordRange undefined');
-		return value;
+		// This happens with XYZ and other unbounded spaces... I think
+		// just treat it as a unit value
+		return toDecimalPrecision(value, precision.unit);
 	}
 
 	const isPercentage = format.types[index] === '<percentage>';

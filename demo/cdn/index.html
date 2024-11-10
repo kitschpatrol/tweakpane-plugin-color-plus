@@ -21,6 +21,10 @@
 			const pane = new Pane();
 			pane.registerPlugin(TweakpanePluginColorPlus);
 			pane.addBinding(params, 'color', {view: 'color-plus'});
+
+			pane.on('change', () => {
+				document.documentElement.style.backgroundColor = params['color'];
+			});
 		</script>
 	</head>
 	<body></body>
