@@ -21,9 +21,9 @@
 
 ## Overview
 
-The Color Plus plugin adds support for many additional color string formats to the [Tweakpane](https://tweakpane.github.io/docs/) parameter UI library. The plugin supports all [CSS Color Module Level 4](https://drafts.csswg.org/css-color-4/) formats and color spaces, and also adds support for controlling colors stored as tuples / arrays, along with .
+The Color Plus plugin adds support for many additional color string formats to the [Tweakpane](https://tweakpane.github.io/docs/) UI library. The plugin supports all [CSS Color Module Level 4](https://drafts.csswg.org/css-color-4/) formats and color spaces, and also adds support for controlling colors stored as tuples / arrays, and additional color object formats.
 
-Currently, the plugin exactly matches the functionality, options, and control presentation of Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color) — just with support for additional parameter formats and types. This means it should work as a drop-in replacement in existing projects that need to support additional color formats.
+Currently, the plugin (almost) exactly matches the functionality, options, and control presentation of Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color) — just with support for additional parameter formats and types. This means it should work as a drop-in replacement in existing projects that need to support additional color formats, but it also means that the UI is not necessarily well-suited to manipulating the wide-gamut color spaces that can now be represented.
 
 Color notations for wide-gamut color like [`oklch`](https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl) are supported, **but the current implementation clips all out-of-gamut colors to the `sRGB` color space**. Future versions of the plugin might implement additional UI and options for working with wide color in P3 or Rec. 2020.
 
@@ -36,6 +36,8 @@ The plugin was developed specifically for the benefit of [Svelte Tweakpane UI](h
 The plugin requires [Tweakpane 4](https://www.npmjs.com/package/tweakpane).
 
 If you're using the ["lite" build](#the-lite-plugin-build) of the plugin without a bundler, you'll need to provide the [@tweakpane/core](https://www.npmjs.com/package/@tweakpane/core) library as well.
+
+If you're using Svelte as a front-end library, you might want to take a look at [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui), which wraps this plugin (and much more functionality) in a Svelte-friendly set of components.
 
 ### Installation
 
@@ -53,7 +55,7 @@ npm install tweakpane-plugin-color-plus
 
 ## Usage
 
-Import and register the plugin. For now, you must explicitly add `view: 'color-plus'` to the `addBinding` options object. (Tweakpane's built-in color input handling will take precedence in the absence of the option.)
+Import and register the plugin. For now, you must explicitly add `view: 'color-plus'` to the `addBinding` options object. (Tweakpane's built-in color input handling will take precedence in the absence of the `view` option.)
 
 #### NPM
 
@@ -74,7 +76,6 @@ const params = {
 const pane = new Pane();
 pane.registerPlugin(TweakpanePluginColorPlus);
 pane.addBinding(params, 'color', {view: 'color-plus'});
-
 ```
 
 <!-- /code -->
@@ -111,7 +112,6 @@ pane.addBinding(params, 'color', {view: 'color-plus'});
 	</head>
 	<body></body>
 </html>
-
 ```
 
 <!-- /code -->
@@ -142,6 +142,8 @@ Supported spaces / color functions include:
 - XYZ D65 _(a.k.a. XYZ)_
 
 #### String formats
+
+#### Precision
 
 #### Object formats
 
@@ -179,7 +181,7 @@ Instead, it gets built into the single-file plugin artifact, which is typically 
 import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
 ```
 
-If you're not using a bundler, direct ESM imports from URLs can still work if needed by defining the `@tweakpane/core` dependency in an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap).
+If you're not using a bundler, direct ESM imports from URLs can still work by defining the `@tweakpane/core` dependency in an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap).
 
 Or, if you're just using a single plugin and would rather not think about it, a "classic" all-inclusive build is exported by default to match the typical behavior of a Tweakpane plugin:
 
