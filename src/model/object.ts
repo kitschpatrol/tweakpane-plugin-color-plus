@@ -392,8 +392,8 @@ export function colorToObjectString(
 		return undefined;
 	}
 
-	const precision = (format.format as ObjectFormat).colorType === 'int' ? 0 : 2;
-	const precisionAlpha = 2;
+	const precision = (format.format as ObjectFormat).colorType === 'int' ? 0 : 3;
+	const precisionAlpha = 3;
 	return stringifyObject(object, precision, precisionAlpha);
 }
 

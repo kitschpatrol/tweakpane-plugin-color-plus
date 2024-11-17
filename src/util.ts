@@ -1,6 +1,6 @@
 import {isObject, parsePickerLayout, parseRecord} from '@tweakpane/core';
 
-import {ColorFormat, ColorType} from './model/shared';
+import {ColorType} from './model/shared';
 import {ColorPlusInputParams} from './plugin';
 
 export function parseColorInputParams(
@@ -20,28 +20,28 @@ export function parseColorInputParams(
 	}));
 }
 
-export function getKeyScaleForColor(forAlpha: boolean): number {
-	return forAlpha ? 0.1 : 1;
-}
+// export function getKeyScaleForColor(forAlpha: boolean): number {
+// 	return forAlpha ? 0.1 : 1;
+// }
 
 function parseColorType(value: unknown): ColorType | undefined {
 	return value === 'int' ? 'int' : value === 'float' ? 'float' : undefined;
 }
 
-export function parseColorFormat(value: unknown): ColorFormat | undefined {
-	// TODO: validate format
-	return value as ColorFormat;
-}
+// export function parseColorFormat(value: unknown): ColorFormat | undefined {
+// 	// TODO: validate format
+// 	return value as ColorFormat;
+// }
 
-export function alphaEnabled(
-	format: ColorFormat,
-	alphaMode: boolean | undefined,
-): boolean {
-	if (typeof alphaMode === 'boolean') {
-		return alphaMode;
-	}
-	return format.alpha ?? false;
-}
+// export function alphaEnabled(
+// 	format: ColorFormat,
+// 	alphaMode: boolean | undefined,
+// ): boolean {
+// 	if (typeof alphaMode === 'boolean') {
+// 		return alphaMode;
+// 	}
+// 	return format.alpha ?? false;
+// }
 
 export function validateColorInputParams(
 	params: ColorPlusInputParams,

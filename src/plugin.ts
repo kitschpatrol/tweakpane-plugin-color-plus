@@ -116,7 +116,6 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				// Reuse old HSV value if the new one doesn't change its
 				// value representation... deals with having more precision
 				// internally than externally
-				// TODO deep equals?
 				if (deepEquals(value, args.params.lastExternalValue)) {
 					return args.params.lastInternalValue;
 				}
@@ -135,6 +134,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				}
 
 				newColor.convert('hsv');
+
 				// TODO necessary?
 				// newColor.toGamut('srgb');
 				return newColor;

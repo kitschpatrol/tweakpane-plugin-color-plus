@@ -122,23 +122,19 @@ export class ColorPlus {
 		return this.color.alpha;
 	}
 
-	public get(prop: Ref, space?: ColorSpaceId, precision?: number): number {
+	public get(prop: Ref, space?: ColorSpaceId): number {
 		// TODO good idea to toDecimalPrecision here?
-		return toDecimalPrecision(
-			colorJsGet(
-				convert(this.color, space ?? this.color.spaceId) ?? this.color,
-				prop,
-			),
-			precision,
+		return colorJsGet(
+			convert(this.color, space ?? this.color.spaceId) ?? this.color,
+			prop,
 		);
 	}
 
-	public getAll(space?: ColorSpaceId, precision?: number): Coords {
+	public getAll(space?: ColorSpaceId): Coords {
 		// TODO constrain space
 		// TODO check for 'none' values?
 		return colorJsGetAll(this.color, {
 			space,
-			precision,
 		});
 
 		// TODO copy check?

@@ -66,7 +66,7 @@ export class ColorPickerController
 						props: ValueMap.fromObject({
 							pointerScale: 0.01,
 							keyScale: 0.1,
-							formatter: createNumberFormatter(2),
+							formatter: createNumberFormatter(3),
 						}),
 						value: createValue(0, {
 							constraint: new DefiniteRangeConstraint({min: 0, max: 1}),
@@ -79,9 +79,7 @@ export class ColorPickerController
 			connectValues({
 				primary: this.value,
 				secondary: this.alphaIcs_.text.value,
-				// TODO vet this
 				forward: (p) => p.alpha,
-				// TODO vet this
 				backward: (p, s) => {
 					p.alpha = s;
 					return p.clone();

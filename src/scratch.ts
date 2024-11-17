@@ -1,4 +1,4 @@
-// // import Color from 'colorjs.io';
+import Color from 'colorjs.io';
 // // import {toGamutCSS} from 'colorjs.io/fn';
 
 // import {mapRange} from '@tweakpane/core';
@@ -12,9 +12,11 @@
 // 	ObjectFormat,
 // 	TupleFormat,
 // } from './model/color-plus';
-// // // const color = new Color('#ff00ff');
-
-// // // console.log(color);
+const colora = new Color('color(hsl 360 0 0)');
+const colorb = colora.clone().to('srgb');
+console.log(colora.toString());
+console.log(colora.coords);
+console.log(colorb.coords);
 // // // console.log('----------------------------------');
 // // // console.log(color.to('srgb')); // #ff0000
 // // // console.log('----------------------------------');

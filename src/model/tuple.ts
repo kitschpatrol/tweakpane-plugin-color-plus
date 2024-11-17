@@ -123,8 +123,8 @@ export function colorToTupleString(
 		return undefined;
 	}
 
-	const precision = (format.format as TupleFormat).colorType === 'int' ? 0 : 2;
-	const precisionAlpha = 2;
+	const precision = (format.format as TupleFormat).colorType === 'int' ? 0 : 3;
+	const precisionAlpha = 3;
 
 	return stringifyTuple(tuple, precision, precisionAlpha);
 }

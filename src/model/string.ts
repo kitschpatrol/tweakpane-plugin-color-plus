@@ -116,7 +116,8 @@ export function colorToString(
 		// inGamut: true, // TODO expose? Overrides inGamut in the format object
 		commas: stringFormat.commas,
 
-		// Precision is total significant digits, not decimal places, so stick with default
+		// Precision is total significant digits, not decimal places, so stick with default?
+		precision: 3,
 		// @ts-expect-error - Type definition inconsistencies
 		alpha:
 			// Erase alpha from output
@@ -162,6 +163,18 @@ function toDecimalPrecisionForFormat(
 	stringFormat: StringFormat,
 	precision: DecimalPrecision,
 ): ColorPlusObject {
+	// Using this everywhere seems to result in some ugly rounding errors...
+	// Skip for now unless color object is RGB...
+	if (
+		!(
+			(stringFormat.formatId === 'rgb' || stringFormat.formatId === 'rgba') &&
+			stringFormat.types !== undefined &&
+			stringFormat.types.every((value) => value === '<number>[0,255]')
+		)
+	) {
+		return color;
+	}
+
 	const newColor = copyColorPlusObject(color);
 
 	if (stringFormat.types !== undefined) {

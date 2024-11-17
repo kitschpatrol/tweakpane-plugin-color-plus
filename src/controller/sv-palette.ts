@@ -15,7 +15,6 @@ import {
 } from '@tweakpane/core';
 
 import {ColorPlus} from '../model/color-plus.js';
-import {getKeyScaleForColor} from '../util.js';
 import {SvPaletteView} from '../view/sv-palette.js';
 
 interface Config {
@@ -107,7 +106,7 @@ export class SvPaletteController
 			ev.preventDefault();
 		}
 
-		const keyScale = getKeyScaleForColor(false);
+		const keyScale = 1; // getKeyScaleForColor(false);
 		const ds = getStepForKey(keyScale, getHorizontalStepKeys(ev));
 		const dv = getStepForKey(keyScale, getVerticalStepKeys(ev));
 		if (ds === 0 && dv === 0) {
@@ -124,7 +123,7 @@ export class SvPaletteController
 	}
 
 	private onKeyUp_(ev: KeyboardEvent): void {
-		const keyScale = getKeyScaleForColor(false);
+		const keyScale = 1; // getKeyScaleForColor(false);
 		const ds = getStepForKey(keyScale, getHorizontalStepKeys(ev));
 		const dv = getStepForKey(keyScale, getVerticalStepKeys(ev));
 		if (ds === 0 && dv === 0) {

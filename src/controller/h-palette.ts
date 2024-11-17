@@ -13,7 +13,6 @@ import {
 } from '@tweakpane/core';
 
 import {ColorPlus} from '../model/color-plus.js';
-import {getKeyScaleForColor} from '../util.js';
 import {HPaletteView} from '../view/h-palette.js';
 
 interface Config {
@@ -97,7 +96,7 @@ export class HPaletteController
 
 	private onKeyDown_(ev: KeyboardEvent): void {
 		const step = getStepForKey(
-			getKeyScaleForColor(false),
+			1, //getKeyScaleForColor(false),
 			getHorizontalStepKeys(ev),
 		);
 		if (step === 0) {
@@ -114,7 +113,7 @@ export class HPaletteController
 
 	private onKeyUp_(ev: KeyboardEvent): void {
 		const step = getStepForKey(
-			getKeyScaleForColor(false),
+			1, //getKeyScaleForColor(false),
 			getHorizontalStepKeys(ev),
 		);
 		if (step === 0) {

@@ -17,7 +17,12 @@ import {
 } from '@tweakpane/core';
 
 import {ColorPlus} from '../model/color-plus.js';
-import {ColorType, getRangeForChannel} from '../model/shared.js';
+import {
+	ColorType,
+	denormalizeCoord,
+	getRangeForChannel,
+	normalizeCoord,
+} from '../model/shared.js';
 // import {getKeyScaleForColor} from '../util.js';
 import {ColorTextsMode, ColorTextsView} from '../view/color-texts.js';
 
@@ -28,7 +33,7 @@ interface Config {
 }
 
 function createFormatter(type: ColorType): Formatter<number> {
-	return createNumberFormatter(type === 'float' ? 2 : 0);
+	return createNumberFormatter(type === 'float' ? 3 : 0);
 }
 
 type ColorMode = 'hsl' | 'hsv' | 'srgb';
@@ -38,6 +43,10 @@ function createConstraint(
 	type: ColorType,
 	index: number,
 ): Constraint<number> {
+	if (type === 'float') {
+		return new DefiniteRangeConstraint({min: 0, max: 1});
+	}
+
 	const [min, max] = getRangeForChannel(mode, index);
 
 	const coefficient = type === 'int' && mode === 'srgb' ? 255 : 1;
@@ -63,7 +72,7 @@ function createComponentController(
 		parser: config.parser,
 		props: ValueMap.fromObject({
 			formatter: createFormatter(config.colorType),
-			keyScale: 1, //, getKeyScaleForColor(false),
+			keyScale: config.colorType === 'float' ? 0.01 : 1, // TODO revisit was getKeyScaleForColor(false)
 			pointerScale: config.colorType === 'float' ? 0.01 : 1,
 		}),
 		value: createValue(0, {
@@ -94,24 +103,47 @@ function createComponentControllers(
 			primary: config.value,
 			// Like the 'view'
 			secondary: c.value,
-			// From ColorPlus model to number in text field
+			// From HSV ColorPlus model to number in text field
+			// Note edge case for int srgb representation
 			forward(p) {
-				const coefficient =
-					config.colorType === 'int' && config.colorMode === 'srgb' ? 255 : 1;
-				return (p.getAll(config.colorMode)[i] ?? 0) * coefficient;
+				const hsvRawValue = p.getAll()[i] ?? 0;
+				let rawValue = p.getAll(config.colorMode)[i] ?? 0;
+
+				// Edge case to prevent wrapping 360 to 0 in HSL
+				if (i === 0 && config.colorMode === 'hsl' && hsvRawValue === 360) {
+					rawValue = 360;
+				}
+
+				return config.colorType === 'float'
+					? normalizeCoord(config.colorMode, i, rawValue)
+					: rawValue * (config.colorMode === 'srgb' ? 255 : 1);
 			},
 			// Number in text field to ColorPlus model
 			backward(p, s) {
 				// Number / channel to ColorPlus object
+				// Note edge case for int srgb representation
 				// TODO setChannel method on ColorPlus?
-				const comps = p.getAll(config.colorMode);
-				const coefficient =
-					config.colorType === 'int' && config.colorMode === 'srgb' ? 255 : 1;
+				const newColor = p.clone();
+				const comps = newColor.getAll(config.colorMode);
 
-				comps[i] = s / coefficient;
-				p.setAll(comps, config.colorMode);
+				comps[i] =
+					config.colorType === 'float'
+						? denormalizeCoord(config.colorMode, i, s ?? 0)
+						: (s ?? 0) / (config.colorMode === 'srgb' ? 255 : 1);
+				newColor.setAll(comps, config.colorMode);
 
-				return p.clone();
+				// Edge case to prevent wrapping 360 to 0 in HSL
+				if (
+					i === 0 &&
+					config.colorMode === 'hsl' &&
+					((config.colorType === 'int' && s === 360) ||
+						(config.colorType === 'float' && s === 1))
+				) {
+					console.log('edge');
+					newColor.set('h', 360);
+				}
+
+				return newColor;
 			},
 		});
 		return c;
@@ -149,7 +181,7 @@ function createHexController(
 				return serialized;
 			},
 		}),
-		value: createValue(ColorPlus.create('0x000000')!),
+		value: createValue(config.value.rawValue.clone()),
 		viewProps: config.viewProps,
 	});
 

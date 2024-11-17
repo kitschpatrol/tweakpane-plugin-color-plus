@@ -1,3 +1,4 @@
+import {constrainRange, mapRange} from '@tweakpane/core';
 import {
 	A98RGB,
 	type ColorConstructor as ColorJsConstructor,
@@ -31,7 +32,7 @@ ColorJsColorSpace.register(HSL); // hsl(), hsla(), hsl,
 ColorJsColorSpace.register(HSV); // --hsv (Tweakpane legacy)
 ColorJsColorSpace.register(HWB); // hwb(), hwb
 ColorJsColorSpace.register(Lab_D65); // lab-d65
-ColorJsColorSpace.register(Lab); // lab(), lab, lab-d50
+ColorJsColorSpace.register(Lab); // lab(), lab, (implicitly lab-d50, but the 'lab-d50' string is not supported)
 ColorJsColorSpace.register(LCH); // lch(), lch
 ColorJsColorSpace.register(OKLab); // oklab(), oklab
 ColorJsColorSpace.register(OKLCH); // oklch(), oklch
@@ -370,4 +371,42 @@ export function colorPlusObjectsAreEqual(
 		a.coords[1] === b.coords[1] &&
 		a.coords[2] === b.coords[2]
 	);
+}
+
+export function denormalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
+	coords[0] = denormalizeCoord(space, 0, coords[0]);
+	coords[1] = denormalizeCoord(space, 1, coords[1]);
+	coords[2] = denormalizeCoord(space, 2, coords[2]);
+	return coords;
+}
+
+export function normalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
+	coords[0] = normalizeCoord(space, 0, coords[0]);
+	coords[1] = normalizeCoord(space, 1, coords[1]);
+	coords[2] = normalizeCoord(space, 2, coords[2]);
+	return coords;
+}
+
+export function normalizeCoord(
+	space: ColorSpaceId,
+	channelIndex: number,
+	value: number | null,
+): number | null {
+	if (value === null) {
+		return null;
+	}
+	const range = getRangeForChannel(space, channelIndex);
+	return mapRange(value, range[0], range[1], 0, 1);
+}
+
+export function denormalizeCoord(
+	space: ColorSpaceId,
+	channelIndex: number,
+	value: number | null,
+): number | null {
+	if (value === null) {
+		return null;
+	}
+	const range = getRangeForChannel(space, channelIndex);
+	return mapRange(value, 0, 1, range[0], range[1]);
 }
