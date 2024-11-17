@@ -12,7 +12,7 @@
 		"url": "https://ericmika.com"
 	},
 	"license": "MIT",
-	"packageManager": "pnpm@9.12.3",
+	"packageManager": "pnpm@9.13.2",
 	"engines": {
 		"node": ">=18.0.0",
 		"pnpm": ">=9.0.0"
@@ -62,7 +62,7 @@
 		"tweakpane": "^4.0.0"
 	},
 	"dependencies": {
-		"@tweakpane/core": "^2.0.0"
+		"@tweakpane/core": "^2.0.5"
 	},
 	"devDependencies": {
 		"@rollup/plugin-alias": "^5.1.1",
@@ -71,29 +71,29 @@
 		"@rollup/plugin-terser": "^0.4.4",
 		"@rollup/plugin-typescript": "^12.1.1",
 		"@types/node": "^22.9.0",
-		"@typescript-eslint/eslint-plugin": "^8.13.0",
-		"@typescript-eslint/parser": "^8.13.0",
+		"@typescript-eslint/eslint-plugin": "^8.14.0",
+		"@typescript-eslint/parser": "^8.14.0",
 		"autoprefixer": "^10.4.20",
 		"bumpp": "^9.8.1",
 		"colorjs.io": "link:../color.js",
-		"eslint": "^9.14.0",
+		"eslint": "^9.15.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-prettier": "^5.2.1",
 		"eslint-plugin-simple-import-sort": "^12.1.1",
 		"mdat": "^0.8.1",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0",
-		"postcss": "^8.4.47",
+		"postcss": "^8.4.49",
 		"prettier": "^3.3.3",
 		"prettier-plugin-pkg": "^0.18.1",
 		"pretty-bytes": "^6.1.1",
 		"rimraf": "^6.0.1",
-		"rollup": "^4.25.0",
+		"rollup": "^4.27.2",
 		"rollup-plugin-cleanup": "^3.2.1",
-		"sass": "^1.80.6",
+		"sass": "^1.81.0",
 		"typescript": "^5.6.3",
-		"vite": "^5.4.10",
-		"vitest": "^2.1.4",
+		"vite": "^5.4.11",
+		"vitest": "^2.1.5",
 		"zod": "^3.23.8"
 	},
 	"publishConfig": {
