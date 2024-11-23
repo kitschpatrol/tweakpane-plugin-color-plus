@@ -23,9 +23,9 @@
 
 The Color Plus plugin adds support for many additional color string formats to the [Tweakpane](https://tweakpane.github.io/docs/) UI library. The plugin supports all [CSS Color Module Level 4](https://drafts.csswg.org/css-color-4/) formats and color spaces, and also adds support for controlling colors stored as tuples / arrays, and additional color object formats.
 
-Currently, the plugin (almost) exactly matches the functionality, options, and control presentation of Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color) — just with support for additional parameter formats and types. This means it should work as a drop-in replacement in existing projects that need to support additional color formats, but it also means that the UI is not necessarily well-suited to manipulating the wide-gamut color spaces that can now be represented.
+Currently, the plugin (almost) exactly matches the functionality, options, and control presentation of Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color) — just with support for additional parameter formats and types. This means it should work as a drop-in replacement in existing projects that need to support additional color formats, but it also means that the UI is not necessarily well-suited to manipulating the wide-gamut colors that can now be represented.
 
-Color notations for wide-gamut color like [`oklch`](https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl) are supported, **but the current implementation clips all out-of-gamut colors to the `sRGB` color space**. Future versions of the plugin might implement additional UI and options for working with wide color in P3 or Rec. 2020.
+Color notations for preceptually-uniform color spaces like [`oklch`](https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl) are supported, **but the current implementation clips all out-of-gamut colors to the `sRGB` color space**. Future versions of the plugin might implement additional UI and options tailored working with wide color targeting the P3 or Rec. 2020 gamuts.
 
 The plugin was developed specifically for the benefit of [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui) and [Tweakpane CSS](https://github.com/kitschpatrol/tweakpane-css), but there's no reason it can't be used in vanilla Tweakpane projects as well.
 
@@ -37,7 +37,7 @@ The plugin requires [Tweakpane 4](https://www.npmjs.com/package/tweakpane).
 
 If you're using the ["lite" build](#the-lite-plugin-build) of the plugin without a bundler, you'll need to provide the [@tweakpane/core](https://www.npmjs.com/package/@tweakpane/core) library as well.
 
-If you're using Svelte as a front-end library, you might want to take a look at [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui), which wraps this plugin (and much more functionality) in a Svelte-friendly set of components.
+If you're using Svelte as a front-end library, you might want to take a look at [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui), which wraps Tweakpane in a set of Svelte-friendly components, and will soon add support for the Color Plus plugin.
 
 ### Installation
 
@@ -63,19 +63,21 @@ Import and register the plugin. For now, you must explicitly add `view: 'color-p
 
 ```js
 import {Pane} from 'tweakpane';
-import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
+import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus';
 
 const params = {
-	view: 'color-plus',
-	// color: 'oklch(65% 0.26 357deg)',
-	// color: 'rgb(50%, 100%, 20%)',
-	// color: 'rgb(255, 0, 128)',
-	color: 'hsl(255, 0, 100)',
+	color: 'oklch(65% 0.26 357deg)',
 };
 
 const pane = new Pane();
+
 pane.registerPlugin(TweakpanePluginColorPlus);
+
 pane.addBinding(params, 'color', {view: 'color-plus'});
+
+pane.on('change', () => {
+	document.documentElement.style.backgroundColor = params['color'];
+});
 ```
 
 <!-- /code -->
@@ -108,6 +110,10 @@ pane.addBinding(params, 'color', {view: 'color-plus'});
 			const pane = new Pane();
 			pane.registerPlugin(TweakpanePluginColorPlus);
 			pane.addBinding(params, 'color', {view: 'color-plus'});
+
+			pane.on('change', () => {
+				document.documentElement.style.backgroundColor = params['color'];
+			});
 		</script>
 	</head>
 	<body></body>
@@ -118,9 +124,11 @@ pane.addBinding(params, 'color', {view: 'color-plus'});
 
 ### Features
 
-### Supported color formats and spaces
+### Color spaces
 
 As a trade-off between bundle size and flexibility, Color Plus only supports "predefined" color spaces included in the CSS 4 color specification, with the sole addition of `HSV` for parity with the built-in Tweakpane color input implementaiton.
+
+Supported gamuts:
 
 Supported spaces / color functions include:
 
@@ -135,11 +143,13 @@ Supported spaces / color functions include:
 - Oklch
 - Display P3
 - ProPhoto RGB
-- Rec. 2020
-- sRGB
+- [Rec. 2020](https://en.wikipedia.org/wiki/Rec._2020)
+- [sRGB](https://en.wikipedia.org/wiki/SRGB)
 - sRGB Linear
 - XYZ D50
 - XYZ D65 _(a.k.a. XYZ)_
+
+### Color formats
 
 #### String formats
 
@@ -159,29 +169,39 @@ Supported spaces / color functions include:
 
 This plugin is largely derrived from the core Tweakpane color input implementation — it (mostly) reuses the views and controllers, and only really makes significant changes to the model, where it replaces Tweakpane's bespoke color handling functionality with an implementation provided by the [Color.js](https://colorjs.io/) library.
 
-#### Pre-release Color.js 0.6 dependency
+#### Pre-release Color.js version 0.6 dependency
 
-The current 0.5.x release of the Color.js library is missing some core features on which this plugin depends — specifically access to format-related metadata from the string parsing process. There's no official pre-release version of the upcoming 0.6 version, so `tweakpane-plugin-color-plus` (somewhat precariously) bundles a bespoke local preview build of the Color.js main branch. I'll try to keep this reasonably up to date, and will migrate the plugin's Color.js dependency to the official 0.6 release once it's available.
+The current 0.5.x release of the [Color.js](https://colorjs.io/) library is missing some core features on which this plugin depends — specifically access to format-related metadata from the string parsing process.
 
-The plugin uses Color.js' [procedural API](https://colorjs.io/docs/procedural) in the interest of performance and bundle size optimization.
+There's no official pre-release version of the upcoming 0.6 version, so `tweakpane-plugin-color-plus` (somewhat precariously) bundles a bespoke local preview build of the Color.js main branch. I'll try to keep this reasonably up to date, and will migrate the plugin's Color.js dependency to the official 0.6 release once it's available.
+
+The plugin uses Color.js' [procedural API](https://colorjs.io/docs/procedural) and [only imports a subset of available color spaces](#color-spaces) in the interest of performance and bundle size optimization.
 
 #### Other JavaScript color libraries
 
-[Culori](https://culorijs.org/) is another very promising JavaScript color handling library that I explored while developing the plugin — it's great. But, at least as far as I could tell, it does not preserve per-coordinate formatting details during parsing (e.g. whether a color coordinate was represented as a percentage vs. number vs. angle), so you can potentially end up with subtly formatting differences betweeen the strings a user provided and what's serialized.
+I investigated a number of libraries to back the internal color representation in the Color Plus plugin. [Color.js](https://colorjs.io/) was selected because it offers "round trip" continuity of per-coordinate string formatting style, but there are a number of great libraries out there with robust support for modern color spaces and formats. Here are a few:
+
+- [ChromaJS](https://gka.github.io/chroma.js/) by [Gregor Aisch](https://driven-by-data.net/)
+
+- [Culori](https://culorijs.org/) by [Dan Burzo](http://danburzo.ro/)
+
+- [thi.ng/color](https://github.com/thi-ng/umbrella/tree/develop/packages/color#readme) by [Karsten Schmidt](https://mastodon.thi.ng/@toxi)
 
 #### The "lite" plugin build
 
 The [Rollup](https://rollupjs.org) configuration provided in the [Tweakpane plugin template](https://github.com/tweakpane/plugin-template) does not externalize [`@tweakpane/core`](https://github.com/cocopon/tweakpane/tree/main/packages/core) as a production dependency.
 
-Instead, it gets built into the single-file plugin artifact, which is typically what's published to NPM and imported by plugin consumers. This makes it easy to import as an ES module from a URL, but means that larger projects importing multiple Tweakpane plugins end up with duplicate copies of the `@tweakpane/core` code, adding about \~100 Kb to the final minified build for each plugin after the first.
+Instead, it gets built into the single-file plugin artifact, which is typically what's published to NPM and imported by plugin consumers. This makes it easy to import as an ES module from a URL, but means that larger projects importing multiple Tweakpane plugins end up with duplicate bundled copies of the `@tweakpane/core` code, adding about \~100 Kb to the final minified build for each plugin after the first.
 
-`tweakpane-plugin-color-plus` includes a "lite" version of the build, which is configured to externalize the `@tweakpane/core` dependency, allowing build tools like [vite](https://vitejs.dev) to share a single instance of the `@tweakpane/core` code across multiple plugins. You can import it like this:
+To avoid this size penalty, `tweakpane-plugin-color-plus` includes a "lite" version of the build, which is configured to externalize the `@tweakpane/core` dependency. This allows multiple Tweakpane plugins to share a single instance of the `@tweakpane/core`. (I also maintain [forks of a number of popular Tweakpane plugins](https://kitschpatrol.com/svelte-tweakpane-ui/docs/plugins#bundled-plugins) with the `@tweakpane/core` dependency externalization optimization.)
+
+You can import the "lite" version like this:
 
 ```ts
 import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
 ```
 
-If you're not using a bundler, direct ESM imports from URLs can still work by defining the `@tweakpane/core` dependency in an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap).
+If you're not using a bundler, direct ESM imports from URLs can still work by defining the `@tweakpane/core` dependency manually in an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap).
 
 Or, if you're just using a single plugin and would rather not think about it, a "classic" all-inclusive build is exported by default to match the typical behavior of a Tweakpane plugin:
 
@@ -195,15 +215,10 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 186.4 kB | 47.6 kB | 38.9 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 76.1 kB  | 25.6 kB | 22 kB   |
+| tweakpane-plugin-color-plus.min.js      | 188 kB   | 48.1 kB | 39.6 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 77.7 kB  | 26.1 kB | 22.4 kB |
 
 <!-- /size-table -->
-
-| File                                    | Original | Gzip    | Brotli  |
-| --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 186.2 kB | 47.5 kB | 38.9 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 75.9 kB  | 25.5 kB | 21.9 kB |
 
 ## Maintainers
 
