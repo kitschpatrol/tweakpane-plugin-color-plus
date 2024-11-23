@@ -175,7 +175,7 @@ function createHexController(
 				const serialized = value.serialize({
 					format: 'hex',
 					alpha: false,
-					space: value.space,
+					space: 'srgb',
 					type: 'string',
 				});
 				return serialized;
