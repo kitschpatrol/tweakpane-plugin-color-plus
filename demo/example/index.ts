@@ -50,6 +50,15 @@ const params: Record<string, unknown> = {
 		green: 0,
 		b: 102,
 	},
+	objectHsl: {h: 336, s: 100, l: 50},
+	objectHsv: {h: 336, s: 100, v: 100},
+	objectHwb: {h: 336, w: 0, b: 0},
+	objectLab: {l: 55, a: 83, b: 21},
+	objectLch: {
+		l: 55,
+		c: 85,
+		h: 14,
+	},
 
 	// tuples
 	tuple: [255, 0, 102],
@@ -77,60 +86,63 @@ const params: Record<string, unknown> = {
 	colorOklch: 'color(oklch 60% 0.24 13deg)',
 
 	// hsl() strings (Tweakpane built-in)
-	funcHsl: 'hsl(336, 100%, 50%)',
-	funcHslModern: 'hsl(336 100% 50%)',
-	funcHslAlphaModern: 'hsl(336 100% 50% / 0.5)',
-	funcHslNoUnits: 'hsl(336, 100, 50)',
+	funcHslLegacy: 'hsl(336, 100%, 50%)',
+	funcHsl: 'hsl(336 100% 50%)',
+	funcHslAlpha: 'hsl(336 100% 50% / 0.5)',
+	funcHslLegacyNoUnits: 'hsl(336, 100, 50)',
 	funcHslFancyUnits: 'hsl(336deg 100% 50% / .5)',
 
 	// hsla() strings (Tweakpane built-in)
-	funcHsla: 'hsla(336, 100%, 50%, 0.5)',
-	funcHslaModern: 'hsla(336 100% 50% / 0.5)',
-	funcHslaNoUnits: 'hsla(336, 100, 50, 0.5)',
-	funcHslaFancyUnits: 'hsla(336deg, 100%, 50%, 0.5)',
+	funcHslaLegacy: 'hsla(336, 100%, 50%, 0.5)',
+	funcHsla: 'hsla(336 100% 50% / 0.5)',
+	funcHslaLegacyNoUnits: 'hsla(336, 100, 50, 0.5)',
+	funcHslaFancyUnits: 'hsla(336deg 100% 50% / 0.5)',
 
 	// hwb() strings
-	funcHwb: 'hwb(336, 0%, 0%)',
-	funcHwbModern: 'hwb(336 0% 0%)',
-	funcHwbAlphaModern: 'hwb(336 0% 0% / 0.5)',
+	funcHwbLegacy: 'hwb(336, 0%, 0%)',
+	funcHwb: 'hwb(336 0% 0%)',
+	funcHwbAlpha: 'hwb(336 0% 0% / 0.5)',
 
 	// lab() strings
-	funcLab: 'lab(55%, 83, 21)',
-	funcLabModern: 'lab(55% 83 21)',
-	funcLabAlphaModern: 'lab(55% 83 21 / 0.5)',
+	funcLabLegacy: 'lab(55%, 83, 21)',
+	funcLab: 'lab(55% 83 21)',
+	funcLabAlpha: 'lab(55% 83 21 / 0.5)',
 
 	// lch() strings
-	funcLch: 'lch(55, 85, 14)',
-	funcLchModern: 'lch(55 85 14)',
-	funcLchAlphaModern: 'lch(55 85 14 / 0.5)',
+	funcLchLegacy: 'lch(55, 85, 14)',
+	funcLch: 'lch(55 85 14)',
+	funcLchAlpha: 'lch(55 85 14 / 0.5)',
 
 	// oklab() strings
-	funcOklab: 'oklab(0.64, 0.25, 0.05)',
-	funcOklabModern: 'oklab(0.64 0.25 0.05)',
-	funcOklabAlphaModern: 'oklab(0.64 0.25 0.05 / 0.5)',
+	funcOklabLegacy: 'oklab(0.64, 0.25, 0.05)',
+	funcOklab: 'oklab(0.64 0.25 0.05)',
+	funcOklabAlpha: 'oklab(0.64 0.25 0.05 / 0.5)',
 
 	// oklch() strings
-	funcOklch: 'oklch(60%, 0.26, 11deg)',
-	funcOklchModern: 'oklch(60% 0.26 11deg)',
-	funcOklchAlphaModern: 'oklch(60% 0.26 11deg / 0.5)',
+	funcOklchLegacy: 'oklch(60%, 0.26, 11deg)',
+	funcOklch: 'oklch(60% 0.26 11deg)',
+	funcOklchAlpha: 'oklch(60% 0.26 11deg / 0.5)',
 
 	// rgb() strings (Tweakpane built-in)
-	funcRgb: 'rgb(255, 0, 102)',
-	funcRgbModern: 'rgb(255 0 102)',
-	funcRgbAlphaModern: 'rgb(255 0 102 / 0.5)',
+	funcRgbLegacy: 'rgb(255, 0, 102)',
+	funcRgb: 'rgb(255 0 102)',
+	funcRgbAlpha: 'rgb(255 0 102 / 0.5)',
 
 	// rgba() strings (Tweakpane built-in)
-	funcRgba: 'rgba(255, 0, 102, 0.5)',
-	funcRgbaModern: 'rgba(255 0 102 / 0.5)',
+	funcRgbaLegacy: 'rgba(255, 0, 102, 0.5)',
+	funcRgba: 'rgba(255 0 102 / 0.5)',
 };
 
 // Some params are completely unsupported by Tweakpane's built-in input handlers, and must be explicitly ignored
 const ignoredParams = [
-	'oklchString',
-	'oklchStringAlpha',
 	'objectLongKeys',
 	'objectLongKeysAlpha',
 	'objectMixedKeys',
+	'objectHsl',
+	'objectHsv',
+	'objectHwb',
+	'objectLab',
+	'objectLch',
 	'tuple',
 	'tupleAlpha',
 	'tupleFloat',
@@ -152,28 +164,29 @@ const ignoredParams = [
 	'colorLch',
 	'colorOklab',
 	'colorOklch',
-	'funcHslModern',
-	'funcHslAlphaModern',
+	'funcHsl',
+	'funcHslAlpha',
 	'funcHslFancyUnits',
-	'funcHslaModern',
+	'funcHsla',
+	'funcHslaFancyUnits',
+	'funcHwbLegacy',
 	'funcHwb',
-	'funcHwbModern',
-	'funcHwbAlphaModern',
+	'funcHwbAlpha',
+	'funcLabLegacy',
 	'funcLab',
-	'funcLabModern',
-	'funcLabAlphaModern',
+	'funcLabAlpha',
+	'funcLchLegacy',
 	'funcLch',
-	'funcLchModern',
-	'funcLchAlphaModern',
+	'funcLchAlpha',
+	'funcOklabLegacy',
 	'funcOklab',
-	'funcOklabModern',
-	'funcOklabAlphaModern',
+	'funcOklabAlpha',
+	'funcOklchLegacy',
 	'funcOklch',
-	'funcOklchModern',
-	'funcOklchAlphaModern',
-	'funcRgbModern',
-	'funcRgbAlphaModern',
-	'funcRgbaModern',
+	'funcOklchAlpha',
+	'funcRgb',
+	'funcRgbAlpha',
+	'funcRgba',
 ];
 
 // Some params need extra properties
