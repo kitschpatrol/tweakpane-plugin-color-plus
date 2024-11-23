@@ -11,6 +11,9 @@ import {
 	ObjectFormat,
 } from './shared';
 
+/**
+ * Interpret object keys graciously... allow for mixes of long and short single-letter keys, plus likely aliases
+ */
 const colorObjectKeys: Array<{
 	spaceId: ColorSpaceId;
 	channels: Array<{internalKey: string; externalKeys: string[]}>;
@@ -29,11 +32,11 @@ const colorObjectKeys: Array<{
 			},
 			{
 				internalKey: 's',
-				externalKeys: ['s', 'saturation'],
+				externalKeys: ['s', 'sat', 'saturation'],
 			},
 			{
 				internalKey: 'l',
-				externalKeys: ['l', 'lightness'],
+				externalKeys: ['l', 'light', 'lightness'],
 			},
 			{
 				internalKey: 'alpha',
@@ -56,11 +59,11 @@ const colorObjectKeys: Array<{
 			},
 			{
 				internalKey: 's',
-				externalKeys: ['s', 'saturation'],
+				externalKeys: ['s', 'sat', 'saturation'],
 			},
 			{
 				internalKey: 'v',
-				externalKeys: ['b', 'brightness', 'v', 'value'],
+				externalKeys: ['b', 'bright', 'brightness', 'v', 'val', 'value'],
 			},
 			{
 				internalKey: 'alpha',
@@ -82,11 +85,11 @@ const colorObjectKeys: Array<{
 			},
 			{
 				internalKey: 'w',
-				externalKeys: ['w', 'whiteness'],
+				externalKeys: ['w', 'white', 'whiteness'],
 			},
 			{
 				internalKey: 'b',
-				externalKeys: ['b', 'blackness'],
+				externalKeys: ['b', 'black', 'blackness'],
 			},
 			{
 				internalKey: 'alpha',
@@ -98,13 +101,14 @@ const colorObjectKeys: Array<{
 	 * [Lab](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/lab)
 	 * Int example: `{l: 25, a: -50, b: 100, a: .25}`
 	 * Float example: `{l: .25, a: .3, b: .9, a: .25}`
+	 * Note 'a' key for alpha is prohibited due to conflict with 'a' for the 'a' in Lab
 	 */
 	{
 		spaceId: 'lab',
 		channels: [
 			{
 				internalKey: 'l',
-				externalKeys: ['l', 'lightness'],
+				externalKeys: ['l', 'light', 'lightness'],
 			},
 			{
 				internalKey: 'a',
@@ -116,7 +120,7 @@ const colorObjectKeys: Array<{
 			},
 			{
 				internalKey: 'alpha',
-				externalKeys: ['a', 'alpha', 'opacity'],
+				externalKeys: ['alpha', 'opacity'],
 			},
 		],
 	},
@@ -130,7 +134,7 @@ const colorObjectKeys: Array<{
 		channels: [
 			{
 				internalKey: 'l',
-				externalKeys: ['l', 'lightness'],
+				externalKeys: ['l', 'light', 'lightness'],
 			},
 			{
 				internalKey: 'c',
