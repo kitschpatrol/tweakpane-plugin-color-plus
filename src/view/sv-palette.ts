@@ -6,6 +6,8 @@ import {
 	View,
 	ViewProps,
 } from '@tweakpane/core';
+// Work directly with the colorjs.io library to optimize the per-pixel loop
+import {type ColorConstructor, getAll, set} from 'colorjs.io/fn';
 
 import {ColorPlus} from '../model/color-plus';
 
@@ -59,6 +61,7 @@ export class SvPaletteView implements View {
 		const [h, s, v] = this.value.rawValue.getAll('hsv');
 		const left = mapRange(s ?? 0, 0, 100, 0, 100);
 		this.markerElem_.style.left = `${left}%`;
+
 		const top = mapRange(v ?? 0, 0, 100, 100, 0);
 		this.markerElem_.style.top = `${top}%`;
 
@@ -70,8 +73,12 @@ export class SvPaletteView implements View {
 			}
 
 			this.lastHue = h ?? 0;
-			const c = this.value.rawValue.clone();
-			c.convert('hsv');
+			const c: ColorConstructor = {
+				alpha: undefined,
+				coords: [this.lastHue, s, v],
+				spaceId: 'hsv',
+			};
+
 			const width = this.canvasElement.width;
 			const height = this.canvasElement.height;
 			const imgData = ctx.getImageData(0, 0, width, height);
@@ -79,11 +86,11 @@ export class SvPaletteView implements View {
 
 			// TODO faster way?
 			for (let iy = 0; iy < height; iy++) {
-				c.set('v', mapRange(iy, 0, height, 100, 0));
+				set(c, 'v', mapRange(iy, 0, height, 100, 0));
 
 				for (let ix = 0; ix < width; ix++) {
-					c.set('s', mapRange(ix, 0, width, 0, 100));
-					const [r, g, b] = c.getAll('srgb');
+					set(c, 's', mapRange(ix, 0, width, 0, 100));
+					const [r, g, b] = getAll(c, 'srgb');
 
 					const i = (iy * width + ix) * 4;
 					data[i] = (r ?? 0) * 255;
