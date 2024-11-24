@@ -133,9 +133,11 @@ export class ColorPlus {
 	public getAll(space?: ColorSpaceId): Coords {
 		// TODO constrain space
 		// TODO check for 'none' values?
-		return colorJsGetAll(this.color, {
-			space,
-		});
+
+		// We handle conversion manually because of achromatic color rounding issues
+		return colorJsGetAll(
+			convert(this.color, space ?? this.color.spaceId) ?? this.color,
+		);
 
 		// TODO copy check?
 		// return colorJsGetAll(

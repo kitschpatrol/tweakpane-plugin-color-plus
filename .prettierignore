@@ -1,12 +1,9 @@
-# Git Ignore
-# Also used by CSpell and Stylelint
+# Prettier Ignore
+# Does not inherit from .gitignore
 
 # @kitschpatrol/repo-config boilerplate
 .astro/
 .DS_Store
-.env
-.env.*
-!.env.example
 .svelte-kit/
 {tmp,temp}/
 **/*.min.js
@@ -18,5 +15,9 @@ dist/
 node_modules/
 vendor/
 .parcel-cache/
+
+# @kitschpatrol/prettier-config boilerplate
+pnpm-lock.yaml
+package-lock.json
 
 # Customizations

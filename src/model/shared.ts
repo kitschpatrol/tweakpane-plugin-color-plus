@@ -1,4 +1,4 @@
-import {constrainRange, mapRange} from '@tweakpane/core';
+import {mapRange} from '@tweakpane/core';
 import {
 	A98RGB,
 	type ColorConstructor as ColorJsConstructor,
@@ -9,6 +9,7 @@ import {
 	Lab,
 	Lab_D65,
 	LCH,
+	Okhsv,
 	OKLab,
 	OKLCH,
 	P3,
@@ -36,6 +37,7 @@ ColorJsColorSpace.register(Lab); // lab(), lab, (implicitly lab-d50, but the 'la
 ColorJsColorSpace.register(LCH); // lch(), lch
 ColorJsColorSpace.register(OKLab); // oklab(), oklab
 ColorJsColorSpace.register(OKLCH); // oklch(), oklch
+ColorJsColorSpace.register(Okhsv); // ?
 ColorJsColorSpace.register(P3); // display-p3
 ColorJsColorSpace.register(ProPhoto); // prophoto-rgb
 ColorJsColorSpace.register(REC_2020); // rec2020
@@ -59,6 +61,7 @@ export type ColorSpaceId =
 	| 'lch'
 	| 'oklab'
 	| 'oklch'
+	| 'okhsv' // used for internal representation, TODO add to docs and examples
 	| 'prophoto-rgb'
 	| 'rec2020'
 	| 'srgb-linear'
@@ -135,12 +138,28 @@ export type ColorFormat = {
 export function convert(
 	color: ColorPlusObject,
 	spaceId: ColorSpaceId,
+	lastHue: number = 0,
 ): ColorPlusObject | undefined {
 	if (color.spaceId === spaceId) {
 		return undefined;
 	}
 
-	return getColorPlusObjectFromColorJsObject(colorJsConvert(color, spaceId));
+	const converted = colorJsConvert(color, spaceId);
+
+	// Special case to handle rounding errors inducing hue-lucinations in achromatic colors
+	if (spaceId === 'hsl' || spaceId === 'hsv') {
+		if (converted.coords[1] !== null && Math.abs(converted.coords[1]) < 1e-8) {
+			converted.coords[0] = lastHue;
+			converted.coords[1] = 0;
+		}
+
+		if (converted.coords[2] !== null && Math.abs(converted.coords[2]) < 1e-8) {
+			converted.coords[0] = lastHue;
+			converted.coords[2] = 0;
+		}
+	}
+
+	return getColorPlusObjectFromColorJsObject(converted);
 }
 
 export function setFromColorPlusObject(

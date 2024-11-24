@@ -1,5 +1,5 @@
-# Git Ignore
-# Also used by CSpell and Stylelint
+# ESLint Ignore
+# Does not inherit from .gitignore
 
 # @kitschpatrol/repo-config boilerplate
 .astro/
@@ -15,8 +15,12 @@ bower_components/
 build/
 coverage/
 dist/
+env.d.ts
 node_modules/
 vendor/
 .parcel-cache/
+
+# @kitschpatrol/eslint-config boilerplate
+/patches/
 
 # Customizations

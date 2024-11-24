@@ -1,0 +1,25 @@
+{
+	"$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+	"import": "@kitschpatrol/cspell-config",
+	"ignorePaths": [],
+	"words": [
+		"aisch",
+		"blueyellow",
+		"burzo",
+		"colorjs",
+		"colp",
+		"colsw",
+		"coltxt",
+		"culori",
+		"greenred",
+		"gregor",
+		"huelucinations",
+		"importmap",
+		"okhsv",
+		"onwarn",
+		"prophoto",
+		"resol",
+		"tmpv",
+		"verou"
+	]
+}
