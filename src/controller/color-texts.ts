@@ -106,11 +106,15 @@ function createComponentControllers(
 			// From HSV ColorPlus model to number in text field
 			// Note edge case for int srgb representation
 			forward(p) {
-				const hsvRawValue = p.getAll()[i] ?? 0;
 				let rawValue = p.getAll(config.colorMode)[i] ?? 0;
 
 				// Edge case to prevent wrapping 360 to 0 in HSL
-				if (i === 0 && config.colorMode === 'hsl' && hsvRawValue === 360) {
+				// TODO revisit
+				if (
+					i === 0 &&
+					config.colorMode === 'hsl' &&
+					(p.get('h', 'hsv') ?? 0) === 360
+				) {
 					rawValue = 360;
 				}
 
@@ -165,7 +169,7 @@ function createHexController(
 				return null;
 			}
 			parsedColor.convert('hsv');
-			parsedColor.toGamut('srgb');
+			// parsedColor.toGamut('srgb');
 			parsedColor.alpha = config.value.rawValue.alpha;
 
 			return parsedColor;

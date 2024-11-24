@@ -113,9 +113,14 @@ export class SvPaletteController
 			return;
 		}
 
+		// TODO constrain
+
 		const c = this.value.rawValue;
 		const [h, s, v] = c.getAll('hsv');
-		c.setAll([h, (s ?? 0) + ds, (v ?? 0) + dv], 'hsv');
+		c.setAll(
+			[h, s === null ? null : s + ds, v === null ? null : v + dv],
+			'hsv',
+		);
 		this.value.setRawValue(c.clone(), {
 			forceEmit: false,
 			last: false,
@@ -129,6 +134,8 @@ export class SvPaletteController
 		if (ds === 0 && dv === 0) {
 			return;
 		}
+
+		// TODO constrain
 
 		this.value.setRawValue(this.value.rawValue, {
 			forceEmit: true,
