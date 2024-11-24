@@ -19,9 +19,6 @@ interface Config {
 	viewProps: ViewProps;
 }
 
-/**
- * @hidden
- */
 export class ColorPickerView implements View {
 	public readonly element: HTMLElement;
 	private readonly alphaViews_: {

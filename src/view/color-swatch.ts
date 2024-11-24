@@ -9,9 +9,6 @@ interface Config {
 
 const cn = ClassName('colsw');
 
-/**
- * @hidden
- */
 export class ColorSwatchView implements View {
 	public readonly element: HTMLElement;
 	public readonly value: Value<ColorPlus>;

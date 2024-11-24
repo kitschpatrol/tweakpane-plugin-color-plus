@@ -8,9 +8,6 @@ interface Config {
 	viewProps: ViewProps;
 }
 
-/**
- * @hidden
- */
 export class ColorSwatchController
 	implements ValueController<ColorPlus, ColorSwatchView>
 {

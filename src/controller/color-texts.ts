@@ -211,9 +211,6 @@ function isColorMode(mode: ColorTextsMode): mode is ColorMode {
 
 type ComponentValueController = ValueController<unknown, InputView>;
 
-/**
- * @hidden
- */
 export class ColorTextsController
 	implements ValueController<ColorPlus, ColorTextsView>
 {

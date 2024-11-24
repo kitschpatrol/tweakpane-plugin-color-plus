@@ -18,9 +18,6 @@ interface Config {
 	viewProps: ViewProps;
 }
 
-/**
- * @hidden
- */
 export class APaletteController
 	implements ValueController<ColorPlus, APaletteView>
 {

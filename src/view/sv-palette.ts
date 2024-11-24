@@ -20,9 +20,6 @@ interface Config {
 
 const CANVAS_RESOL = 64;
 
-/**
- * @hidden
- */
 export class SvPaletteView implements View {
 	public readonly element: HTMLElement;
 	public readonly value: Value<ColorPlus>;

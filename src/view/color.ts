@@ -14,9 +14,6 @@ interface Config {
 
 const cn = ClassName('col');
 
-/**
- * @hidden
- */
 export class ColorView implements View {
 	public readonly element: HTMLElement;
 	public readonly swatchElement: HTMLElement;

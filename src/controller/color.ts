@@ -33,9 +33,6 @@ interface Config {
 	viewProps: ViewProps;
 }
 
-/**
- * @hidden
- */
 export class ColorController implements ValueController<ColorPlus, ColorView> {
 	public readonly value: Value<ColorPlus>;
 	public readonly view: ColorView;

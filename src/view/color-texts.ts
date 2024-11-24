@@ -40,9 +40,6 @@ function createModeSelectElement(doc: Document): HTMLSelectElement {
 	return selectElem;
 }
 
-/**
- * @hidden
- */
 export class ColorTextsView implements View {
 	public readonly element: HTMLElement;
 	private readonly modeElem_: HTMLSelectElement;

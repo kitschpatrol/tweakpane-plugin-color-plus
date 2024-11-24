@@ -26,9 +26,6 @@ interface Config {
 	supportsAlpha: boolean;
 }
 
-/**
- * @hidden
- */
 export class ColorPickerController
 	implements ValueController<ColorPlus, ColorPickerView>
 {

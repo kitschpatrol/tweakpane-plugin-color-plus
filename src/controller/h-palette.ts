@@ -20,9 +20,6 @@ interface Config {
 	viewProps: ViewProps;
 }
 
-/**
- * @hidden
- */
 export class HPaletteController
 	implements ValueController<ColorPlus, HPaletteView>
 {

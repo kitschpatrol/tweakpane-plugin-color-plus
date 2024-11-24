@@ -9,9 +9,6 @@ interface Config {
 	viewProps: ViewProps;
 }
 
-/**
- * @hidden
- */
 export class HPaletteView implements View {
 	public readonly element: HTMLElement;
 	public readonly value: Value<ColorPlus>;

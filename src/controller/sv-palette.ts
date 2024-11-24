@@ -22,9 +22,6 @@ interface Config {
 	viewProps: ViewProps;
 }
 
-/**
- * @hidden
- */
 export class SvPaletteController
 	implements ValueController<ColorPlus, SvPaletteView>
 {
