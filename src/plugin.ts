@@ -88,10 +88,10 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 		color.convert('hsv');
 		// color.toGamut('srgb');
 
-		const initalValue = color.toValue(format, validParams.color?.alpha);
+		const initialValue = color.toValue(format, validParams.color?.alpha);
 
 		return {
-			initialValue: initalValue,
+			initialValue: initialValue,
 			params: {
 				// Set some defaults...
 				color: {
@@ -103,7 +103,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				picker: parsedParams.picker,
 				readonly: parsedParams.readonly,
 				// Internal
-				lastExternalValue: initalValue,
+				lastExternalValue: initialValue,
 				lastInternalValue: color,
 				format: format,
 			},

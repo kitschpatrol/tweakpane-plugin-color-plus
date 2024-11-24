@@ -26,7 +26,7 @@ import {
 
 // Loading color spaces that are either:
 // - In the CSS 4 spec
-// - Availe in CSS function() style colors
+// - Available in CSS function() style colors
 // - Used by Tweakpane's original implementation
 ColorJsColorSpace.register(A98RGB); // a98-rgb
 ColorJsColorSpace.register(HSL); // hsl(), hsla(), hsl,
@@ -146,7 +146,7 @@ export function convert(
 
 	const converted = colorJsConvert(color, spaceId);
 
-	// Special case to handle rounding errors inducing hue-lucinations in achromatic colors
+	// Special case to handle rounding errors inducing huelucinations in achromatic colors
 	if (spaceId === 'hsl' || spaceId === 'hsv') {
 		if (converted.coords[1] !== null && Math.abs(converted.coords[1]) < 1e-8) {
 			converted.coords[0] = lastHue;
@@ -339,7 +339,7 @@ export function isStringFormat(
 }
 
 /**
- *  Some formats are parseable by Color.js but not serializable, e.g. keyword
+ *  Some formats are parsable by Color.js but not serializable, e.g. keyword
  *  formats like `'blue'`. We can accept these after the format is initialized,
  *  but not as an initial color value.
  * @param format

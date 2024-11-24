@@ -80,18 +80,18 @@ export class ColorPickerView implements View {
 	}
 
 	get allFocusableElements(): HTMLElement[] {
-		const elems = [
+		const elements = [
 			this.svPaletteView_.element,
 			this.hPaletteView_.element,
 			this.textsView_.modeSelectElement,
 			...this.textsView_.inputViews.map((v) => v.inputElement),
 		];
 		if (this.alphaViews_) {
-			elems.push(
+			elements.push(
 				this.alphaViews_.palette.element,
 				this.alphaViews_.text.inputElement,
 			);
 		}
-		return elems;
+		return elements;
 	}
 }
