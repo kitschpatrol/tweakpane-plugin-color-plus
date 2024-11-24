@@ -1,85 +1,79 @@
-import {mapRange} from '@tweakpane/core';
+import { mapRange } from '@tweakpane/core'
 import {
 	type ColorConstructor as ColorJsConstructor,
 	parse as colorJsParse,
 	serialize as colorJsSerialize,
-} from 'colorjs.io/fn';
-
+} from 'colorjs.io/fn'
 import {
-	ColorFormat,
-	ColorPlusObject,
+	type ColorFormat,
+	type ColorPlusObject,
 	convert,
-	CoordFormat,
+	type CoordFormat,
 	copyColorPlusObject,
 	expandHex,
 	getColorPlusObjectFromColorJsObject,
 	hexHasAlpha,
 	isStringFormat,
-	StringFormat,
+	type StringFormat,
 	toDecimalPrecision,
-} from './shared';
+} from './shared'
 
 export function stringToColor(
 	value: unknown,
-): {color: ColorPlusObject; format: ColorFormat} | undefined {
+): { color: ColorPlusObject; format: ColorFormat } | undefined {
 	if (typeof value !== 'string') {
-		return undefined;
+		return undefined
 	}
 
-	const normalizedValue = legacyTweakpaneColorStringNormalization(value);
+	const normalizedValue = legacyTweakpaneColorStringNormalization(value)
 
-	const stringFormatInOut: Partial<StringFormat> = {};
-	let colorJs: ColorJsConstructor | undefined;
+	const stringFormatInOut: Partial<StringFormat> = {}
+	let colorJs: ColorJsConstructor | undefined
 
 	try {
 		colorJs = colorJsParse(normalizedValue, {
 			// @ts-expect-error - Type definition inconsistencies
 			parseMeta: stringFormatInOut,
-		});
+		})
 	} catch {
-		return undefined;
+		return undefined
 	}
 
 	// Is stringFormatInOut ever actually undefined?
 	const stringFormat =
-		stringFormatInOut.formatId === undefined
-			? undefined
-			: (stringFormatInOut as StringFormat);
+		stringFormatInOut.formatId === undefined ? undefined : (stringFormatInOut as StringFormat)
 
 	if (stringFormat === undefined) {
-		console.warn('Could not parse meta');
-		return undefined;
+		console.warn('Could not parse meta')
+		return undefined
 	}
 
-	if (
-		stringFormat.format.alpha !== undefined &&
-		typeof stringFormat.format.alpha !== 'boolean'
-	) {
-		console.warn('Alpha metadata is not boolean?');
-		return undefined;
+	if (stringFormat.format.alpha !== undefined && typeof stringFormat.format.alpha !== 'boolean') {
+		console.warn('Alpha metadata is not boolean?')
+		return undefined
 	}
 
 	const hasAlpha =
-		stringFormat.format.alpha ||
+		stringFormat.format.alpha === true ||
 		stringFormat.alphaType !== undefined ||
-		(stringFormat.formatId === 'hex' && hexHasAlpha(normalizedValue));
+		(stringFormat.formatId === 'hex' && hexHasAlpha(normalizedValue))
 
-	// if (!validateColorJsObject(colorJs)) {
+	// If (!validateColorJsObject(colorJs)) {
 	// 	console.warn("Can't handle null coords");
 	// 	return undefined;
 	// }
 
-	const color = getColorPlusObjectFromColorJsObject(colorJs);
+	const color = getColorPlusObjectFromColorJsObject(colorJs)
 
 	return {
+		color,
 		format: {
-			type: 'string',
-			format: stringFormat,
 			alpha: hasAlpha,
+			format: stringFormat,
 			space: color.spaceId,
+			type: 'string',
 		},
-		color: color,
-	};
+	}
 }
 
 export function colorToString(
@@ -88,10 +82,11 @@ export function colorToString(
 	alphaOverride?: boolean,
 ): string | undefined {
 	if (!isStringFormat(format.format)) {
-		console.warn('Invalid format type');
-		return undefined;
+		console.warn('Invalid format type')
+		return undefined
 	}
-	const stringFormat = format.format;
+
+	const stringFormat = format.format
 
 	// Converts if needed, rounds if needed, always returns a copy
 	const convertedColor = toDecimalPrecisionForFormat(
@@ -102,7 +97,7 @@ export function colorToString(
 			percentage: 1,
 			unit: 2,
 		},
-	);
+	)
 
 	// TODO Special case for keyword formats
 	// if (format.format.formatId === 'keyword') {
@@ -113,11 +108,6 @@ export function colorToString(
 	// See color.js/src/serialize.js
 
 	const result = colorJsSerialize(convertedColor, {
-		// inGamut: true, // TODO expose? Overrides inGamut in the format object
-		commas: stringFormat.commas,
-
-		// Precision is total significant digits, not decimal places, so stick with default?
-		precision: 3,
 		// @ts-expect-error - Type definition inconsistencies
 		alpha:
 			// Erase alpha from output
@@ -131,28 +121,33 @@ export function colorToString(
 							include: alphaOverride ?? format.alpha,
 							type: stringFormat.alphaType,
 						},
+
+		// InGamut: true, // TODO expose? Overrides inGamut in the format object
+		commas: stringFormat.commas,
 		// @ts-expect-error - Type definition inconsistencies
 		coords: stringFormat.types,
 		// @ts-expect-error - Type definition inconsistencies
 		format: stringFormat.format,
-	});
+		// Precision is total significant digits, not decimal places, so stick with default?
+		precision: 3,
+	})
 
 	// Special case for hex to avoid #0f0-style truncation
 	if (stringFormat.formatId === 'hex') {
-		return expandHex(result);
-	} else {
-		return result;
+		return expandHex(result)
 	}
+
+	return result
 }
 
 type DecimalPrecision = {
-	/** Percentage values */
-	percentage: number;
 	/** Values between 0 and a larger integer, like 0-255 */
-	number: number;
+	number: number
+	/** Percentage values */
+	percentage: number
 	/** Values between 0-1 */
-	unit: number;
-};
+	unit: number
+}
 
 /**
  * Special case for RGB integer-style values
@@ -168,14 +163,13 @@ function toDecimalPrecisionForFormat(
 	if (
 		!(
 			(stringFormat.formatId === 'rgb' || stringFormat.formatId === 'rgba') &&
-			stringFormat.types !== undefined &&
-			stringFormat.types.every((value) => value === '<number>[0,255]')
+			stringFormat.types?.every((value) => value === '<number>[0,255]')
 		)
 	) {
-		return color;
+		return color
 	}
 
-	const newColor = copyColorPlusObject(color);
+	const newColor = copyColorPlusObject(color)
 
 	if (stringFormat.types !== undefined) {
 		for (let index = 0; index < newColor.coords.length; index++) {
@@ -184,7 +178,7 @@ function toDecimalPrecisionForFormat(
 				stringFormat,
 				index,
 				precision,
-			);
+			)
 		}
 	}
 
@@ -195,88 +189,64 @@ function toDecimalPrecisionForFormat(
 	// newColor.alpha = toDecimalPrecision(newColor.alpha, 2);
 	// // }
 
-	return newColor;
+	return newColor
 }
 
-function getCoordFormat(
-	format: StringFormat,
-	index: number,
-): CoordFormat | undefined {
+function getCoordFormat(format: StringFormat, index: number): CoordFormat | undefined {
 	if (!Array.isArray(format.format.coords[index])) {
-		return format.format.coords[index];
+		return format.format.coords[index]
 	}
 
-	const targetFormat = format.types[index].split('[')[0];
-	return format.format.coords[index].find(
-		(coordFormat) => coordFormat.type === targetFormat,
-	);
+	const targetFormat = format.types[index].split('[')[0]
+	return format.format.coords[index].find((coordFormat) => coordFormat.type === targetFormat)
 }
 
 function toDecimalPrecisionForCoordinate(
-	value: number | null,
+	value: null | number,
 	format: StringFormat,
 	index: number,
 	precision: DecimalPrecision,
-): number | null {
+): null | number {
 	if (value === null) {
-		return value;
+		return value
 	}
 
-	const coordFormat = getCoordFormat(format, index)!;
+	const coordFormat = getCoordFormat(format, index)!
 	if (coordFormat === undefined) {
-		console.error('coordFormat undefined');
-		return value;
+		console.error('coordFormat undefined')
+		return value
 	}
-	const {range, coordRange} = coordFormat;
+
+	const { coordRange, range } = coordFormat
 	if (range === undefined && coordRange === undefined) {
 		// This happens with XYZ and other unbounded spaces... I think
 		// just treat it as a unit value
-		return toDecimalPrecision(value, precision.unit);
+		return toDecimalPrecision(value, precision.unit)
 	}
 
-	const isPercentage = format.types[index] === '<percentage>';
+	const isPercentage = format.types[index] === '<percentage>'
 
 	if (range === undefined && coordRange !== undefined) {
 		// Since range is undefined, there must be no difference between the formatted
 		// value and internal value, so round directly
 		return toDecimalPrecision(
 			value,
-			isPercentage
-				? precision.percentage
-				: coordRange[1] > 1
-					? precision.number
-					: precision.unit,
-		);
+			isPercentage ? precision.percentage : coordRange[1] > 1 ? precision.number : precision.unit,
+		)
 	}
 
 	if (range !== undefined && coordRange !== undefined) {
 		// Convert to range, then round, then convert back to coord range
-		const mappedValue = mapRange(
-			value,
-			coordRange[0],
-			coordRange[1],
-			range[0],
-			range[1],
-		);
+		const mappedValue = mapRange(value, coordRange[0], coordRange[1], range[0], range[1])
 		const roundedMappedValue = toDecimalPrecision(
 			mappedValue,
-			isPercentage
-				? precision.percentage
-				: range[1] > 1
-					? precision.number
-					: precision.unit,
-		);
-		return mapRange(
-			roundedMappedValue,
-			range[0],
-			range[1],
-			coordRange[0],
-			coordRange[1],
-		);
+			isPercentage ? precision.percentage : range[1] > 1 ? precision.number : precision.unit,
+		)
+		return mapRange(roundedMappedValue, range[0], range[1], coordRange[0], coordRange[1])
 	}
 
-	console.warn('Unreachable reached?');
-	return value;
+	console.warn('Unreachable reached?')
+	return value
 }
 
 /**
@@ -287,22 +257,23 @@ function toDecimalPrecisionForCoordinate(
  * @returns
  */
 function legacyTweakpaneColorStringNormalization(value: string): string {
-	const trimmed = value.trim();
+	const trimmed = value.trim()
 	if (trimmed.startsWith('0x')) {
-		return trimmed.replace('0x', '#');
-	}
-	if (trimmed.startsWith('hsl')) {
-		let index = 0;
-		return trimmed.replace(/([\d.]+%?)/g, (match) => {
-			if (index === 0 || match.includes('%') || index > 2) {
-				index += 1;
-				return match;
-			} else {
-				index += 1;
-				return `${match}%`;
-			}
-		});
+		return trimmed.replace('0x', '#')
 	}
 
-	return trimmed;
+	if (trimmed.startsWith('hsl')) {
+		let index = 0
+		return trimmed.replaceAll(/([\d.]+%?)/g, (match) => {
+			if (index === 0 || match.includes('%') || index > 2) {
+				index += 1
+				return match
+			}
+
+			index += 1
+			return `${match}%`
+		})
+	}
+
+	return trimmed
 }

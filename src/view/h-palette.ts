@@ -1,60 +1,61 @@
-import {ClassName, mapRange, Value, View, ViewProps} from '@tweakpane/core';
+import { ClassName, mapRange, type Value, type View, type ViewProps } from '@tweakpane/core'
+import { type ColorPlus } from '../model/color-plus.js'
 
-import {ColorPlus} from '../model/color-plus.js';
+const cn = ClassName('hpl')
 
-const cn = ClassName('hpl');
-
-interface Config {
-	value: Value<ColorPlus>;
-	viewProps: ViewProps;
+type Config = {
+	value: Value<ColorPlus>
+	viewProps: ViewProps
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export class HPaletteView implements View {
-	public readonly element: HTMLElement;
-	public readonly value: Value<ColorPlus>;
-	private readonly markerElem_: HTMLDivElement;
+	private readonly markerElement: HTMLDivElement
+	public readonly element: HTMLElement
+	public readonly value: Value<ColorPlus>
 
 	constructor(doc: Document, config: Config) {
-		this.onValueChange_ = this.onValueChange_.bind(this);
+		this.onValueChange = this.onValueChange.bind(this)
 
-		this.value = config.value;
-		this.value.emitter.on('change', this.onValueChange_);
+		this.value = config.value
 
-		this.element = doc.createElement('div');
-		this.element.classList.add(cn());
-		config.viewProps.bindClassModifiers(this.element);
-		config.viewProps.bindTabIndex(this.element);
+		this.value.emitter.on('change', this.onValueChange)
 
-		const colorElem = doc.createElement('div');
-		colorElem.classList.add(cn('c'));
-		this.element.appendChild(colorElem);
+		this.element = doc.createElement('div')
+		this.element.classList.add(cn())
+		config.viewProps.bindClassModifiers(this.element)
+		config.viewProps.bindTabIndex(this.element)
 
-		const markerElem = doc.createElement('div');
-		markerElem.classList.add(cn('m'));
-		this.element.appendChild(markerElem);
-		this.markerElem_ = markerElem;
+		const colorElement = doc.createElement('div')
+		colorElement.classList.add(cn('c'))
+		this.element.append(colorElement)
 
-		this.update_();
+		const markerElementContainer = doc.createElement('div')
+		markerElementContainer.classList.add(cn('m'))
+		this.element.append(markerElementContainer)
+		this.markerElement = markerElementContainer
+
+		this.update()
 	}
 
-	private update_(): void {
-		const backgroundColor = this.value.rawValue.clone();
-		const h = backgroundColor.get('h', 'hsv');
-		backgroundColor.setAll([h, 100, 100], 'hsv');
-		backgroundColor.alpha = 1;
+	private onValueChange(): void {
+		this.update()
+	}
 
-		this.markerElem_.style.backgroundColor = backgroundColor.serialize({
+	private update(): void {
+		const backgroundColor = this.value.rawValue.clone()
+		const h = backgroundColor.get('h', 'hsv')
+		backgroundColor.setAll([h, 100, 100], 'hsv')
+		backgroundColor.alpha = 1
+
+		this.markerElement.style.backgroundColor = backgroundColor.serialize({
+			alpha: false,
 			format: 'rgba',
 			space: 'srgb',
 			type: 'string',
-			alpha: false,
-		});
+		})
 
-		const left = mapRange(h, 0, 360, 0, 100);
-		this.markerElem_.style.left = `${left}%`;
-	}
-
-	private onValueChange_(): void {
-		this.update_();
+		const left = mapRange(h, 0, 360, 0, 100)
+		this.markerElement.style.left = `${left}%`
 	}
 }

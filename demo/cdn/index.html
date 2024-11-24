@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
 	<head>
+		<meta charset="UTF-8" />
+		<title>Tweakpane Plugin Color Plus Demo</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<script type="importmap">
 			{
 				"imports": {
@@ -11,20 +14,20 @@
 			}
 		</script>
 		<script type="module">
-			import {Pane} from 'tweakpane';
-			import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
+			import { Pane } from 'tweakpane'
+			import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
 
 			const params = {
 				color: 'oklch(65% 0.26 357deg)',
-			};
+			}
 
-			const pane = new Pane();
-			pane.registerPlugin(TweakpanePluginColorPlus);
-			pane.addBinding(params, 'color', {view: 'color-plus'});
+			const pane = new Pane()
+			pane.registerPlugin(TweakpanePluginColorPlus)
+			pane.addBinding(params, 'color', { view: 'color-plus' })
 
 			pane.on('change', () => {
-				document.documentElement.style.backgroundColor = params['color'];
-			});
+				document.documentElement.style.backgroundColor = params.color
+			})
 		</script>
 	</head>
 	<body></body>

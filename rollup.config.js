@@ -1,32 +1,32 @@
 /* eslint-env node */
 
-import Alias from '@rollup/plugin-alias';
-import {nodeResolve} from '@rollup/plugin-node-resolve';
-import Replace from '@rollup/plugin-replace';
-import terser from '@rollup/plugin-terser';
-import Typescript from '@rollup/plugin-typescript';
-import Autoprefixer from 'autoprefixer';
-import fs from 'fs';
-import Postcss from 'postcss';
-import Cleanup from 'rollup-plugin-cleanup';
-import * as Sass from 'sass';
+import Alias from '@rollup/plugin-alias'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import Replace from '@rollup/plugin-replace'
+import terser from '@rollup/plugin-terser'
+import Typescript from '@rollup/plugin-typescript'
+import Autoprefixer from 'autoprefixer'
+import fs from 'node:fs'
+import Postcss from 'postcss'
+import Cleanup from 'rollup-plugin-cleanup'
+import * as Sass from 'sass'
 
-const Package = JSON.parse(fs.readFileSync('./package.json'));
+const Package = JSON.parse(fs.readFileSync('./package.json'))
 
 async function compileCss() {
 	const css = Sass.renderSync({
 		file: 'src/sass/plugin.scss',
 		outputStyle: 'compressed',
-	}).css.toString();
+	}).css.toString()
 
 	const result = await Postcss([Autoprefixer]).process(css, {
 		from: undefined,
-	});
-	return result.css.replace(/'/g, "\\'").trim();
+	})
+	return result.css.replaceAll("'", String.raw`\'`).trim()
 }
 
 function getPlugins(css, shouldMinify, includeAlias = true) {
-	const plugins = [];
+	const plugins = []
 
 	if (includeAlias) {
 		plugins.push(
@@ -38,7 +38,7 @@ function getPlugins(css, shouldMinify, includeAlias = true) {
 					},
 				],
 			}),
-		);
+		)
 	}
 
 	plugins.push(
@@ -50,10 +50,10 @@ function getPlugins(css, shouldMinify, includeAlias = true) {
 			__css__: css,
 			preventAssignment: false,
 		}),
-	);
+	)
 
 	if (shouldMinify) {
-		plugins.push(terser());
+		plugins.push(terser())
 	}
 
 	return [
@@ -62,64 +62,66 @@ function getPlugins(css, shouldMinify, includeAlias = true) {
 		Cleanup({
 			comments: 'none',
 		}),
-	];
+	]
 }
 
-function getDistName(packageName) {
+function getDistributionName(packageName) {
 	// `@tweakpane/plugin-foobar` -> `tweakpane-plugin-foobar`
 	// `tweakpane-plugin-foobar`  -> `tweakpane-plugin-foobar`
 	return packageName
-		.split(/[@/-]/)
-		.reduce((comps, comp) => (comp !== '' ? [...comps, comp] : comps), [])
-		.join('-');
+		.split(/[/@-]/)
+		.reduce((comps, comp) => (comp === '' ? comps : [...comps, comp]), [])
+		.join('-')
 }
 
+// eslint-disable-next-line unicorn/no-anonymous-default-export
 export default async () => {
-	const production = process.env.BUILD === 'production';
-	const postfix = production ? '.min' : '';
+	const production = process.env.BUILD === 'production'
+	const postfix = production ? '.min' : ''
 
-	const distName = getDistName(Package.name);
-	const css = await compileCss();
+	const distributionName = getDistributionName(Package.name)
+	const css = await compileCss()
 
 	// Configuration shared between both builds
 	const baseConfig = {
 		input: 'src/index.ts',
-		plugins: getPlugins(css, production),
 		// Suppress `Circular dependency` warning
 		onwarn(warning, rollupWarn) {
 			if (warning.code === 'CIRCULAR_DEPENDENCY') {
-				return;
+				return
 			}
-			rollupWarn(warning);
+
+			rollupWarn(warning)
 		},
-	};
+		plugins: getPlugins(css, production),
+	}
 
 	// Build with external @tweakpane/core
 	const externalBuild = {
 		...baseConfig,
 		external: ['tweakpane', '@tweakpane/core'],
 		output: {
-			file: `dist/${distName}.lite${postfix}.js`,
+			file: `dist/${distributionName}.lite${postfix}.js`,
 			format: 'esm',
 			globals: {
 				tweakpane: 'Tweakpane',
 			},
 		},
-	};
+	}
 
 	// Build with bundled @tweakpane/core
 	const bundledBuild = {
 		...baseConfig,
 		external: ['tweakpane'],
 		output: {
-			file: `dist/${distName}${postfix}.js`,
+			file: `dist/${distributionName}${postfix}.js`,
 			format: 'esm',
 			globals: {
 				tweakpane: 'Tweakpane',
 			},
 		},
 		plugins: getPlugins(css, production, false), // Don't include alias plugin for bundled build
-	};
+	}
 
-	return [externalBuild, bundledBuild];
-};
+	return [externalBuild, bundledBuild]
+}

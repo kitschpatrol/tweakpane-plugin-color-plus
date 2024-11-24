@@ -53,7 +53,7 @@ npm install tweakpane-plugin-color-plus
 <script src="https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus"></script>
 ```
 
-## Usage
+### Usage
 
 Import and register the plugin. For now, you must explicitly add `view: 'color-plus'` to the `addBinding` options object. (Tweakpane's built-in color input handling will take precedence in the absence of the `view` option.)
 
@@ -62,22 +62,22 @@ Import and register the plugin. For now, you must explicitly add `view: 'color-p
 <!-- code { file: "./demo/npm/index.js" } -->
 
 ```js
-import {Pane} from 'tweakpane';
-import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus';
+import { Pane } from 'tweakpane'
+import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus'
 
 const params = {
-	color: 'oklch(65% 0.26 357deg)',
-};
+  color: 'oklch(65% 0.26 357deg)',
+}
 
-const pane = new Pane();
+const pane = new Pane()
 
-pane.registerPlugin(TweakpanePluginColorPlus);
+pane.registerPlugin(TweakpanePluginColorPlus)
 
-pane.addBinding(params, 'color', {view: 'color-plus'});
+pane.addBinding(params, 'color', { view: 'color-plus' })
 
 pane.on('change', () => {
-	document.documentElement.style.backgroundColor = params['color'];
-});
+  document.documentElement.style.backgroundColor = params.color
+})
 ```
 
 <!-- /code -->
@@ -89,34 +89,34 @@ pane.on('change', () => {
 ```html
 <!doctype html>
 <html lang="en">
-	<head>
-		<script type="importmap">
-			{
-				"imports": {
-					"tweakpane": "https://cdn.jsdelivr.net/npm/tweakpane",
-					"@tweakpane/core": "https://cdn.jsdelivr.net/npm/@tweakpane/core",
-					"tweakpane-plugin-profiler": "https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus/lite"
-				}
-			}
-		</script>
-		<script type="module">
-			import {Pane} from 'tweakpane';
-			import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
+  <head>
+    <script type="importmap">
+      {
+        "imports": {
+          "tweakpane": "https://cdn.jsdelivr.net/npm/tweakpane",
+          "@tweakpane/core": "https://cdn.jsdelivr.net/npm/@tweakpane/core",
+          "tweakpane-plugin-profiler": "https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus/lite"
+        }
+      }
+    </script>
+    <script type="module">
+      import { Pane } from 'tweakpane'
+      import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
 
-			const params = {
-				color: 'oklch(65% 0.26 357deg)',
-			};
+      const params = {
+        color: 'oklch(65% 0.26 357deg)',
+      }
 
-			const pane = new Pane();
-			pane.registerPlugin(TweakpanePluginColorPlus);
-			pane.addBinding(params, 'color', {view: 'color-plus'});
+      const pane = new Pane()
+      pane.registerPlugin(TweakpanePluginColorPlus)
+      pane.addBinding(params, 'color', { view: 'color-plus' })
 
-			pane.on('change', () => {
-				document.documentElement.style.backgroundColor = params['color'];
-			});
-		</script>
-	</head>
-	<body></body>
+      pane.on('change', () => {
+        document.documentElement.style.backgroundColor = params.color
+      })
+    </script>
+  </head>
+  <body></body>
 </html>
 ```
 
@@ -198,7 +198,7 @@ To avoid this size penalty, `tweakpane-plugin-color-plus` includes a "lite" vers
 You can import the "lite" version like this:
 
 ```ts
-import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
+import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
 ```
 
 If you're not using a bundler, direct ESM imports from URLs can still work by defining the `@tweakpane/core` dependency manually in an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap).
@@ -206,7 +206,7 @@ If you're not using a bundler, direct ESM imports from URLs can still work by de
 Or, if you're just using a single plugin and would rather not think about it, a "classic" all-inclusive build is exported by default to match the typical behavior of a Tweakpane plugin:
 
 ```ts
-import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus';
+import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus'
 ```
 
 You can see the effect of externalization on the minified library's size below:
@@ -215,8 +215,8 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 188 kB   | 48.1 kB | 39.6 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 77.7 kB  | 26.1 kB | 22.4 kB |
+| tweakpane-plugin-color-plus.min.js      | 193.3 kB | 50.4 kB | 41.8 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 83 kB    | 28.3 kB | 24.3 kB |
 
 <!-- /size-table -->
 

@@ -1,8 +1,10 @@
-import {mapRange} from '@tweakpane/core';
+import { mapRange } from '@tweakpane/core'
 import {
 	A98RGB,
-	type ColorConstructor as ColorJsConstructor,
 	ColorSpace as ColorJsColorSpace,
+	type ColorConstructor as ColorJsConstructor,
+	to as colorJsConvert,
+	serialize as colorJsSerialize,
 	HSL,
 	HSV,
 	HWB,
@@ -16,37 +18,35 @@ import {
 	type PlainColorObject as PlainColorJsObject,
 	ProPhoto,
 	REC_2020,
-	serialize as colorJsSerialize,
 	sRGB,
 	sRGB_Linear,
-	to as colorJsConvert,
 	XYZ_D50,
 	XYZ_D65,
-} from 'colorjs.io/fn';
+} from 'colorjs.io/fn'
 
 // Loading color spaces that are either:
 // - In the CSS 4 spec
 // - Available in CSS function() style colors
 // - Used by Tweakpane's original implementation
-ColorJsColorSpace.register(A98RGB); // a98-rgb
-ColorJsColorSpace.register(HSL); // hsl(), hsla(), hsl,
-ColorJsColorSpace.register(HSV); // --hsv (Tweakpane legacy)
-ColorJsColorSpace.register(HWB); // hwb(), hwb
-ColorJsColorSpace.register(Lab_D65); // lab-d65
-ColorJsColorSpace.register(Lab); // lab(), lab, (implicitly lab-d50, but the 'lab-d50' string is not supported)
-ColorJsColorSpace.register(LCH); // lch(), lch
-ColorJsColorSpace.register(OKLab); // oklab(), oklab
-ColorJsColorSpace.register(OKLCH); // oklch(), oklch
-ColorJsColorSpace.register(Okhsv); // ?
-ColorJsColorSpace.register(P3); // display-p3
-ColorJsColorSpace.register(ProPhoto); // prophoto-rgb
-ColorJsColorSpace.register(REC_2020); // rec2020
-ColorJsColorSpace.register(sRGB_Linear); // srgb-linear
-ColorJsColorSpace.register(sRGB); // rgb(), rgba(), srgb
-ColorJsColorSpace.register(XYZ_D50); // xyz-d50
-ColorJsColorSpace.register(XYZ_D65); // xyz, xyz-d65
+ColorJsColorSpace.register(A98RGB) // A98-rgb
+ColorJsColorSpace.register(HSL) // Hsl(), hsla(), hsl,
+ColorJsColorSpace.register(HSV) // --hsv (Tweakpane legacy)
+ColorJsColorSpace.register(HWB) // Hwb(), hwb
+ColorJsColorSpace.register(Lab_D65) // Lab-d65
+ColorJsColorSpace.register(Lab) // Lab(), lab, (implicitly lab-d50, but the 'lab-d50' string is not supported)
+ColorJsColorSpace.register(LCH) // Lch(), lch
+ColorJsColorSpace.register(OKLab) // Oklab(), oklab
+ColorJsColorSpace.register(OKLCH) // Oklch(), oklch
+ColorJsColorSpace.register(Okhsv) // ?
+ColorJsColorSpace.register(P3) // Display-p3
+ColorJsColorSpace.register(ProPhoto) // Prophoto-rgb
+ColorJsColorSpace.register(REC_2020) // Rec2020
+ColorJsColorSpace.register(sRGB_Linear) // Srgb-linear
+ColorJsColorSpace.register(sRGB) // Rgb(), rgba(), srgb
+ColorJsColorSpace.register(XYZ_D50) // Xyz-d50
+ColorJsColorSpace.register(XYZ_D65) // Xyz, xyz-d65
 
-export type ColorType = 'int' | 'float';
+export type ColorType = 'float' | 'int'
 
 // Subset of the full list to match what's supported / imported
 export type ColorSpaceId =
@@ -55,125 +55,124 @@ export type ColorSpaceId =
 	| 'hsl'
 	| 'hsv'
 	| 'hwb'
+	| 'lab'
 	| 'lab-d50'
 	| 'lab-d65'
-	| 'lab'
 	| 'lch'
+	| 'okhsv' // Used for internal representation, TODO add to docs and examples
 	| 'oklab'
 	| 'oklch'
-	| 'okhsv' // used for internal representation, TODO add to docs and examples
 	| 'prophoto-rgb'
 	| 'rec2020'
-	| 'srgb-linear'
 	| 'srgb'
+	| 'srgb-linear'
+	| 'xyz'
 	| 'xyz-d50'
 	| 'xyz-d65'
-	| 'xyz';
 
-export type Coords = [number | null, number | null, number | null];
+export type Coords = [null | number, null | number, null | number]
 
 export type ColorPlusObject = {
-	spaceId: ColorSpaceId;
-	coords: Coords;
-	alpha: number;
-};
+	alpha: number
+	coords: Coords
+	spaceId: ColorSpaceId
+}
 
 // Not yet correctly typed in colorjs.io
 // This is a partial type based on inspection of the code
 export type CoordFormat = {
-	type: string;
-	range: [number, number] | undefined;
-	coordRange: [number, number] | undefined;
-};
+	coordRange: [number, number] | undefined
+	range: [number, number] | undefined
+	type: string
+}
 
 // Not yet correctly typed in colorjs.io
 // This is a partial type based on inspection of the code
 export type StringFormat = {
-	alphaType?: string;
-	commas?: boolean;
-	types: string[];
-	formatId: string;
+	alphaType?: string
+	commas?: boolean
 	format: {
-		type: string;
-		name: string;
-		alpha?: boolean | Record<string, unknown> | string;
-		spaceCoords: undefined | number[];
-		coords: (CoordFormat | CoordFormat[])[];
-		toGamut?: boolean;
-		// test: [Function: test],
+		alpha?: boolean | Record<string, unknown> | string
+		coords: Array<CoordFormat | CoordFormat[]>
+		name: string
+		spaceCoords: number[] | undefined
+		toGamut?: boolean
+		type: string
+		// Test: [Function: test],
 		// parse: [Function: parse],
 		// serialize: [Function: serialize],
 		// space: [RGBColorSpace],
 		// [Symbol(instance)]: [Circular *1]
-	};
-};
+	}
+	formatId: string
+	types: string[]
+}
 
 export type ObjectFormat = {
-	colorType: ColorType;
-	coordKeys: [string, string, string];
-	alphaKey: string | undefined; // undefined if no alpha
-};
+	alphaKey: string | undefined // Undefined if no alpha
+	colorType: ColorType
+	coordKeys: [string, string, string]
+}
 
 export type TupleFormat = {
 	// Space is always SRGB
-	colorType: ColorType;
-};
+	colorType: ColorType
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export type NumberFormat = {
 	// Nothing for now, but important to distinguish from non-object format strings
-};
+}
 
 /**
  * Original format and alpha state inferred from the user-provided value
  */
 export type ColorFormat = {
-	type: 'number' | 'string' | 'object' | 'tuple';
-	format: StringFormat | ObjectFormat | TupleFormat | NumberFormat | string;
-	alpha: boolean;
-	space: ColorSpaceId;
-};
+	alpha: boolean
+	format: NumberFormat | ObjectFormat | string | StringFormat | TupleFormat
+	space: ColorSpaceId
+	type: 'number' | 'object' | 'string' | 'tuple'
+}
 
 /** Returns a new color object only if conversion is needed, otherwise returns undefined */
 export function convert(
 	color: ColorPlusObject,
 	spaceId: ColorSpaceId,
-	lastHue: number = 0,
+	lastHue = 0,
 ): ColorPlusObject | undefined {
 	if (color.spaceId === spaceId) {
-		return undefined;
+		return undefined
 	}
 
-	const converted = colorJsConvert(color, spaceId);
+	const converted = colorJsConvert(color, spaceId)
 
 	// Special case to handle rounding errors inducing huelucinations in achromatic colors
 	if (spaceId === 'hsl' || spaceId === 'hsv') {
 		if (converted.coords[1] !== null && Math.abs(converted.coords[1]) < 1e-8) {
-			converted.coords[0] = lastHue;
-			converted.coords[1] = 0;
+			converted.coords[0] = lastHue
+			converted.coords[1] = 0
 		}
 
 		if (converted.coords[2] !== null && Math.abs(converted.coords[2]) < 1e-8) {
-			converted.coords[0] = lastHue;
-			converted.coords[2] = 0;
+			converted.coords[0] = lastHue
+			converted.coords[2] = 0
 		}
 	}
 
-	return getColorPlusObjectFromColorJsObject(converted);
+	return getColorPlusObjectFromColorJsObject(converted)
 }
 
 export function setFromColorPlusObject(
 	targetColor: ColorPlusObject,
 	sourceColor: ColorPlusObject,
 ): void {
-	targetColor.spaceId = sourceColor.spaceId;
-	targetColor.coords[0] = sourceColor.coords[0];
-	targetColor.coords[1] = sourceColor.coords[1];
-	targetColor.coords[2] = sourceColor.coords[2];
-	targetColor.alpha = sourceColor.alpha;
+	targetColor.spaceId = sourceColor.spaceId
+	targetColor.coords[0] = sourceColor.coords[0]
+	targetColor.coords[1] = sourceColor.coords[1]
+	targetColor.coords[2] = sourceColor.coords[2]
+	targetColor.alpha = sourceColor.alpha
 }
 
-// export function validateColorJsObject(
+// Export function validateColorJsObject(
 // 	colorJs: PlainColorJsObject | ColorJsConstructor,
 // ): boolean {
 // 	if (colorJs.coords.some((c) => c === null)) {
@@ -184,40 +183,40 @@ export function setFromColorPlusObject(
 
 /** Does not validate! */
 export function getColorPlusObjectFromColorJsObject(
-	colorJs: PlainColorJsObject | ColorJsConstructor,
+	colorJs: ColorJsConstructor | PlainColorJsObject,
 ): ColorPlusObject {
 	return {
-		spaceId: ('spaceId' in colorJs
-			? colorJs.spaceId
-			: colorJs.space.id) as ColorSpaceId,
-		coords: [...(colorJs.coords as [number, number, number])],
 		alpha: colorJs.alpha ?? 1,
-	};
+		coords: [...(colorJs.coords as [number, number, number])],
+		spaceId: ('spaceId' in colorJs ? colorJs.spaceId : colorJs.space.id) as ColorSpaceId,
+	}
 }
 
 export function copyColorPlusObject(color: ColorPlusObject): ColorPlusObject {
 	return {
-		spaceId: color.spaceId,
-		coords: [...color.coords],
 		alpha: color.alpha,
-	};
+		coords: [...color.coords],
+		spaceId: color.spaceId,
+	}
 }
 
 export function hexHasAlpha(hex: string): boolean {
-	return hex.length === 5 || hex.length === 9;
+	return hex.length === 5 || hex.length === 9
 }
 
 export function expandHex(hex: string): string {
 	// Expects leading #
-	const len = hex.length;
-	if (len === 4 || len === 5) {
-		let result = '#';
-		for (let i = 1; i < len; i++) {
-			result += hex[i] + hex[i];
+	const length_ = hex.length
+	if (length_ === 4 || length_ === 5) {
+		let result = '#'
+		for (let i = 1; i < length_; i++) {
+			result += hex[i] + hex[i]
 		}
-		return result;
+
+		return result
 	}
-	return hex;
+
+	return hex
 }
 
 // Generic serialization...
@@ -227,52 +226,47 @@ export function serialize(
 	alphaOverride?: boolean,
 ): string | undefined {
 	if (typeof format.format !== 'string') {
-		console.warn('Invalid format type');
-		return undefined;
+		console.warn('Invalid format type')
+		return undefined
 	}
 
-	const convertedColor = convert(color, format.space) ?? color;
+	const convertedColor = convert(color, format.space) ?? color
 
 	const result = colorJsSerialize(convertedColor, {
-		format: format.format,
 		alpha: alphaOverride ?? format.alpha,
-	});
+		format: format.format,
+	})
 
 	// Special case for hex to avoid #0f0-style truncation
-	return format.format === 'hex' ? expandHex(result) : result;
+	return format.format === 'hex' ? expandHex(result) : result
 }
 
-function getColorJsColorSpaceById(
-	spaceId: ColorSpaceId,
-): ColorJsColorSpace | undefined {
+function getColorJsColorSpaceById(spaceId: ColorSpaceId): ColorJsColorSpace | undefined {
 	try {
-		const space = ColorJsColorSpace.get(spaceId);
-		return space;
+		const space = ColorJsColorSpace.get(spaceId)
+		return space
 	} catch {
-		console.warn(`Unknown color space: ${spaceId}`);
-		return undefined;
+		console.warn(`Unknown color space: ${spaceId}`)
+		return undefined
 	}
 }
 
-export function getRangeForChannel(
-	spaceId: ColorSpaceId,
-	channelIndex: number,
-): [number, number] {
-	const space = getColorJsColorSpaceById(spaceId);
+export function getRangeForChannel(spaceId: ColorSpaceId, channelIndex: number): [number, number] {
+	const space = getColorJsColorSpaceById(spaceId)
 	if (space === undefined) {
-		throw new Error(`Unknown color space: ${spaceId}`);
+		throw new Error(`Unknown color space: ${spaceId}`)
 	}
 
 	// Assumes correctly ordered channels...
 	// Not sure how to get channel name to index map from color space
-	const coordMeta = Object.values(space.coords).at(channelIndex);
-	const range = coordMeta?.range ?? coordMeta?.refRange ?? undefined;
+	const coordMeta = Object.values(space.coords).at(channelIndex)
+	const range = coordMeta?.range ?? coordMeta?.refRange ?? undefined
 
 	if (range === undefined) {
-		throw new Error(`Unknown range for channel: ${channelIndex}`);
+		throw new Error(`Unknown range for channel: ${channelIndex}`)
 	}
 
-	return range;
+	return range
 }
 
 /**
@@ -285,10 +279,7 @@ export function getRangeForChannel(
  * toDecimalPrecision(10.9999, 1) // returns 11.0
  * toDecimalPrecision(123.456, 0) // returns 123
  */
-export function toDecimalPrecision(
-	n: number,
-	decimalPrecision: number | undefined,
-): number {
+export function toDecimalPrecision(n: number, decimalPrecision: number | undefined): number {
 	if (
 		decimalPrecision === undefined ||
 		decimalPrecision === null ||
@@ -296,36 +287,32 @@ export function toDecimalPrecision(
 		!Number.isInteger(decimalPrecision) ||
 		!Number.isFinite(n)
 	) {
-		return n;
+		return n
 	}
 
 	if (decimalPrecision === 0) {
-		return Math.round(n);
+		return Math.round(n)
 	}
 
 	// Calculate the multiplier based on decimal precision
-	const multiplier = Math.pow(10, decimalPrecision);
+	const multiplier = 10 ** decimalPrecision
 
 	// Round the number using the multiplier
-	return Math.round(n * multiplier) / multiplier;
+	return Math.round(n * multiplier) / multiplier
 }
 
-export function formatNumber(
-	value: number,
-	digits: number | undefined,
-): string {
+export function formatNumber(value: number, digits: number | undefined): string {
 	if (digits === undefined) {
-		return value.toString();
+		return value.toString()
 	}
-	return value.toFixed(Math.max(Math.min(digits, 20), 0));
+
+	return value.toFixed(Math.max(Math.min(digits, 20), 0))
 }
 
 /**
  * Type check for string format object type
  */
-export function isStringFormat(
-	format: ColorFormat['format'],
-): format is StringFormat {
+export function isStringFormat(format: ColorFormat['format']): format is StringFormat {
 	return (
 		typeof format === 'object' &&
 		format !== null &&
@@ -335,7 +322,7 @@ export function isStringFormat(
 		format.format !== null &&
 		'type' in format.format &&
 		typeof format.format.type === 'string'
-	);
+	)
 }
 
 /**
@@ -348,84 +335,81 @@ export function isStringFormat(
 export function formatIsSerializable(format: ColorFormat): boolean {
 	// Reimplement canSerialize() from colorjs
 	if (isStringFormat(format.format)) {
-		return (
-			format.format.format.type === 'function' ||
-			'serialize' in format.format.format
-		);
+		return format.format.format.type === 'function' || 'serialize' in format.format.format
 	}
+
 	// Assume all other formats are serializable
-	return true;
+	return true
 }
 
 export function applyDecimalPrecision(
 	targetColor: ColorPlusObject,
 	decimalPrecision: number,
-	includeAlpha: boolean = true,
+	includeAlpha = true,
 ): void {
 	targetColor.coords[0] =
 		targetColor.coords[0] === null
 			? null
-			: toDecimalPrecision(targetColor.coords[0], decimalPrecision);
+			: toDecimalPrecision(targetColor.coords[0], decimalPrecision)
 	targetColor.coords[1] =
 		targetColor.coords[1] === null
 			? null
-			: toDecimalPrecision(targetColor.coords[1], decimalPrecision);
+			: toDecimalPrecision(targetColor.coords[1], decimalPrecision)
 	targetColor.coords[2] =
 		targetColor.coords[2] === null
 			? null
-			: toDecimalPrecision(targetColor.coords[2], decimalPrecision);
+			: toDecimalPrecision(targetColor.coords[2], decimalPrecision)
 	if (includeAlpha) {
-		targetColor.alpha = toDecimalPrecision(targetColor.alpha, decimalPrecision);
+		targetColor.alpha = toDecimalPrecision(targetColor.alpha, decimalPrecision)
 	}
 }
 
-export function colorPlusObjectsAreEqual(
-	a: ColorPlusObject,
-	b: ColorPlusObject,
-): boolean {
+export function colorPlusObjectsAreEqual(a: ColorPlusObject, b: ColorPlusObject): boolean {
 	return (
 		a.spaceId === b.spaceId &&
 		a.alpha === b.alpha &&
 		a.coords[0] === b.coords[0] &&
 		a.coords[1] === b.coords[1] &&
 		a.coords[2] === b.coords[2]
-	);
+	)
 }
 
 export function denormalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
-	coords[0] = denormalizeCoord(space, 0, coords[0]);
-	coords[1] = denormalizeCoord(space, 1, coords[1]);
-	coords[2] = denormalizeCoord(space, 2, coords[2]);
-	return coords;
+	coords[0] = denormalizeCoord(space, 0, coords[0])
+	coords[1] = denormalizeCoord(space, 1, coords[1])
+	coords[2] = denormalizeCoord(space, 2, coords[2])
+	return coords
 }
 
 export function normalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
-	coords[0] = normalizeCoord(space, 0, coords[0]);
-	coords[1] = normalizeCoord(space, 1, coords[1]);
-	coords[2] = normalizeCoord(space, 2, coords[2]);
-	return coords;
+	coords[0] = normalizeCoord(space, 0, coords[0])
+	coords[1] = normalizeCoord(space, 1, coords[1])
+	coords[2] = normalizeCoord(space, 2, coords[2])
+	return coords
 }
 
 export function normalizeCoord(
 	space: ColorSpaceId,
 	channelIndex: number,
-	value: number | null,
-): number | null {
+	value: null | number,
+): null | number {
 	if (value === null) {
-		return null;
+		return null
 	}
-	const range = getRangeForChannel(space, channelIndex);
-	return mapRange(value, range[0], range[1], 0, 1);
+
+	const range = getRangeForChannel(space, channelIndex)
+	return mapRange(value, range[0], range[1], 0, 1)
 }
 
 export function denormalizeCoord(
 	space: ColorSpaceId,
 	channelIndex: number,
-	value: number | null,
-): number | null {
+	value: null | number,
+): null | number {
 	if (value === null) {
-		return null;
+		return null
 	}
-	const range = getRangeForChannel(space, channelIndex);
-	return mapRange(value, 0, 1, range[0], range[1]);
+
+	const range = getRangeForChannel(space, channelIndex)
+	return mapRange(value, 0, 1, range[0], range[1])
 }

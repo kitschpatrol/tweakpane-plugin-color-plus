@@ -5,131 +5,96 @@ import {
 	getVerticalStepKeys,
 	isArrowKey,
 	mapRange,
-	PointerData,
+	type PointerData,
 	PointerHandler,
-	PointerHandlerEvents,
-	Value,
-	ValueChangeOptions,
-	ValueController,
-	ViewProps,
-} from '@tweakpane/core';
+	type PointerHandlerEvents,
+	type Value,
+	type ValueChangeOptions,
+	type ValueController,
+	type ViewProps,
+} from '@tweakpane/core'
+import { type ColorPlus } from '../model/color-plus.js'
+import { SvPaletteView } from '../view/sv-palette.js'
 
-import {ColorPlus} from '../model/color-plus.js';
-import {SvPaletteView} from '../view/sv-palette.js';
-
-interface Config {
-	value: Value<ColorPlus>;
-	viewProps: ViewProps;
+type Config = {
+	value: Value<ColorPlus>
+	viewProps: ViewProps
 }
 
-export class SvPaletteController
-	implements ValueController<ColorPlus, SvPaletteView>
-{
-	public readonly value: Value<ColorPlus>;
-	public readonly view: SvPaletteView;
-	public readonly viewProps: ViewProps;
-	private readonly ptHandler_: PointerHandler;
+export class SvPaletteController implements ValueController<ColorPlus, SvPaletteView> {
+	private readonly pointerHandler: PointerHandler
+	public readonly value: Value<ColorPlus>
+	public readonly view: SvPaletteView
+	public readonly viewProps: ViewProps
 
 	constructor(doc: Document, config: Config) {
-		this.onKeyDown_ = this.onKeyDown_.bind(this);
-		this.onKeyUp_ = this.onKeyUp_.bind(this);
-		this.onPointerDown_ = this.onPointerDown_.bind(this);
-		this.onPointerMove_ = this.onPointerMove_.bind(this);
-		this.onPointerUp_ = this.onPointerUp_.bind(this);
+		this.onKeyDown = this.onKeyDown.bind(this)
+		this.onKeyUp = this.onKeyUp.bind(this)
+		this.onPointerDown = this.onPointerDown.bind(this)
+		this.onPointerMove = this.onPointerMove.bind(this)
+		this.onPointerUp = this.onPointerUp.bind(this)
 
-		this.value = config.value;
-		this.viewProps = config.viewProps;
+		this.value = config.value
+		this.viewProps = config.viewProps
 
 		this.view = new SvPaletteView(doc, {
 			value: this.value,
 			viewProps: this.viewProps,
-		});
+		})
 
-		this.ptHandler_ = new PointerHandler(this.view.element);
-		this.ptHandler_.emitter.on('down', this.onPointerDown_);
-		this.ptHandler_.emitter.on('move', this.onPointerMove_);
-		this.ptHandler_.emitter.on('up', this.onPointerUp_);
+		this.pointerHandler = new PointerHandler(this.view.element)
+		this.pointerHandler.emitter.on('down', this.onPointerDown)
+		this.pointerHandler.emitter.on('move', this.onPointerMove)
+		this.pointerHandler.emitter.on('up', this.onPointerUp)
 
-		this.view.element.addEventListener('keydown', this.onKeyDown_);
-		this.view.element.addEventListener('keyup', this.onKeyUp_);
+		this.view.element.addEventListener('keydown', this.onKeyDown)
+		this.view.element.addEventListener('keyup', this.onKeyUp)
 	}
 
-	private handlePointerEvent_(d: PointerData, opts: ValueChangeOptions): void {
+	private handlePointerEvent(d: PointerData, options: ValueChangeOptions): void {
 		if (!d.point) {
-			return;
+			return
 		}
 
-		const saturation = constrainRange(
-			mapRange(d.point.x, 0, d.bounds.width, 0, 100),
-			0,
-			100,
-		);
-		const value = constrainRange(
-			mapRange(d.point.y, 0, d.bounds.height, 100, 0),
-			0,
-			100,
-		);
+		const saturation = constrainRange(mapRange(d.point.x, 0, d.bounds.width, 0, 100), 0, 100)
+		const value = constrainRange(mapRange(d.point.y, 0, d.bounds.height, 100, 0), 0, 100)
 
-		const c = this.value.rawValue.clone();
-		const h = c.get('h', 'hsv');
-		c.setAll([h, saturation, value], 'hsv');
+		const c = this.value.rawValue.clone()
+		const h = c.get('h', 'hsv')
+		c.setAll([h, saturation, value], 'hsv')
 
-		this.value.setRawValue(c.clone(), opts);
+		this.value.setRawValue(c.clone(), options)
 	}
 
-	private onPointerDown_(ev: PointerHandlerEvents['down']): void {
-		this.handlePointerEvent_(ev.data, {
-			forceEmit: false,
-			last: false,
-		});
-	}
-
-	private onPointerMove_(ev: PointerHandlerEvents['move']): void {
-		this.handlePointerEvent_(ev.data, {
-			forceEmit: false,
-			last: false,
-		});
-	}
-
-	private onPointerUp_(ev: PointerHandlerEvents['up']): void {
-		this.handlePointerEvent_(ev.data, {
-			forceEmit: true,
-			last: true,
-		});
-	}
-
-	private onKeyDown_(ev: KeyboardEvent): void {
-		if (isArrowKey(ev.key)) {
-			ev.preventDefault();
+	private onKeyDown(event_: KeyboardEvent): void {
+		if (isArrowKey(event_.key)) {
+			event_.preventDefault()
 		}
 
-		const keyScale = 1; // getKeyScaleForColor(false);
-		const ds = getStepForKey(keyScale, getHorizontalStepKeys(ev));
-		const dv = getStepForKey(keyScale, getVerticalStepKeys(ev));
+		const keyScale = 1 // GetKeyScaleForColor(false);
+		const ds = getStepForKey(keyScale, getHorizontalStepKeys(event_))
+		const dv = getStepForKey(keyScale, getVerticalStepKeys(event_))
 		if (ds === 0 && dv === 0) {
-			return;
+			return
 		}
 
 		// TODO constrain
 
-		const c = this.value.rawValue;
-		const [h, s, v] = c.getAll('hsv');
-		c.setAll(
-			[h, s === null ? null : s + ds, v === null ? null : v + dv],
-			'hsv',
-		);
+		const c = this.value.rawValue
+		const [h, s, v] = c.getAll('hsv')
+		c.setAll([h, s === null ? null : s + ds, v === null ? null : v + dv], 'hsv')
 		this.value.setRawValue(c.clone(), {
 			forceEmit: false,
 			last: false,
-		});
+		})
 	}
 
-	private onKeyUp_(ev: KeyboardEvent): void {
-		const keyScale = 1; // getKeyScaleForColor(false);
-		const ds = getStepForKey(keyScale, getHorizontalStepKeys(ev));
-		const dv = getStepForKey(keyScale, getVerticalStepKeys(ev));
+	private onKeyUp(event_: KeyboardEvent): void {
+		const keyScale = 1 // GetKeyScaleForColor(false);
+		const ds = getStepForKey(keyScale, getHorizontalStepKeys(event_))
+		const dv = getStepForKey(keyScale, getVerticalStepKeys(event_))
 		if (ds === 0 && dv === 0) {
-			return;
+			return
 		}
 
 		// TODO constrain
@@ -137,6 +102,27 @@ export class SvPaletteController
 		this.value.setRawValue(this.value.rawValue, {
 			forceEmit: true,
 			last: true,
-		});
+		})
+	}
+
+	private onPointerDown(event_: PointerHandlerEvents['down']): void {
+		this.handlePointerEvent(event_.data, {
+			forceEmit: false,
+			last: false,
+		})
+	}
+
+	private onPointerMove(event_: PointerHandlerEvents['move']): void {
+		this.handlePointerEvent(event_.data, {
+			forceEmit: false,
+			last: false,
+		})
+	}
+
+	private onPointerUp(event_: PointerHandlerEvents['up']): void {
+		this.handlePointerEvent(event_.data, {
+			forceEmit: true,
+			last: true,
+		})
 	}
 }

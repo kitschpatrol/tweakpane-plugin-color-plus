@@ -24,3 +24,4 @@ vendor/
 /patches/
 
 # Customizations
+/src/sass/plugin.scss

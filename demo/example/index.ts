@@ -1,6 +1,8 @@
-import {isObject} from '@tweakpane/core';
-import {Pane} from 'tweakpane';
-import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite';
+/* eslint-disable perfectionist/sort-objects */
+/* eslint-disable capitalized-comments */
+import { isObject } from '@tweakpane/core'
+import { Pane } from 'tweakpane'
+import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
 
 const params: Record<string, unknown> = {
 	// // hex strings
@@ -131,32 +133,12 @@ const params: Record<string, unknown> = {
 	// // rgba() strings (Tweakpane built-in)
 	// funcRgbaLegacy: 'rgba(255, 0, 102, 0.5)',
 	// funcRgba: 'rgba(255 0 102 / 0.5)',
-};
+}
 
 // Some params are completely unsupported by Tweakpane's built-in input handlers, and must be explicitly ignored
-const ignoredParams = [
-	'objectLongKeys',
-	'objectLongKeysAlpha',
-	'objectMixedKeys',
-	'objectHsl',
-	'objectHsv',
-	'objectHwb',
-	'objectLab',
-	'objectLch',
-	'tuple',
-	'tupleAlpha',
-	'tupleFloat',
-	'tupleFloatAlpha',
-	'colorPrefixHsv',
+const ignoredParams = new Set([
 	'colorA98Rgb',
 	'colorDisplayP3',
-	'colorProphotoRgb',
-	'colorRec2020',
-	'colorSrgb',
-	'colorSrgbLinear',
-	'colorXyz',
-	'colorXyzD50',
-	'colorXyzD65',
 	'colorHsl',
 	'colorHwb',
 	'colorLab',
@@ -164,30 +146,50 @@ const ignoredParams = [
 	'colorLch',
 	'colorOklab',
 	'colorOklch',
+	'colorPrefixHsv',
+	'colorProphotoRgb',
+	'colorRec2020',
+	'colorSrgb',
+	'colorSrgbLinear',
+	'colorXyz',
+	'colorXyzD50',
+	'colorXyzD65',
 	'funcHsl',
-	'funcHslAlpha',
-	'funcHslFancyUnits',
 	'funcHsla',
 	'funcHslaFancyUnits',
-	'funcHwbLegacy',
+	'funcHslAlpha',
+	'funcHslFancyUnits',
 	'funcHwb',
 	'funcHwbAlpha',
-	'funcLabLegacy',
+	'funcHwbLegacy',
 	'funcLab',
 	'funcLabAlpha',
-	'funcLchLegacy',
+	'funcLabLegacy',
 	'funcLch',
 	'funcLchAlpha',
-	'funcOklabLegacy',
+	'funcLchLegacy',
 	'funcOklab',
 	'funcOklabAlpha',
-	'funcOklchLegacy',
+	'funcOklabLegacy',
 	'funcOklch',
 	'funcOklchAlpha',
+	'funcOklchLegacy',
 	'funcRgb',
-	'funcRgbAlpha',
 	'funcRgba',
-];
+	'funcRgbAlpha',
+	'objectHsl',
+	'objectHsv',
+	'objectHwb',
+	'objectLab',
+	'objectLch',
+	'objectLongKeys',
+	'objectLongKeysAlpha',
+	'objectMixedKeys',
+	'tuple',
+	'tupleAlpha',
+	'tupleFloat',
+	'tupleFloatAlpha',
+])
 
 // Some params need extra properties
 // Tweakpane Plugin Color Plus implements the same
@@ -218,35 +220,33 @@ const extraProps = {
 			type: 'float',
 		},
 	},
-};
+}
 
 function prettyLabel(label: string): string {
-	return label
-		.replace(/([A-Z])/g, ' $1')
-		.replace(/^./, (str) => str.toUpperCase());
+	return label.replaceAll(/([A-Z])/g, ' $1').replace(/^./, (string_) => string_.toUpperCase())
 }
 
 const paneColorPlus = new Pane({
 	container: document.querySelector<HTMLDivElement>('div#plus')!,
 	title: 'Tweakpane Plugin Color Plus',
-});
-paneColorPlus.registerPlugin(TweakpanePluginColorPlus);
+})
+paneColorPlus.registerPlugin(TweakpanePluginColorPlus)
 
 const paneColorOriginal = new Pane({
 	container: document.querySelector<HTMLDivElement>('div#integrated')!,
 	title: 'Tweakpane Integrated Color',
-});
+})
 
 for (const key of Object.keys(params)) {
 	paneColorPlus.addBinding(params, key, {
 		view: 'color-plus',
 		picker: 'inline',
 		label: prettyLabel(key),
-		...extraProps[key],
-	});
+		...extraProps[key as keyof typeof extraProps],
+	})
 
 	// Special case for ignored keys...
-	if (ignoredParams.includes(key)) {
+	if (ignoredParams.has(key)) {
 		paneColorOriginal.addBinding(
 			{
 				value: `${isObject(params[key]) ? JSON.stringify(params[key]) : String(params[key])} (Unsupported)`,
@@ -256,21 +256,21 @@ for (const key of Object.keys(params)) {
 				disabled: true,
 				label: prettyLabel(key),
 			},
-		);
+		)
 	} else {
 		paneColorOriginal.addBinding(params, key, {
 			view: 'color',
 			picker: 'inline',
 			label: prettyLabel(key),
-			...extraProps[key],
-		});
+			...extraProps[key as keyof typeof extraProps],
+		})
 	}
 }
 
 paneColorPlus.on('change', () => {
-	paneColorOriginal.refresh();
-});
+	paneColorOriginal.refresh()
+})
 
 paneColorOriginal.on('change', () => {
-	paneColorPlus.refresh();
-});
+	paneColorPlus.refresh()
+})

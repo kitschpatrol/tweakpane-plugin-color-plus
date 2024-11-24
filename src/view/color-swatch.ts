@@ -1,74 +1,71 @@
-import {ClassName, Value, View, ViewProps} from '@tweakpane/core';
+import { ClassName, type Value, type View, type ViewProps } from '@tweakpane/core'
+import { type ColorPlus } from '../model/color-plus.js'
 
-import {ColorPlus} from '../model/color-plus.js';
-
-interface Config {
-	value: Value<ColorPlus>;
-	viewProps: ViewProps;
+type Config = {
+	value: Value<ColorPlus>
+	viewProps: ViewProps
 }
 
-const cn = ClassName('colsw');
+const cn = ClassName('colsw')
 
 export class ColorSwatchView implements View {
-	public readonly element: HTMLElement;
-	public readonly value: Value<ColorPlus>;
-	public readonly buttonElement: HTMLButtonElement;
-	private readonly swatchRealElem_: HTMLDivElement;
-	private readonly swatchFallbackElem_: HTMLDivElement;
+	private readonly swatchFallbackElement: HTMLDivElement
+	private readonly swatchRealElement: HTMLDivElement
+	public readonly buttonElement: HTMLButtonElement
+	public readonly element: HTMLElement
+	public readonly value: Value<ColorPlus>
 
 	constructor(doc: Document, config: Config) {
-		this.onValueChange_ = this.onValueChange_.bind(this);
+		this.onValueChange = this.onValueChange.bind(this)
 
-		config.value.emitter.on('change', this.onValueChange_);
-		this.value = config.value;
+		config.value.emitter.on('change', this.onValueChange)
+		this.value = config.value
 
-		this.element = doc.createElement('div');
-		this.element.classList.add(cn());
-		config.viewProps.bindClassModifiers(this.element);
+		this.element = doc.createElement('div')
+		this.element.classList.add(cn())
+		config.viewProps.bindClassModifiers(this.element)
 
-		const swatchRealElem = doc.createElement('div');
-		swatchRealElem.classList.add(cn('sw'));
-		this.element.appendChild(swatchRealElem);
-		this.swatchRealElem_ = swatchRealElem;
+		this.swatchRealElement = doc.createElement('div')
+		this.swatchRealElement.classList.add(cn('sw'))
+		this.element.append(this.swatchRealElement)
 
-		const swatchFallbackElem = doc.createElement('div');
-		swatchFallbackElem.style.width = '100%';
-		swatchFallbackElem.style.height = '100%';
-		swatchFallbackElem.style.clipPath = 'polygon(100% 0%, 0% 100%, 100% 100%)';
-		swatchRealElem.appendChild(swatchFallbackElem);
-		this.swatchFallbackElem_ = swatchFallbackElem;
+		this.swatchFallbackElement = doc.createElement('div')
+		this.swatchFallbackElement.style.width = '100%'
+		this.swatchFallbackElement.style.height = '100%'
+		this.swatchFallbackElement.style.clipPath = 'polygon(100% 0%, 0% 100%, 100% 100%)'
+		this.swatchRealElement.append(this.swatchFallbackElement)
 
-		const buttonElem = doc.createElement('button');
-		buttonElem.classList.add(cn('b'));
-		config.viewProps.bindDisabled(buttonElem);
-		this.element.appendChild(buttonElem);
-		this.buttonElement = buttonElem;
+		const buttonElement = doc.createElement('button')
+		buttonElement.classList.add(cn('b'))
+		config.viewProps.bindDisabled(buttonElement)
+		this.element.append(buttonElement)
+		this.buttonElement = buttonElement
 
-		this.update_();
+		this.update()
 	}
 
-	private update_(): void {
-		const value = this.value.rawValue;
-
-		this.swatchRealElem_.style.opacity = value.alpha.toString();
-		this.swatchRealElem_.style.backgroundColor = value.serialize({
-			format: 'oklch',
-			alpha: false,
-			space: 'oklch',
-			type: 'string',
-		});
-
-		const fallbackColor = value.clone();
-		fallbackColor.toGamut('srgb');
-		this.swatchFallbackElem_.style.backgroundColor = fallbackColor.serialize({
-			format: 'oklch',
-			alpha: false,
-			space: 'oklch',
-			type: 'string',
-		});
+	private onValueChange(): void {
+		this.update()
 	}
 
-	private onValueChange_(): void {
-		this.update_();
+	private update(): void {
+		const value = this.value.rawValue
+
+		this.swatchRealElement.style.opacity = value.alpha.toString()
+		this.swatchRealElement.style.backgroundColor = value.serialize({
+			alpha: false,
+			format: 'oklch',
+			space: 'oklch',
+			type: 'string',
+		})
+
+		const fallbackColor = value.clone()
+		fallbackColor.toGamut('srgb')
+		this.swatchFallbackElement.style.backgroundColor = fallbackColor.serialize({
+			alpha: false,
+			format: 'oklch',
+			space: 'oklch',
+			type: 'string',
+		})
 	}
 }

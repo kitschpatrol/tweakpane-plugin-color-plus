@@ -2,14 +2,17 @@ import sharedConfig from '@kitschpatrol/prettier-config'
 
 /** @type {import("prettier").Config} */
 const localConfig = {
-	// Config overrides
-	// overrides: [
-	// 	...sharedConfig.overrides,
-	// 	{
-	// 		// Per-file overrides overrides
-	// 	},
-	// ],
+	overrides: [
+		...sharedConfig.overrides,
+		{
+			files: '*.scss',
+			options: {
+				parser: 'scss',
+			},
+		},
+	],
 }
+
 export default {
 	...sharedConfig,
 	...localConfig,

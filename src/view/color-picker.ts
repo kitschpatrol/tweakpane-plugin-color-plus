@@ -1,97 +1,96 @@
-import {ClassName, NumberTextView, View, ViewProps} from '@tweakpane/core';
+import { ClassName, type NumberTextView, type View, type ViewProps } from '@tweakpane/core'
+import { type APaletteView } from './a-palette.js'
+import { type ColorTextsView } from './color-texts.js'
+import { type HPaletteView } from './h-palette.js'
+import { type SvPaletteView } from './sv-palette.js'
 
-import {APaletteView} from './a-palette.js';
-import {ColorTextsView} from './color-texts.js';
-import {HPaletteView} from './h-palette.js';
-import {SvPaletteView} from './sv-palette.js';
+const cn = ClassName('colp')
 
-const cn = ClassName('colp');
-
-interface Config {
+type Config = {
 	alphaViews: {
-		palette: APaletteView;
-		text: NumberTextView;
-	} | null;
-	hPaletteView: HPaletteView;
-	supportsAlpha: boolean;
-	svPaletteView: SvPaletteView;
-	textsView: ColorTextsView;
-	viewProps: ViewProps;
+		palette: APaletteView
+		text: NumberTextView
+	} | null
+	hPaletteView: HPaletteView
+	supportsAlpha: boolean
+	svPaletteView: SvPaletteView
+	textsView: ColorTextsView
+	viewProps: ViewProps
 }
 
 export class ColorPickerView implements View {
-	public readonly element: HTMLElement;
-	private readonly alphaViews_: {
-		palette: APaletteView;
-		text: NumberTextView;
-	} | null = null;
-	private readonly hPaletteView_: HPaletteView;
-	private readonly svPaletteView_: SvPaletteView;
-	private readonly textsView_: ColorTextsView;
+	private readonly alphaViews: {
+		palette: APaletteView
+		text: NumberTextView
+	} | null = null
+
+	private readonly hPaletteView: HPaletteView
+
+	private readonly svPaletteView: SvPaletteView
+	private readonly textsView: ColorTextsView
+	public readonly element: HTMLElement
 
 	constructor(doc: Document, config: Config) {
-		this.element = doc.createElement('div');
-		this.element.classList.add(cn());
-		config.viewProps.bindClassModifiers(this.element);
+		this.element = doc.createElement('div')
+		this.element.classList.add(cn())
+		config.viewProps.bindClassModifiers(this.element)
 
-		const hsvElem = doc.createElement('div');
-		hsvElem.classList.add(cn('hsv'));
+		const hsvElement = doc.createElement('div')
+		hsvElement.classList.add(cn('hsv'))
 
-		const svElem = doc.createElement('div');
-		svElem.classList.add(cn('sv'));
-		this.svPaletteView_ = config.svPaletteView;
-		svElem.appendChild(this.svPaletteView_.element);
-		hsvElem.appendChild(svElem);
+		const svElement = doc.createElement('div')
+		svElement.classList.add(cn('sv'))
+		this.svPaletteView = config.svPaletteView
+		svElement.append(this.svPaletteView.element)
+		hsvElement.append(svElement)
 
-		const hElem = doc.createElement('div');
-		hElem.classList.add(cn('h'));
-		this.hPaletteView_ = config.hPaletteView;
-		hElem.appendChild(this.hPaletteView_.element);
-		hsvElem.appendChild(hElem);
-		this.element.appendChild(hsvElem);
+		const hElement = doc.createElement('div')
+		hElement.classList.add(cn('h'))
+		this.hPaletteView = config.hPaletteView
+		hElement.append(this.hPaletteView.element)
+		hsvElement.append(hElement)
+		this.element.append(hsvElement)
 
-		const rgbElem = doc.createElement('div');
-		rgbElem.classList.add(cn('rgb'));
-		this.textsView_ = config.textsView;
-		rgbElem.appendChild(this.textsView_.element);
-		this.element.appendChild(rgbElem);
+		const rgbElement = doc.createElement('div')
+		rgbElement.classList.add(cn('rgb'))
+		this.textsView = config.textsView
+		rgbElement.append(this.textsView.element)
+		this.element.append(rgbElement)
 
 		if (config.alphaViews) {
-			this.alphaViews_ = {
+			this.alphaViews = {
 				palette: config.alphaViews.palette,
 				text: config.alphaViews.text,
-			};
+			}
 
-			const aElem = doc.createElement('div');
-			aElem.classList.add(cn('a'));
+			const aElement = doc.createElement('div')
+			aElement.classList.add(cn('a'))
 
-			const apElem = doc.createElement('div');
-			apElem.classList.add(cn('ap'));
-			apElem.appendChild(this.alphaViews_.palette.element);
-			aElem.appendChild(apElem);
+			const apElement = doc.createElement('div')
+			apElement.classList.add(cn('ap'))
+			apElement.append(this.alphaViews.palette.element)
+			aElement.append(apElement)
 
-			const atElem = doc.createElement('div');
-			atElem.classList.add(cn('at'));
-			atElem.appendChild(this.alphaViews_.text.element);
-			aElem.appendChild(atElem);
+			const atElement = doc.createElement('div')
+			atElement.classList.add(cn('at'))
+			atElement.append(this.alphaViews.text.element)
+			aElement.append(atElement)
 
-			this.element.appendChild(aElem);
+			this.element.append(aElement)
 		}
 	}
 
 	get allFocusableElements(): HTMLElement[] {
 		const elements = [
-			this.svPaletteView_.element,
-			this.hPaletteView_.element,
-			this.textsView_.modeSelectElement,
-			...this.textsView_.inputViews.map((v) => v.inputElement),
-		];
-		if (this.alphaViews_) {
-			elements.push(
-				this.alphaViews_.palette.element,
-				this.alphaViews_.text.inputElement,
-			);
+			this.svPaletteView.element,
+			this.hPaletteView.element,
+			this.textsView.modeSelectElement,
+			...this.textsView.inputViews.map((v) => v.inputElement),
+		]
+		if (this.alphaViews) {
+			elements.push(this.alphaViews.palette.element, this.alphaViews.text.inputElement)
 		}
-		return elements;
+
+		return elements
 	}
 }

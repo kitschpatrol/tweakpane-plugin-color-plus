@@ -1,22 +1,21 @@
-import {mapRange} from '@tweakpane/core';
-
+import { mapRange } from '@tweakpane/core'
 import {
-	ColorFormat,
-	ColorPlusObject,
-	ColorSpaceId,
-	ColorType,
+	type ColorFormat,
+	type ColorPlusObject,
+	type ColorSpaceId,
+	type ColorType,
 	convert,
 	formatNumber,
 	getRangeForChannel,
-	ObjectFormat,
-} from './shared';
+	type ObjectFormat,
+} from './shared'
 
 /**
  * Interpret object keys graciously... allow for mixes of long and short single-letter keys, plus likely aliases
  */
 const colorObjectKeys: Array<{
-	spaceId: ColorSpaceId;
-	channels: Array<{internalKey: string; externalKeys: string[]}>;
+	channels: Array<{ externalKeys: string[]; internalKey: string }>
+	spaceId: ColorSpaceId
 }> = [
 	/*
 	 * [HSL](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hsl)
@@ -24,25 +23,25 @@ const colorObjectKeys: Array<{
 	 * Float example: `{h: .75, s: 1, l: .8, a: .25}`
 	 */
 	{
-		spaceId: 'hsl',
 		channels: [
 			{
-				internalKey: 'h',
 				externalKeys: ['h', 'hue'],
+				internalKey: 'h',
 			},
 			{
-				internalKey: 's',
 				externalKeys: ['s', 'sat', 'saturation'],
+				internalKey: 's',
 			},
 			{
-				internalKey: 'l',
 				externalKeys: ['l', 'light', 'lightness'],
+				internalKey: 'l',
 			},
 			{
-				internalKey: 'alpha',
 				externalKeys: ['a', 'alpha', 'opacity'],
+				internalKey: 'alpha',
 			},
 		],
+		spaceId: 'hsl',
 	},
 	/*
 	 * HSV
@@ -51,25 +50,25 @@ const colorObjectKeys: Array<{
 	 * Float example: `{h: .75, s: 1, v: .8, a: .25}`
 	 */
 	{
-		spaceId: 'hsv',
 		channels: [
 			{
-				internalKey: 'h',
 				externalKeys: ['h', 'hue'],
+				internalKey: 'h',
 			},
 			{
-				internalKey: 's',
 				externalKeys: ['s', 'sat', 'saturation'],
+				internalKey: 's',
 			},
 			{
-				internalKey: 'v',
 				externalKeys: ['b', 'bright', 'brightness', 'v', 'val', 'value'],
+				internalKey: 'v',
 			},
 			{
-				internalKey: 'alpha',
 				externalKeys: ['a', 'alpha', 'opacity'],
+				internalKey: 'alpha',
 			},
 		],
+		spaceId: 'hsv',
 	},
 	/*
 	 * [HWB](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hwb)
@@ -77,25 +76,25 @@ const colorObjectKeys: Array<{
 	 * Float example: `{h: .75, w: 1, b: .8, a: .25}`
 	 */
 	{
-		spaceId: 'hwb',
 		channels: [
 			{
-				internalKey: 'h',
 				externalKeys: ['h', 'hue'],
+				internalKey: 'h',
 			},
 			{
-				internalKey: 'w',
 				externalKeys: ['w', 'white', 'whiteness'],
+				internalKey: 'w',
 			},
 			{
-				internalKey: 'b',
 				externalKeys: ['b', 'black', 'blackness'],
+				internalKey: 'b',
 			},
 			{
-				internalKey: 'alpha',
 				externalKeys: ['a', 'alpha', 'opacity'],
+				internalKey: 'alpha',
 			},
 		],
+		spaceId: 'hwb',
 	},
 	/*
 	 * [Lab](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/lab)
@@ -104,25 +103,25 @@ const colorObjectKeys: Array<{
 	 * Note 'a' key for alpha is prohibited due to conflict with 'a' for the 'a' in Lab
 	 */
 	{
-		spaceId: 'lab',
 		channels: [
 			{
-				internalKey: 'l',
 				externalKeys: ['l', 'light', 'lightness'],
+				internalKey: 'l',
 			},
 			{
-				internalKey: 'a',
 				externalKeys: ['a', 'green-red', 'greenred', 'gr'],
+				internalKey: 'a',
 			},
 			{
-				internalKey: 'b',
 				externalKeys: ['b', 'blue-yellow', 'blueyellow', 'by'],
+				internalKey: 'b',
 			},
 			{
-				internalKey: 'alpha',
 				externalKeys: ['alpha', 'opacity'],
+				internalKey: 'alpha',
 			},
 		],
+		spaceId: 'lab',
 	},
 	/*
 	 * [LCH](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/lch)
@@ -130,25 +129,25 @@ const colorObjectKeys: Array<{
 	 * Float example: `{l: .25, c: .5, h: .33, a: .25}`
 	 */
 	{
-		spaceId: 'lch',
 		channels: [
 			{
-				internalKey: 'l',
 				externalKeys: ['l', 'light', 'lightness'],
+				internalKey: 'l',
 			},
 			{
-				internalKey: 'c',
 				externalKeys: ['c', 'chroma'],
+				internalKey: 'c',
 			},
 			{
-				internalKey: 'h',
 				externalKeys: ['h', 'hue'],
+				internalKey: 'h',
 			},
 			{
-				internalKey: 'alpha',
 				externalKeys: ['a', 'alpha', 'opacity'],
+				internalKey: 'alpha',
 			},
 		],
+		spaceId: 'lch',
 	},
 	/*
 	 * [RGB](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb)
@@ -156,37 +155,35 @@ const colorObjectKeys: Array<{
 	 * Float example: `{r: 1, g: 0, b: 0, a: .5}`
 	 */
 	{
-		spaceId: 'srgb',
 		channels: [
 			{
-				internalKey: 'r',
 				externalKeys: ['r', 'red'],
+				internalKey: 'r',
 			},
 			{
-				internalKey: 'g',
 				externalKeys: ['g', 'green'],
+				internalKey: 'g',
 			},
 			{
-				internalKey: 'b',
 				externalKeys: ['b', 'blue'],
+				internalKey: 'b',
 			},
 			{
-				internalKey: 'alpha',
 				externalKeys: ['a', 'alpha', 'opacity'],
+				internalKey: 'alpha',
 			},
 		],
+		spaceId: 'srgb',
 	},
-];
+]
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === 'object' && value !== null && !Array.isArray(value);
+	return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function isNumberRecord(
-	value: unknown,
-): value is Record<string, number | null> {
-	if (!isRecord(value)) return false;
-	return Object.values(value).every((v) => v === null || typeof v === 'number');
+function isNumberRecord(value: unknown): value is Record<string, null | number> {
+	if (!isRecord(value)) return false
+	return Object.values(value).every((v) => v === null || typeof v === 'number')
 }
 
 /**
@@ -197,192 +194,152 @@ function isNumberRecord(
 export function objectToColor(
 	value: unknown,
 	colorType: ColorType,
-): {color: ColorPlusObject; format: ColorFormat} | undefined {
+): { color: ColorPlusObject; format: ColorFormat } | undefined {
 	// Handle object-like strings, too
-	const objectValue =
-		typeof value === 'string' ? (parseObjectString(value) ?? value) : value;
+	const objectValue = typeof value === 'string' ? (parseObjectString(value) ?? value) : value
 
-	if (!isNumberRecord(objectValue)) return undefined;
+	if (!isNumberRecord(objectValue)) return undefined
 
 	const lowerCaseValue = Object.fromEntries(
 		Object.entries(objectValue).map(([k, v]) => [k.toLowerCase(), v]),
-	);
+	)
 
-	const inputKeys = new Set(
-		Object.keys(lowerCaseValue).map((k) => k.toLowerCase()),
-	);
+	const inputKeys = new Set(Object.keys(lowerCaseValue).map((k) => k.toLowerCase()))
 
 	for (const objectKeys of colorObjectKeys) {
-		const {spaceId, channels} = objectKeys;
+		const { channels, spaceId } = objectKeys
 
 		// Split channels into regular and alpha channels
-		const regularChannels = channels.filter((c) => c.internalKey !== 'alpha');
-		const alphaChannel = channels.find((c) => c.internalKey === 'alpha');
+		const regularChannels = channels.filter((c) => c.internalKey !== 'alpha')
+		const alphaChannel = channels.find((c) => c.internalKey === 'alpha')
 
 		// Check if all required (non-alpha) channels are present
 		const hasAllRequiredChannels = regularChannels.every((channel) =>
 			channel.externalKeys.some((key) => inputKeys.has(key.toLowerCase())),
-		);
+		)
 
 		// Check if all input keys map to valid channels (including alpha)
 		const allInputKeysValid = [...inputKeys].every((inputKey) =>
 			channels.some((channel) =>
 				channel.externalKeys.some((key) => key.toLowerCase() === inputKey),
 			),
-		);
+		)
 
 		if (hasAllRequiredChannels && allInputKeysValid) {
 			const colorFormat: ColorFormat = {
-				type: 'object',
-				format: {
-					colorType: colorType,
-					coordKeys: ['', '', ''], // Will be overwritten
-					alphaKey: undefined, // May be overwritten
-				},
 				alpha: false, // May be overwritten
+				format: {
+					alphaKey: undefined, // May be overwritten
+					colorType,
+					coordKeys: ['', '', ''], // Will be overwritten
+				},
 				space: spaceId,
-			};
+				type: 'object',
+			}
 
 			const result: ColorPlusObject = {
-				spaceId: spaceId,
-				coords: [0, 0, 0],
 				alpha: 1,
-			};
+				coords: [0, 0, 0],
+				spaceId,
+			}
 
 			// Process regular channels
-			regularChannels.forEach((channel, index) => {
-				const matchingKey = channel.externalKeys.find((key) =>
-					inputKeys.has(key.toLowerCase()),
-				);
+			for (const [index, channel] of regularChannels.entries()) {
+				const matchingKey = channel.externalKeys.find((key) => inputKeys.has(key.toLowerCase()))
 
 				if (matchingKey) {
-					const channelValue = lowerCaseValue[matchingKey.toLowerCase()]!;
-					(colorFormat.format as ObjectFormat).coordKeys[index] = matchingKey;
-					result.coords[index] = channelValue;
+					const channelValue = lowerCaseValue[matchingKey.toLowerCase()]!
+					;(colorFormat.format as ObjectFormat).coordKeys[index] = matchingKey
+					result.coords[index] = channelValue
 				}
-			});
+			}
 
 			// Handle alpha channel separately
 			if (alphaChannel) {
-				const alphaKey = alphaChannel.externalKeys.find((key) =>
-					inputKeys.has(key.toLowerCase()),
-				);
+				const alphaKey = alphaChannel.externalKeys.find((key) => inputKeys.has(key.toLowerCase()))
 
 				if (alphaKey) {
 					// Alpha value provided
-					(colorFormat.format as ObjectFormat).alphaKey = alphaKey;
-					colorFormat.alpha = true;
-					result.alpha = lowerCaseValue[alphaKey.toLowerCase()]!;
+					;(colorFormat.format as ObjectFormat).alphaKey = alphaKey
+					colorFormat.alpha = true
+					result.alpha = lowerCaseValue[alphaKey.toLowerCase()]!
 				}
 			}
 
 			// Map between float and int if needed
 			for (const [index, value] of result.coords.entries()) {
-				if (value !== null) {
-					const [colorJsLow, colorJsHigh] = getRangeForChannel(
-						result.spaceId,
-						index,
-					);
+				if (value === null) continue
 
-					// SRGB is the only supported space that's represented with 0-1 internally by ColorJS
-					if (result.spaceId === 'srgb') {
-						if ((colorFormat.format as ObjectFormat).colorType === 'int') {
-							result.coords[index] = mapRange(
-								value,
-								0,
-								255,
-								colorJsLow, // 0
-								colorJsHigh, // 1
-							);
-						} else {
-							result.coords[index] = value;
-						}
-					} else {
-						if ((colorFormat.format as ObjectFormat).colorType === 'float') {
-							result.coords[index] = mapRange(
-								value,
-								0,
-								1,
-								colorJsLow,
-								colorJsHigh,
-							);
-						} else {
-							result.coords[index] = value;
-						}
-					}
+				const [colorJsLow, colorJsHigh] = getRangeForChannel(result.spaceId, index)
+
+				// SRGB is the only supported space that's represented with 0-1 internally by ColorJS
+				if (result.spaceId === 'srgb') {
+					result.coords[index] =
+						(colorFormat.format as ObjectFormat).colorType === 'int'
+							? mapRange(value, 0, 255, colorJsLow, colorJsHigh)
+							: value
+				} else if ((colorFormat.format as ObjectFormat).colorType === 'float') {
+					result.coords[index] = mapRange(value, 0, 1, colorJsLow, colorJsHigh)
+				} else {
+					result.coords[index] = value
 				}
 			}
 
 			return {
 				color: result,
 				format: colorFormat,
-			};
+			}
 		}
 	}
 
-	return undefined;
+	return undefined
 }
 
 export function colorToObject(
 	color: ColorPlusObject,
 	format: ColorFormat,
 	alphaOverride?: boolean,
-): undefined | Record<string, number | null> {
+): Record<string, null | number> | undefined {
 	// TODO proper type guard
-	const objectFormat = format.format as ObjectFormat;
+	const objectFormat = format.format as ObjectFormat
 
 	if (format.type !== 'object') {
-		console.warn(`Invalid format type: ${format.type}`);
-		return undefined;
+		console.warn(`Invalid format type: ${format.type}`)
+		return undefined
 	}
 
 	if (!colorObjectKeys.some((keys) => keys.spaceId === format.space)) {
-		console.warn(`Invalid color space for object conversion: ${format.space}`);
-		return undefined;
+		console.warn(`Invalid color space for object conversion: ${format.space}`)
+		return undefined
 	}
 
-	const result: Record<string, number | null> = {};
+	const result: Record<string, null | number> = {}
 
-	const convertedColor = convert(color, format.space) ?? color;
+	const convertedColor = convert(color, format.space) ?? color
 
 	// Map between float and int if needed
 	for (const [index, value] of convertedColor.coords.entries()) {
 		if (value !== null) {
-			const [colorJsLow, colorJsHigh] = getRangeForChannel(format.space, index);
+			const [colorJsLow, colorJsHigh] = getRangeForChannel(format.space, index)
 
 			if (format.space === 'srgb') {
-				if (objectFormat.colorType === 'int') {
-					result[objectFormat.coordKeys[index]] = mapRange(
-						value,
-						colorJsLow,
-						colorJsHigh,
-						0,
-						255,
-					);
-				} else {
-					result[objectFormat.coordKeys[index]] = value;
-				}
+				result[objectFormat.coordKeys[index]] =
+					objectFormat.colorType === 'int'
+						? mapRange(value, colorJsLow, colorJsHigh, 0, 255)
+						: value
+			} else if (objectFormat.colorType === 'float') {
+				result[objectFormat.coordKeys[index]] = mapRange(value, colorJsLow, colorJsHigh, 0, 1)
 			} else {
-				if (objectFormat.colorType === 'float') {
-					result[objectFormat.coordKeys[index]] = mapRange(
-						value,
-						colorJsLow,
-						colorJsHigh,
-						0,
-						1,
-					);
-				} else {
-					result[objectFormat.coordKeys[index]] = value;
-				}
+				result[objectFormat.coordKeys[index]] = value
 			}
 		}
 	}
 
 	if ((alphaOverride ?? format.alpha) && objectFormat.alphaKey !== undefined) {
-		result[objectFormat.alphaKey] = convertedColor.alpha;
+		result[objectFormat.alphaKey] = convertedColor.alpha
 	}
 
-	return result;
+	return result
 }
 
 export function colorToObjectString(
@@ -390,31 +347,32 @@ export function colorToObjectString(
 	format: ColorFormat,
 	alphaOverride?: boolean,
 ): string | undefined {
-	const object = colorToObject(color, format, alphaOverride);
+	const object = colorToObject(color, format, alphaOverride)
 
 	if (object === undefined) {
-		return undefined;
+		return undefined
 	}
 
-	const precision = (format.format as ObjectFormat).colorType === 'int' ? 0 : 3;
-	const precisionAlpha = 3;
-	return stringifyObject(object, precision, precisionAlpha);
+	const precision = (format.format as ObjectFormat).colorType === 'int' ? 0 : 3
+	const precisionAlpha = 3
+	return stringifyObject(object, precision, precisionAlpha)
 }
 
 function stringifyObject(
-	object: Record<string, number | null>,
+	object: Record<string, null | number>,
 	precision: number,
 	precisionAlpha: number,
 ): string {
-	const parts: string[] = [];
-	let index = 0;
+	const parts: string[] = []
+	let index = 0
 	for (const [key, value] of Object.entries(object)) {
 		parts.push(
 			`${key}: ${value === null ? 'null' : formatNumber(value, index === 3 ? precisionAlpha : precision)}`,
-		);
-		index++;
+		)
+		index++
 	}
-	return `{${parts.join(', ')}}`;
+
+	return `{${parts.join(', ')}}`
 }
 
 /**
@@ -423,42 +381,43 @@ function stringifyObject(
  */
 function parseObjectString(value: string): Record<string, unknown> | undefined {
 	try {
-		return JSON.parse(value);
+		return JSON.parse(value) as Record<string, unknown>
 	} catch {
 		// Manual parse
 		// Strip certain characters and trim whitespace
 		const parts = value
-			.replace(/[%{}:,"']/g, '')
+			.replaceAll(/["%',:{}]/g, '')
 			.split(' ')
-			.map((part) => part.trim())
-			.filter((part) => part !== '');
+			.map((part: string) => part.trim())
+			.filter((part: string) => part !== '')
 
 		// Must have even number of parts to parse manually
 		if (parts.length % 2 !== 0) {
-			return undefined;
+			return undefined
 		}
 
-		const object: Record<string, unknown> = {};
+		const object: Record<string, unknown> = {}
 
 		for (let i = 0; i < parts.length - 1; i += 2) {
-			const key = parts[i];
+			const key = parts[i]
 			if (typeof key !== 'string') {
-				return undefined;
+				return undefined
 			}
 
-			const value = parts[i + 1];
+			const value = parts[i + 1]
 
 			if (value === 'null') {
-				object[key] = null;
+				object[key] = null
 			} else {
-				const number = parseFloat(value);
+				const number = Number.parseFloat(value)
 				if (Number.isNaN(number)) {
-					return undefined;
+					return undefined
 				}
-				object[key] = number;
+
+				object[key] = number
 			}
 		}
 
-		return object;
+		return object
 	}
 }

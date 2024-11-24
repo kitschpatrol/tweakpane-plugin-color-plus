@@ -1,93 +1,89 @@
-import {ClassName, mapRange, Value, View, ViewProps} from '@tweakpane/core';
+import { ClassName, mapRange, type Value, type View, type ViewProps } from '@tweakpane/core'
+import { type ColorPlus } from '../model/color-plus.js'
 
-import {ColorPlus} from '../model/color-plus.js';
+const cn = ClassName('apl')
 
-const cn = ClassName('apl');
-
-interface Config {
-	value: Value<ColorPlus>;
-	viewProps: ViewProps;
+type Config = {
+	value: Value<ColorPlus>
+	viewProps: ViewProps
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export class APaletteView implements View {
-	public readonly element: HTMLElement;
-	public readonly value: Value<ColorPlus>;
-	private readonly colorElem_: HTMLDivElement;
-	private readonly markerElem_: HTMLDivElement;
-	private readonly previewElem_: HTMLDivElement;
+	private readonly colorElement: HTMLDivElement
+	private readonly markerElement: HTMLDivElement
+	private readonly previewElement: HTMLDivElement
+	public readonly element: HTMLElement
+	public readonly value: Value<ColorPlus>
 
 	constructor(doc: Document, config: Config) {
-		this.onValueChange_ = this.onValueChange_.bind(this);
+		this.onValueChange = this.onValueChange.bind(this)
 
-		this.value = config.value;
-		this.value.emitter.on('change', this.onValueChange_);
+		this.value = config.value
 
-		this.element = doc.createElement('div');
-		this.element.classList.add(cn());
-		config.viewProps.bindClassModifiers(this.element);
-		config.viewProps.bindTabIndex(this.element);
+		this.value.emitter.on('change', this.onValueChange)
 
-		const barElem = doc.createElement('div');
-		barElem.classList.add(cn('b'));
-		this.element.appendChild(barElem);
+		this.element = doc.createElement('div')
+		this.element.classList.add(cn())
+		config.viewProps.bindClassModifiers(this.element)
+		config.viewProps.bindTabIndex(this.element)
 
-		const colorElem = doc.createElement('div');
-		colorElem.classList.add(cn('c'));
-		barElem.appendChild(colorElem);
-		this.colorElem_ = colorElem;
+		const barElement = doc.createElement('div')
+		barElement.classList.add(cn('b'))
+		this.element.append(barElement)
 
-		const markerElem = doc.createElement('div');
-		markerElem.classList.add(cn('m'));
-		this.element.appendChild(markerElem);
-		this.markerElem_ = markerElem;
+		this.colorElement = doc.createElement('div')
+		this.colorElement.classList.add(cn('c'))
+		barElement.append(this.colorElement)
 
-		const previewElem = doc.createElement('div');
-		previewElem.classList.add(cn('p'));
-		this.markerElem_.appendChild(previewElem);
-		this.previewElem_ = previewElem;
+		this.markerElement = doc.createElement('div')
+		this.markerElement.classList.add(cn('m'))
+		this.element.append(this.markerElement)
 
-		this.update_();
+		this.previewElement = doc.createElement('div')
+		this.previewElement.classList.add(cn('p'))
+		this.markerElement.append(this.previewElement)
+
+		this.update()
 	}
 
-	private update_(): void {
-		const activeColor = this.value.rawValue.clone();
-		activeColor.convert('srgb');
-		const leftColor = activeColor.clone();
-		leftColor.alpha = 0;
+	private onValueChange(): void {
+		this.update()
+	}
 
-		const rightColor = leftColor.clone();
-		rightColor.alpha = 1;
+	private update(): void {
+		const activeColor = this.value.rawValue.clone()
+		activeColor.convert('srgb')
+		const leftColor = activeColor.clone()
+		leftColor.alpha = 0
+
+		const rightColor = leftColor.clone()
+		rightColor.alpha = 1
 
 		const gradientComps = [
 			'to right',
 			leftColor.serialize({
-				format: 'rgba',
 				alpha: true,
+				format: 'rgba',
 				space: 'srgb',
 				type: 'string',
 			}),
 			rightColor.serialize({
-				format: 'rgba',
 				alpha: true,
+				format: 'rgba',
 				space: 'srgb',
 				type: 'string',
 			}),
-		];
-		this.colorElem_.style.background = `linear-gradient(${gradientComps.join(
-			',',
-		)})`;
+		]
+		this.colorElement.style.background = `linear-gradient(${gradientComps.join(',')})`
 
-		this.previewElem_.style.backgroundColor = activeColor.serialize({
-			format: 'rgba',
+		this.previewElement.style.backgroundColor = activeColor.serialize({
 			alpha: true,
+			format: 'rgba',
 			space: 'srgb',
 			type: 'string',
-		});
-		const left = mapRange(activeColor.alpha, 0, 1, 0, 100);
-		this.markerElem_.style.left = `${left}%`;
-	}
-
-	private onValueChange_(): void {
-		this.update_();
+		})
+		const left = mapRange(activeColor.alpha, 0, 1, 0, 100)
+		this.markerElement.style.left = `${left}%`
 	}
 }

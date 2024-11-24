@@ -7,5 +7,8 @@ module.exports = {
 	rules: {
 		'unicorn/no-null': 'off',
 		'new-cap': 'off',
+		'@typescript-eslint/member-ordering': 'off',
+		'@typescript-eslint/ban-types': 'off',
+		'@typescript-eslint/unbound-method': 'off',
 	},
 }

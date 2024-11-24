@@ -1,116 +1,114 @@
 import {
 	getHorizontalStepKeys,
 	getStepForKey,
-	PointerData,
+	type PointerData,
 	PointerHandler,
-	PointerHandlerEvents,
-	Value,
-	ValueChangeOptions,
-	ValueController,
-	ViewProps,
-} from '@tweakpane/core';
+	type PointerHandlerEvents,
+	type Value,
+	type ValueChangeOptions,
+	type ValueController,
+	type ViewProps,
+} from '@tweakpane/core'
+import { type ColorPlus } from '../model/color-plus.js'
+import { APaletteView } from '../view/a-palette.js'
 
-import {ColorPlus} from '../model/color-plus.js';
-import {APaletteView} from '../view/a-palette.js';
-
-interface Config {
-	value: Value<ColorPlus>;
-	viewProps: ViewProps;
+type Config = {
+	value: Value<ColorPlus>
+	viewProps: ViewProps
 }
 
-export class APaletteController
-	implements ValueController<ColorPlus, APaletteView>
-{
-	public readonly value: Value<ColorPlus>;
-	public readonly view: APaletteView;
-	public readonly viewProps: ViewProps;
-	private readonly ptHandler_: PointerHandler;
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export class APaletteController implements ValueController<ColorPlus, APaletteView> {
+	private readonly pointerHandler: PointerHandler
+	public readonly value: Value<ColorPlus>
+	public readonly view: APaletteView
+	public readonly viewProps: ViewProps
 
 	constructor(doc: Document, config: Config) {
-		this.onKeyDown_ = this.onKeyDown_.bind(this);
-		this.onKeyUp_ = this.onKeyUp_.bind(this);
-		this.onPointerDown_ = this.onPointerDown_.bind(this);
-		this.onPointerMove_ = this.onPointerMove_.bind(this);
-		this.onPointerUp_ = this.onPointerUp_.bind(this);
+		this.onKeyDown = this.onKeyDown.bind(this)
+		this.onKeyUp = this.onKeyUp.bind(this)
+		this.onPointerDown = this.onPointerDown.bind(this)
+		this.onPointerMove = this.onPointerMove.bind(this)
+		this.onPointerUp = this.onPointerUp.bind(this)
 
-		this.value = config.value;
-		this.viewProps = config.viewProps;
+		this.value = config.value
+		this.viewProps = config.viewProps
 
 		this.view = new APaletteView(doc, {
 			value: this.value,
 			viewProps: this.viewProps,
-		});
+		})
 
-		this.ptHandler_ = new PointerHandler(this.view.element);
-		this.ptHandler_.emitter.on('down', this.onPointerDown_);
-		this.ptHandler_.emitter.on('move', this.onPointerMove_);
-		this.ptHandler_.emitter.on('up', this.onPointerUp_);
+		this.pointerHandler = new PointerHandler(this.view.element)
+		this.pointerHandler.emitter.on('down', this.onPointerDown)
+		this.pointerHandler.emitter.on('move', this.onPointerMove)
+		this.pointerHandler.emitter.on('up', this.onPointerUp)
 
-		this.view.element.addEventListener('keydown', this.onKeyDown_);
-		this.view.element.addEventListener('keyup', this.onKeyUp_);
+		this.view.element.addEventListener('keydown', this.onKeyDown)
+		this.view.element.addEventListener('keyup', this.onKeyUp)
 	}
 
-	private handlePointerEvent_(d: PointerData, opts: ValueChangeOptions): void {
+	private handlePointerEvent(d: PointerData, options: ValueChangeOptions): void {
 		if (!d.point) {
-			return;
+			return
 		}
 
-		const c = this.value.rawValue.clone();
-		c.alpha = d.point.x / d.bounds.width;
-		this.value.setRawValue(c, opts);
+		const c = this.value.rawValue.clone()
+		c.alpha = d.point.x / d.bounds.width
+		this.value.setRawValue(c, options)
 	}
 
-	private onPointerDown_(ev: PointerHandlerEvents['down']): void {
-		this.handlePointerEvent_(ev.data, {
-			forceEmit: false,
-			last: false,
-		});
-	}
-
-	private onPointerMove_(ev: PointerHandlerEvents['move']): void {
-		this.handlePointerEvent_(ev.data, {
-			forceEmit: false,
-			last: false,
-		});
-	}
-
-	private onPointerUp_(ev: PointerHandlerEvents['up']): void {
-		this.handlePointerEvent_(ev.data, {
-			forceEmit: true,
-			last: true,
-		});
-	}
-
-	private onKeyDown_(ev: KeyboardEvent): void {
+	private onKeyDown(event_: KeyboardEvent): void {
 		const step = getStepForKey(
-			0.1, //getKeyScaleForColor(true),
-			getHorizontalStepKeys(ev),
-		);
+			0.1, // GetKeyScaleForColor(true),
+			getHorizontalStepKeys(event_),
+		)
 		if (step === 0) {
-			return;
+			return
 		}
 
-		const c = this.value.rawValue.clone();
-		c.set('alpha', (value) => value + step);
+		const c = this.value.rawValue.clone()
+		c.set('alpha', (value) => value + step)
 
 		this.value.setRawValue(c, {
 			forceEmit: false,
 			last: false,
-		});
+		})
 	}
 
-	private onKeyUp_(ev: KeyboardEvent): void {
+	private onKeyUp(event_: KeyboardEvent): void {
 		const step = getStepForKey(
-			0.1, //getKeyScaleForColor(true),
-			getHorizontalStepKeys(ev),
-		);
+			0.1, // GetKeyScaleForColor(true),
+			getHorizontalStepKeys(event_),
+		)
 		if (step === 0) {
-			return;
+			return
 		}
 
 		this.value.setRawValue(this.value.rawValue, {
 			forceEmit: true,
 			last: true,
-		});
+		})
+	}
+
+	private onPointerDown(event_: PointerHandlerEvents['down']): void {
+		this.handlePointerEvent(event_.data, {
+			forceEmit: false,
+			last: false,
+		})
+	}
+
+	private onPointerMove(event_: PointerHandlerEvents['move']): void {
+		this.handlePointerEvent(event_.data, {
+			forceEmit: false,
+			last: false,
+		})
+	}
+
+	private onPointerUp(event_: PointerHandlerEvents['up']): void {
+		this.handlePointerEvent(event_.data, {
+			forceEmit: true,
+			last: true,
+		})
 	}
 }

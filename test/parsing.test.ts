@@ -1,5 +1,5 @@
-import {ColorPlus} from '../src/model/color-plus.js';
-import {expect, it} from 'vitest';
+import { expect, it } from 'vitest'
+import { ColorPlus } from '../src/model/color-plus.js'
 
 it('parses hex colors correctly', () => {
 	const tests = [
@@ -11,138 +11,134 @@ it('parses hex colors correctly', () => {
 		['0xf068', 'ColorPlus(srgb, [1,0,0.4], 0.5333333333333333)'],
 		['0xff0066', 'ColorPlus(srgb, [1,0,0.4], 1)'],
 		['0xff006688', 'ColorPlus(srgb, [1,0,0.4], 0.5333333333333333)'],
-	];
+	]
 
-	tests.forEach(([input, expected]) => {
-		expect(ColorPlus.create(input)?.toString()).toEqual(expected);
-	});
-});
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
 
 it('parses number colors correctly', () => {
 	const tests = [
-		[0xff0066, 'ColorPlus(srgb, [1,0,0.4], 1)'],
-		[0xff00667f, 'ColorPlus(srgb, [1,0,0.4], 0.4980392156862745)'],
-	];
+		[0xff_00_66, 'ColorPlus(srgb, [1,0,0.4], 1)'],
+		[0xff_00_66_7f, 'ColorPlus(srgb, [1,0,0.4], 0.4980392156862745)'],
+	]
 
-	tests.forEach(([input, expected]) => {
-		expect(ColorPlus.create(input)?.toString()).toEqual(expected);
-	});
-});
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
 
 it('parses object colors correctly', () => {
 	const tests = [
 		[
 			{
-				r: 255,
-				g: 0,
 				b: 102,
+				g: 0,
+				r: 255,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 1)',
 		],
 		[
 			{
-				r: 255,
-				g: 0,
-				b: 102,
 				a: 0.5,
-			},
-			'ColorPlus(srgb, [1,0,0.4], 0.5)',
-		],
-		[
-			{
-				red: 255,
-				green: 0,
-				blue: 102,
-			},
-			'ColorPlus(srgb, [1,0,0.4], 1)',
-		],
-		[
-			{
-				red: 255,
-				green: 0,
-				blue: 102,
-				alpha: 0.5,
-			},
-			'ColorPlus(srgb, [1,0,0.4], 0.5)',
-		],
-		[
-			{
-				r: 255,
-				green: 0,
 				b: 102,
+				g: 0,
+				r: 255,
+			},
+			'ColorPlus(srgb, [1,0,0.4], 0.5)',
+		],
+		[
+			{
+				blue: 102,
+				green: 0,
+				red: 255,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 1)',
 		],
-		[{h: 336, s: 100, l: 50}, 'ColorPlus(hsl, [336,100,50], 1)'],
-		[{h: 336, s: 100, v: 100}, 'ColorPlus(hsv, [336,100,100], 1)'],
-		[{h: 336, w: 0, b: 0}, 'ColorPlus(hwb, [336,0,0], 1)'],
-		[{l: 55, a: 83, b: 21}, 'ColorPlus(lab, [55,83,21], 1)'],
 		[
 			{
-				l: 55,
+				alpha: 0.5,
+				blue: 102,
+				green: 0,
+				red: 255,
+			},
+			'ColorPlus(srgb, [1,0,0.4], 0.5)',
+		],
+		[
+			{
+				b: 102,
+				green: 0,
+				r: 255,
+			},
+			'ColorPlus(srgb, [1,0,0.4], 1)',
+		],
+		[{ h: 336, l: 50, s: 100 }, 'ColorPlus(hsl, [336,100,50], 1)'],
+		[{ h: 336, s: 100, v: 100 }, 'ColorPlus(hsv, [336,100,100], 1)'],
+		[{ b: 0, h: 336, w: 0 }, 'ColorPlus(hwb, [336,0,0], 1)'],
+		[{ a: 83, b: 21, l: 55 }, 'ColorPlus(lab, [55,83,21], 1)'],
+		[
+			{
 				c: 85,
 				h: 14,
+				l: 55,
 			},
 			'ColorPlus(lch, [55,85,14], 1)',
 		],
-	];
+	]
 
-	tests.forEach(([input, expected]) => {
-		expect(ColorPlus.create(input)?.toString()).toEqual(expected);
-	});
-});
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
 
 it('parses object float colors correctly', () => {
 	const tests = [
 		[
 			{
-				r: 1,
-				g: 0,
 				b: 0.4,
+				g: 0,
+				r: 1,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 1)',
 		],
 		[
 			{
-				r: 1,
-				g: 0,
-				b: 0.4,
 				a: 0.5,
+				b: 0.4,
+				g: 0,
+				r: 1,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 0.5)',
 		],
-	];
+	]
 
-	tests.forEach(([input, expected]) => {
-		expect(ColorPlus.create(input, undefined, 'float')?.toString()).toEqual(
-			expected,
-		);
-	});
-});
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input, undefined, 'float')?.toString()).toEqual(expected)
+	}
+})
 
 it('parses color tuples correctly', () => {
 	const tests = [
 		[[255, 0, 102], 'ColorPlus(srgb, [1,0,0.4], 1)'],
 		[[255, 0, 102, 0.5], 'ColorPlus(srgb, [1,0,0.4], 0.5)'],
-	];
+	]
 
-	tests.forEach(([input, expected]) => {
-		expect(ColorPlus.create(input)?.toString()).toEqual(expected);
-	});
-});
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
 
 it('parses color float tuples correctly', () => {
 	const tests = [
 		[[1, 0, 0.4], 'ColorPlus(srgb, [1,0,0.4], 1)'],
 		[[1, 0, 0.4, 0.5], 'ColorPlus(srgb, [1,0,0.4], 0.5)'],
-	];
+	]
 
-	tests.forEach(([input, expected]) => {
-		expect(ColorPlus.create(input, undefined, 'float')?.toString()).toEqual(
-			expected,
-		);
-	});
-});
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input, undefined, 'float')?.toString()).toEqual(expected)
+	}
+})
 
 it('parses color function colors correctly', () => {
 	const tests = [
@@ -173,12 +169,12 @@ it('parses color function colors correctly', () => {
 		['color(xyz-d50 0 100% 50%)', 'ColorPlus(xyz-d50, [0,1,0.5], 1)'],
 		['color(xyz-d65 0 1 .5)', 'ColorPlus(xyz-d65, [0,1,0.5], 1)'],
 		['color(xyz-d65 0 100% 50%)', 'ColorPlus(xyz-d65, [0,1,0.5], 1)'],
-	];
+	]
 
-	tests.forEach(([input, expected]) => {
-		expect(ColorPlus.create(input)?.toString()).toEqual(expected);
-	});
-});
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
 
 it('parses named function colors correctly', () => {
 	const tests = [
@@ -227,12 +223,12 @@ it('parses named function colors correctly', () => {
 		['rgb(0 127.5 300 / .5)', 'ColorPlus(srgb, [0,0.5,1.1765], 0.5)'],
 		['rgba(0,127.5,300,0.5)', 'ColorPlus(srgb, [0,0.5,1.1765], 0.5)'],
 		['rgba(0% 50% 200% / 0.5)', 'ColorPlus(srgb, [0,0.5,2], 0.5)'],
-	];
+	]
 
-	tests.forEach(([input, expected]) => {
-		expect(ColorPlus.create(input)?.toString()).toEqual(expected);
-	});
-});
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
 
 it('parses legacy hsl values correctly', () => {
 	// TODO tests for 0x-prefixed strings
@@ -242,9 +238,9 @@ it('parses legacy hsl values correctly', () => {
 		['hsl(180, 24, 25)', 'ColorPlus(hsl, [180,24,25], 1)'],
 		['hsla(180, 24, 25, 0.5)', 'ColorPlus(hsl, [180,24,25], 0.5)'],
 		['hsla(180 24 25 / 0.5)', 'ColorPlus(hsl, [180,24,25], 0.5)'],
-	];
+	]
 
-	tests.forEach(([input, expected]) => {
-		expect(ColorPlus.create(input)?.toString()).toEqual(expected);
-	});
-});
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})

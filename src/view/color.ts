@@ -1,56 +1,52 @@
 import {
 	bindValueMap,
 	ClassName,
-	Foldable,
-	PickerLayout,
+	type Foldable,
+	type PickerLayout,
 	valueToClassName,
-	View,
-} from '@tweakpane/core';
+	type View,
+} from '@tweakpane/core'
 
-interface Config {
-	foldable: Foldable;
-	pickerLayout: PickerLayout;
+type Config = {
+	foldable: Foldable
+	pickerLayout: PickerLayout
 }
 
-const cn = ClassName('col');
+const cn = ClassName('col')
 
 export class ColorView implements View {
-	public readonly element: HTMLElement;
-	public readonly swatchElement: HTMLElement;
-	public readonly textElement: HTMLElement;
-	public readonly pickerElement: HTMLElement | null;
+	public readonly element: HTMLElement
+	public readonly pickerElement: HTMLElement | null
+	public readonly swatchElement: HTMLElement
+	public readonly textElement: HTMLElement
 
 	constructor(doc: Document, config: Config) {
-		this.element = doc.createElement('div');
-		this.element.classList.add(cn());
-		config.foldable.bindExpandedClass(this.element, cn(undefined, 'expanded'));
-		bindValueMap(
-			config.foldable,
-			'completed',
-			valueToClassName(this.element, cn(undefined, 'cpl')),
-		);
+		this.element = doc.createElement('div')
+		this.element.classList.add(cn())
+		config.foldable.bindExpandedClass(this.element, cn(undefined, 'expanded'))
+		bindValueMap(config.foldable, 'completed', valueToClassName(this.element, cn(undefined, 'cpl')))
 
-		const headElem = doc.createElement('div');
-		headElem.classList.add(cn('h'));
-		this.element.appendChild(headElem);
+		const headElement = doc.createElement('div')
+		headElement.classList.add(cn('h'))
+		this.element.append(headElement)
 
-		const swatchElem = doc.createElement('div');
-		swatchElem.classList.add(cn('s'));
-		headElem.appendChild(swatchElem);
-		this.swatchElement = swatchElem;
+		const swatchElement = doc.createElement('div')
+		swatchElement.classList.add(cn('s'))
+		headElement.append(swatchElement)
+		this.swatchElement = swatchElement
 
-		const textElem = doc.createElement('div');
-		textElem.classList.add(cn('t'));
-		headElem.appendChild(textElem);
-		this.textElement = textElem;
+		const textElement = doc.createElement('div')
+		textElement.classList.add(cn('t'))
+		headElement.append(textElement)
+		this.textElement = textElement
 
 		if (config.pickerLayout === 'inline') {
-			const pickerElem = doc.createElement('div');
-			pickerElem.classList.add(cn('p'));
-			this.element.appendChild(pickerElem);
-			this.pickerElement = pickerElem;
+			const pickerElement = doc.createElement('div')
+			pickerElement.classList.add(cn('p'))
+			this.element.append(pickerElement)
+			this.pickerElement = pickerElement
 		} else {
-			this.pickerElement = null;
+			this.pickerElement = null
 		}
 	}
 }

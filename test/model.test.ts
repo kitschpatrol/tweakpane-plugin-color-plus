@@ -1,100 +1,101 @@
-import {expect, it} from 'vitest';
-
-import {ColorPlus} from '../src/model/color-plus.js';
+import { expect, it } from 'vitest'
+import { ColorPlus } from '../src/model/color-plus.js'
 
 it('converts to a simple string', () => {
-	const c = ColorPlus.create('#f00');
-	expect(c).toBeDefined();
-	expect(c?.toString()).toBe('ColorPlus(srgb, [1,0,0], 1)');
-});
+	const c = ColorPlus.create('#f00')
+	expect(c).toBeDefined()
+	expect(c?.toString()).toBe('ColorPlus(srgb, [1,0,0], 1)')
+})
 
 it('converts to simple json', () => {
-	const c = ColorPlus.create('#f00');
-	expect(c).toBeDefined();
+	const c = ColorPlus.create('#f00')
+	expect(c).toBeDefined()
 	expect(c!.toJSON()).toEqual({
-		spaceId: 'srgb',
-		coords: [1, 0, 0],
 		alpha: 1,
-	});
-});
+		coords: [1, 0, 0],
+		spaceId: 'srgb',
+	})
+})
 
 it('sets and reads alpha without mutating the object', () => {
-	const c = ColorPlus.create('#f00');
-	expect(c).toBeDefined();
-	const id = getObjectId(c);
-	expect(c!.alpha).toBe(1);
-	c!.alpha = 0.5;
-	expect(c!.alpha).toBe(0.5);
+	const c = ColorPlus.create('#f00')
+	expect(c).toBeDefined()
+	const id = getObjectId(c!)
+	expect(c!.alpha).toBe(1)
+	c!.alpha = 0.5
+	expect(c!.alpha).toBe(0.5)
 
-	expect(id).toBe(getObjectId(c));
-});
+	expect(id).toBe(getObjectId(c!))
+})
 
 it('gets individual properties in any color space without mutating the object', () => {
-	const c = ColorPlus.create('#f00');
-	expect(c).toBeDefined();
-	const id = getObjectId(c);
+	const c = ColorPlus.create('#f00')
+	expect(c).toBeDefined()
+	const id = getObjectId(c!)
 
-	expect(c!.get('h', 'oklch')).toBe(29.23388027962784);
-	expect(id).toBe(getObjectId(c));
-});
+	expect(c!.get('h', 'oklch')).toBe(29.233_880_279_627_84)
+	expect(id).toBe(getObjectId(c!))
+})
 
 it('gets all channels in any color space without mutating the object', () => {
-	const c = ColorPlus.create('#f00');
-	expect(c).toBeDefined();
-	const id = getObjectId(c);
+	const c = ColorPlus.create('#f00')
+	expect(c).toBeDefined()
+	const id = getObjectId(c!)
 
 	expect(c!.getAll('oklch')).toEqual([
-		0.6279553639214311, 0.2576833038053608, 29.23388027962784,
-	]);
-	expect(id).toBe(getObjectId(c));
-});
+		0.627_955_363_921_431_1, 0.257_683_303_805_360_8, 29.233_880_279_627_84,
+	])
+	expect(id).toBe(getObjectId(c!))
+})
 
 it('sets individual properties in any color space without mutating the object', () => {
-	const c = ColorPlus.create('#f00');
-	expect(c).toBeDefined();
-	const id = getObjectId(c);
-	c!.set('h', 29.23388027962784, 'oklch');
-	expect(c!.getAll(undefined)).toEqual([
-		0.9999999999999999, 2.902435236595835e-15, 4.4825254619240695e-17,
-	]);
-	expect(id).toBe(getObjectId(c));
-});
+	const c = ColorPlus.create('#f00')
+	expect(c).toBeDefined()
+	const id = getObjectId(c!)
+	c!.set('h', 29.233_880_279_627_84, 'oklch')
+	expect(c!.getAll()).toEqual([
+		0.999_999_999_999_999_9, 2.902_435_236_595_835e-15, 4.482_525_461_924_069_5e-17,
+	])
+	expect(id).toBe(getObjectId(c!))
+})
 
 it('sets all properties in any color space without mutating the object', () => {
-	const c = ColorPlus.create('#f00');
-	expect(c).toBeDefined();
-	const id = getObjectId(c);
-	c!.setAll([45, 0.5, 0.5], 'oklch');
-	expect(c!.getAll(undefined)).toEqual([
-		126.18837298313177, 121.61659443932724, 122.73701128142707,
-	]);
-	expect(id).toBe(getObjectId(c));
-});
+	const c = ColorPlus.create('#f00')
+	expect(c).toBeDefined()
+	const id = getObjectId(c!)
+	c!.setAll([45, 0.5, 0.5], 'oklch')
+	expect(c!.getAll()).toEqual([
+		126.188_372_983_131_77, 121.616_594_439_327_24, 122.737_011_281_427_07,
+	])
+	expect(id).toBe(getObjectId(c!))
+})
 
 it('converts to other color spaces in-place', () => {
-	const c = ColorPlus.create('#f00');
-	expect(c).toBeDefined();
-	const id = getObjectId(c);
-	c!.convert('oklch');
-	expect(c!.getAll(undefined)).toEqual([
-		0.6279553639214311, 0.2576833038053608, 29.23388027962784,
-	]);
-	expect(id).toBe(getObjectId(c));
-});
+	const c = ColorPlus.create('#f00')
+	expect(c).toBeDefined()
+	const id = getObjectId(c!)
+	c!.convert('oklch')
+	expect(c!.getAll()).toEqual([
+		0.627_955_363_921_431_1, 0.257_683_303_805_360_8, 29.233_880_279_627_84,
+	])
+	expect(id).toBe(getObjectId(c!))
+})
 
 it('clones the object', () => {
-	const c = ColorPlus.create('#f00');
-	expect(c).toBeDefined();
-	const id = getObjectId(c);
-	const c2 = c!.clone();
-	expect(c2.equals(c!)).toBe(true);
-	expect(id).not.toBe(getObjectId(c2));
-});
+	const c = ColorPlus.create('#f00')
+	expect(c).toBeDefined()
+	const id = getObjectId(c!)
+	const c2 = c!.clone()
+	expect(c2.equals(c!)).toBe(true)
+	expect(id).not.toBe(getObjectId(c2))
+})
 
-function getObjectId(obj: any): symbol {
-	if (!('__id' in obj)) {
-		obj.__id = Symbol(Date.now().toString());
-	}
+function getObjectId<T extends object>(object: T): symbol {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	type ObjectWithId = { __id?: symbol } & T
+	const object_ = object as ObjectWithId
 
-	return obj.__id;
+	object_.__id ??= Symbol(Date.now().toString())
+
+	return object_.__id
 }

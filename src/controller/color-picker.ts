@@ -5,54 +5,52 @@ import {
 	DefiniteRangeConstraint,
 	NumberTextController,
 	parseNumber,
-	Value,
-	ValueController,
+	type Value,
+	type ValueController,
 	ValueMap,
-	ViewProps,
-} from '@tweakpane/core';
-import {ColorType} from '@tweakpane/core/dist/input-binding/color/model/color-model.js';
+	type ViewProps,
+} from '@tweakpane/core'
+import { type ColorType } from '@tweakpane/core/dist/input-binding/color/model/color-model.js'
+import { type ColorPlus } from '../model/color-plus.js'
+import { ColorPickerView } from '../view/color-picker.js'
+import { APaletteController } from './a-palette.js'
+import { ColorTextsController } from './color-texts.js'
+import { HPaletteController } from './h-palette.js'
+import { SvPaletteController } from './sv-palette.js'
 
-import {ColorPlus} from '../model/color-plus.js';
-import {ColorPickerView} from '../view/color-picker.js';
-import {APaletteController} from './a-palette.js';
-import {ColorTextsController} from './color-texts.js';
-import {HPaletteController} from './h-palette.js';
-import {SvPaletteController} from './sv-palette.js';
-
-interface Config {
-	colorType: ColorType;
-	value: Value<ColorPlus>;
-	viewProps: ViewProps;
-	supportsAlpha: boolean;
+type Config = {
+	colorType: ColorType
+	supportsAlpha: boolean
+	value: Value<ColorPlus>
+	viewProps: ViewProps
 }
 
-export class ColorPickerController
-	implements ValueController<ColorPlus, ColorPickerView>
-{
-	public readonly value: Value<ColorPlus>;
-	public readonly view: ColorPickerView;
-	public readonly viewProps: ViewProps;
-	private readonly alphaIcs_: {
-		palette: APaletteController;
-		text: NumberTextController;
-	} | null;
-	private readonly hPaletteC_: HPaletteController;
-	private readonly svPaletteC_: SvPaletteController;
-	private readonly textsC_: ColorTextsController;
+export class ColorPickerController implements ValueController<ColorPlus, ColorPickerView> {
+	private readonly alphaIcs: {
+		palette: APaletteController
+		text: NumberTextController
+	} | null
+
+	private readonly hPaletteC: HPaletteController
+	private readonly svPaletteC: SvPaletteController
+	private readonly textsC: ColorTextsController
+	public readonly value: Value<ColorPlus>
+	public readonly view: ColorPickerView
+	public readonly viewProps: ViewProps
 
 	constructor(doc: Document, config: Config) {
-		this.value = config.value;
-		this.viewProps = config.viewProps;
+		this.value = config.value
+		this.viewProps = config.viewProps
 
-		this.hPaletteC_ = new HPaletteController(doc, {
+		this.hPaletteC = new HPaletteController(doc, {
 			value: this.value,
 			viewProps: this.viewProps,
-		});
-		this.svPaletteC_ = new SvPaletteController(doc, {
+		})
+		this.svPaletteC = new SvPaletteController(doc, {
 			value: this.value,
 			viewProps: this.viewProps,
-		});
-		this.alphaIcs_ = config.supportsAlpha
+		})
+		this.alphaIcs = config.supportsAlpha
 			? {
 					palette: new APaletteController(doc, {
 						value: this.value,
@@ -61,51 +59,51 @@ export class ColorPickerController
 					text: new NumberTextController(doc, {
 						parser: parseNumber,
 						props: ValueMap.fromObject({
-							pointerScale: 0.01,
-							keyScale: 0.1,
 							formatter: createNumberFormatter(3),
+							keyScale: 0.1,
+							pointerScale: 0.01,
 						}),
 						value: createValue(0, {
-							constraint: new DefiniteRangeConstraint({min: 0, max: 1}),
+							constraint: new DefiniteRangeConstraint({ max: 1, min: 0 }),
 						}),
 						viewProps: this.viewProps,
 					}),
 				}
-			: null;
-		if (this.alphaIcs_) {
+			: null
+		if (this.alphaIcs) {
 			connectValues({
-				primary: this.value,
-				secondary: this.alphaIcs_.text.value,
-				forward: (p) => p.alpha,
-				backward: (p, s) => {
-					p.alpha = s;
-					return p.clone();
+				backward(p, s) {
+					p.alpha = s
+					return p.clone()
 				},
-			});
+				forward: (p) => p.alpha,
+				primary: this.value,
+				secondary: this.alphaIcs.text.value,
+			})
 		}
 
-		this.textsC_ = new ColorTextsController(doc, {
+		this.textsC = new ColorTextsController(doc, {
 			colorType: config.colorType,
 			value: this.value,
 			viewProps: this.viewProps,
-		});
+		})
 
 		this.view = new ColorPickerView(doc, {
-			alphaViews: this.alphaIcs_
+			alphaViews: this.alphaIcs
 				? {
-						palette: this.alphaIcs_.palette.view,
-						text: this.alphaIcs_.text.view,
+						palette: this.alphaIcs.palette.view,
+						text: this.alphaIcs.text.view,
 					}
 				: null,
-			hPaletteView: this.hPaletteC_.view,
+			hPaletteView: this.hPaletteC.view,
 			supportsAlpha: config.supportsAlpha,
-			svPaletteView: this.svPaletteC_.view,
-			textsView: this.textsC_.view,
+			svPaletteView: this.svPaletteC.view,
+			textsView: this.textsC.view,
 			viewProps: this.viewProps,
-		});
+		})
 	}
 
 	get textsController(): ColorTextsController {
-		return this.textsC_;
+		return this.textsC
 	}
 }
