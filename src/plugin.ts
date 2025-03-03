@@ -13,7 +13,7 @@ import { parseColorInputParams, validateColorInputParams } from './util.js'
 
 export type ColorValueExternal =
 	| ColorTupleRgb
-	| ColorTupleRgba // Only strings for now...
+	| ColorTupleRgba
 	| number
 	| Record<string, null | number>
 	| string

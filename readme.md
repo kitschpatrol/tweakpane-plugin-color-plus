@@ -297,3 +297,6 @@ hsla()
 "{r: 100%, g: 50%, b: 0%, a: 100%}"
 
 ## Options
+
+- <https://bottosson.github.io/misc/colorpicker/>
+- <https://bottosson.github.io/posts/colorpicker/>
