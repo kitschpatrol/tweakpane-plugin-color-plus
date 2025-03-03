@@ -19,12 +19,12 @@ type Config = {
 	viewProps: ViewProps
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line ts/naming-convention
 export class HPaletteController implements ValueController<ColorPlus, HPaletteView> {
-	private readonly pointerHandler: PointerHandler
 	public readonly value: Value<ColorPlus>
 	public readonly view: HPaletteView
 	public readonly viewProps: ViewProps
+	private readonly pointerHandler: PointerHandler
 
 	constructor(doc: Document, config: Config) {
 		this.onKeyDown = this.onKeyDown.bind(this)

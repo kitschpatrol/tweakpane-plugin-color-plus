@@ -20,11 +20,11 @@ type Config = {
 const canvasResolution = 64
 
 export class SvPaletteView implements View {
-	private lastHue = -1
-	private readonly markerElement: HTMLDivElement
 	public readonly canvasElement: HTMLCanvasElement
 	public readonly element: HTMLElement
 	public readonly value: Value<ColorPlus>
+	private lastHue = -1
+	private readonly markerElement: HTMLDivElement
 
 	constructor(doc: Document, config: Config) {
 		this.onValueChange = this.onValueChange.bind(this)
@@ -79,7 +79,7 @@ export class SvPaletteView implements View {
 				spaceId: 'hsv',
 			}
 
-			const { height, width } = this.canvasElement
+			const { width, height } = this.canvasElement
 			const imgData = context.getImageData(0, 0, width, height)
 			const { data } = imgData
 

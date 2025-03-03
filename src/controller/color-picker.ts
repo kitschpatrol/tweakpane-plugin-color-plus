@@ -26,17 +26,21 @@ type Config = {
 }
 
 export class ColorPickerController implements ValueController<ColorPlus, ColorPickerView> {
-	private readonly alphaIcs: {
-		palette: APaletteController
-		text: NumberTextController
-	} | null
-
-	private readonly hPaletteC: HPaletteController
-	private readonly svPaletteC: SvPaletteController
-	private readonly textsC: ColorTextsController
 	public readonly value: Value<ColorPlus>
+
 	public readonly view: ColorPickerView
 	public readonly viewProps: ViewProps
+	get textsController(): ColorTextsController {
+		return this.textsC
+	}
+	private readonly alphaIcs: null | {
+		palette: APaletteController
+		text: NumberTextController
+	}
+	private readonly hPaletteC: HPaletteController
+	private readonly svPaletteC: SvPaletteController
+
+	private readonly textsC: ColorTextsController
 
 	constructor(doc: Document, config: Config) {
 		this.value = config.value
@@ -64,7 +68,7 @@ export class ColorPickerController implements ValueController<ColorPlus, ColorPi
 							pointerScale: 0.01,
 						}),
 						value: createValue(0, {
-							constraint: new DefiniteRangeConstraint({ max: 1, min: 0 }),
+							constraint: new DefiniteRangeConstraint({ min: 0, max: 1 }),
 						}),
 						viewProps: this.viewProps,
 					}),
@@ -101,9 +105,5 @@ export class ColorPickerController implements ValueController<ColorPlus, ColorPi
 			textsView: this.textsC.view,
 			viewProps: this.viewProps,
 		})
-	}
-
-	get textsController(): ColorTextsController {
-		return this.textsC
 	}
 }

@@ -1,3 +1,5 @@
+console.log('I am not empty!')
+
 // Import Color from 'colorjs.io';
 // // import {toGamutCSS} from 'colorjs.io/fn';
 
@@ -12,11 +14,11 @@
 // 	ObjectFormat,
 // 	TupleFormat,
 // } from './model/color-plus';
-// const colora = new Color('color(hsl 360 0 0)');
-// const colorb = colora.clone().to('srgb');
-// console.log(colora.toString());
-// console.log(colora.coords);
-// console.log(colorb.coords);
+// const colorA = new Color('color(hsl 360 0 0)');
+// const colorB = colorA.clone().to('srgb');
+// console.log(colorA.toString());
+// console.log(colorA.coords);
+// console.log(colorB.coords);
 // // // console.log('----------------------------------');
 // // // console.log(color.to('srgb')); // #ff0000
 // // // console.log('----------------------------------');

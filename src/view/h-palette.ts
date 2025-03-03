@@ -8,11 +8,11 @@ type Config = {
 	viewProps: ViewProps
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line ts/naming-convention
 export class HPaletteView implements View {
-	private readonly markerElement: HTMLDivElement
 	public readonly element: HTMLElement
 	public readonly value: Value<ColorPlus>
+	private readonly markerElement: HTMLDivElement
 
 	constructor(doc: Document, config: Config) {
 		this.onValueChange = this.onValueChange.bind(this)

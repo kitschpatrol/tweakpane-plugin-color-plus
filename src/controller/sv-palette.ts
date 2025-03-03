@@ -22,10 +22,10 @@ type Config = {
 }
 
 export class SvPaletteController implements ValueController<ColorPlus, SvPaletteView> {
-	private readonly pointerHandler: PointerHandler
 	public readonly value: Value<ColorPlus>
 	public readonly view: SvPaletteView
 	public readonly viewProps: ViewProps
+	private readonly pointerHandler: PointerHandler
 
 	constructor(doc: Document, config: Config) {
 		this.onKeyDown = this.onKeyDown.bind(this)

@@ -33,14 +33,18 @@ type Config = {
 }
 
 export class ColorController implements ValueController<ColorPlus, ColorView> {
+	public readonly value: Value<ColorPlus>
+	public readonly view: ColorView
+	public readonly viewProps: ViewProps
+	get textController(): TextController<ColorPlus> {
+		return this.textC
+	}
 	private readonly foldable: Foldable
 	private readonly pickerC: ColorPickerController
 	private readonly popC: null | PopupController
 	private readonly swatchC: ColorSwatchController
+
 	private readonly textC: TextController<ColorPlus>
-	public readonly value: Value<ColorPlus>
-	public readonly view: ColorView
-	public readonly viewProps: ViewProps
 
 	constructor(doc: Document, config: Config) {
 		this.onButtonBlur = this.onButtonBlur.bind(this)
@@ -170,9 +174,5 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 		} else if (this.view.pickerElement && event.key === 'Escape') {
 			this.swatchC.view.buttonElement.focus()
 		}
-	}
-
-	get textController(): TextController<ColorPlus> {
-		return this.textC
 	}
 }

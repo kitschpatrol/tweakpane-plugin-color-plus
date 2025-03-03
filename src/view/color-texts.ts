@@ -29,6 +29,7 @@ function createModeSelectElement(doc: Document): HTMLSelectElement {
 		// {text: 'OKLCH', value: 'oklch'},
 	]
 	selectElement.append(
+		// eslint-disable-next-line unicorn/no-array-reduce
 		items.reduce((frag, item) => {
 			const optElement = doc.createElement('option')
 			optElement.textContent = item.text
@@ -41,10 +42,23 @@ function createModeSelectElement(doc: Document): HTMLSelectElement {
 }
 
 export class ColorTextsView implements View {
-	private readonly inputsElement: HTMLElement
-	private inputViewsInternal: InputView[]
-	private readonly modeElement: HTMLSelectElement
 	public readonly element: HTMLElement
+	get inputViews(): InputView[] {
+		return this.inputViewsInternal
+	}
+	set inputViews(inputViews: InputView[]) {
+		this.inputViewsInternal = inputViews
+		this.applyInputViewsInternal()
+	}
+	get modeSelectElement(): HTMLSelectElement {
+		return this.modeElement
+	}
+
+	private readonly inputsElement: HTMLElement
+
+	private inputViewsInternal: InputView[]
+
+	private readonly modeElement: HTMLSelectElement
 
 	constructor(doc: Document, config: Config) {
 		this.element = doc.createElement('div')
@@ -88,18 +102,5 @@ export class ColorTextsView implements View {
 			compElement.append(v.element)
 			this.inputsElement.append(compElement)
 		}
-	}
-
-	get inputViews(): InputView[] {
-		return this.inputViewsInternal
-	}
-
-	set inputViews(inputViews: InputView[]) {
-		this.inputViewsInternal = inputViews
-		this.applyInputViewsInternal()
-	}
-
-	get modeSelectElement(): HTMLSelectElement {
-		return this.modeElement
 	}
 }

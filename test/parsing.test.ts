@@ -33,18 +33,18 @@ it('parses object colors correctly', () => {
 	const tests = [
 		[
 			{
-				b: 102,
-				g: 0,
 				r: 255,
+				g: 0,
+				b: 102,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 1)',
 		],
 		[
 			{
-				a: 0.5,
-				b: 102,
-				g: 0,
 				r: 255,
+				g: 0,
+				b: 102,
+				a: 0.5,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 0.5)',
 		],
@@ -67,13 +67,13 @@ it('parses object colors correctly', () => {
 		],
 		[
 			{
+				r: 255,
 				b: 102,
 				green: 0,
-				r: 255,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 1)',
 		],
-		[{ h: 336, l: 50, s: 100 }, 'ColorPlus(hsl, [336,100,50], 1)'],
+		[{ h: 336, s: 100, l: 50 }, 'ColorPlus(hsl, [336,100,50], 1)'],
 		[{ h: 336, s: 100, v: 100 }, 'ColorPlus(hsv, [336,100,100], 1)'],
 		[{ b: 0, h: 336, w: 0 }, 'ColorPlus(hwb, [336,0,0], 1)'],
 		[{ a: 83, b: 21, l: 55 }, 'ColorPlus(lab, [55,83,21], 1)'],
@@ -96,18 +96,18 @@ it('parses object float colors correctly', () => {
 	const tests = [
 		[
 			{
-				b: 0.4,
-				g: 0,
 				r: 1,
+				g: 0,
+				b: 0.4,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 1)',
 		],
 		[
 			{
-				a: 0.5,
-				b: 0.4,
-				g: 0,
 				r: 1,
+				g: 0,
+				b: 0.4,
+				a: 0.5,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 0.5)',
 		],

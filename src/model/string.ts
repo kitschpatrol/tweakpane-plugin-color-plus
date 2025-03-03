@@ -18,9 +18,12 @@ import {
 	toDecimalPrecision,
 } from './shared'
 
+/**
+ * Parses a CSS color string into a color object and format metadata
+ */
 export function stringToColor(
 	value: unknown,
-): { color: ColorPlusObject; format: ColorFormat } | undefined {
+): undefined | { color: ColorPlusObject; format: ColorFormat } {
 	if (typeof value !== 'string') {
 		return undefined
 	}
@@ -76,6 +79,9 @@ export function stringToColor(
 	}
 }
 
+/**
+ * Converts a color object into a CSS color string, using the provided format metadata
+ */
 export function colorToString(
 	color: ColorPlusObject,
 	format: ColorFormat,
@@ -121,7 +127,6 @@ export function colorToString(
 							include: alphaOverride ?? format.alpha,
 							type: stringFormat.alphaType,
 						},
-
 		// InGamut: true, // TODO expose? Overrides inGamut in the format object
 		commas: stringFormat.commas,
 		// @ts-expect-error - Type definition inconsistencies
@@ -152,7 +157,8 @@ type DecimalPrecision = {
 /**
  * Special case for RGB integer-style values
  * https://github.com/color-js/color.js/issues/203
- * Returns a new color object */
+ * Returns a new color object
+ */
 function toDecimalPrecisionForFormat(
 	color: ColorPlusObject,
 	stringFormat: StringFormat,
@@ -163,7 +169,7 @@ function toDecimalPrecisionForFormat(
 	if (
 		!(
 			(stringFormat.formatId === 'rgb' || stringFormat.formatId === 'rgba') &&
-			stringFormat.types?.every((value) => value === '<number>[0,255]')
+			stringFormat.types.every((value) => value === '<number>[0,255]')
 		)
 	) {
 		return color
@@ -171,6 +177,7 @@ function toDecimalPrecisionForFormat(
 
 	const newColor = copyColorPlusObject(color)
 
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (stringFormat.types !== undefined) {
 		for (let index = 0; index < newColor.coords.length; index++) {
 			newColor.coords[index] = toDecimalPrecisionForCoordinate(
@@ -212,6 +219,7 @@ function toDecimalPrecisionForCoordinate(
 	}
 
 	const coordFormat = getCoordFormat(format, index)!
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (coordFormat === undefined) {
 		console.error('coordFormat undefined')
 		return value
@@ -253,8 +261,6 @@ function toDecimalPrecisionForCoordinate(
  * Transforms the input string to expand supported import formats
  * - 0x-prefixed hex string support
  * - Legacy HSL compatibility: The built-in Tweakpane color input control accepts HSL strings without `%` units, e.g. `hsl(20, 15, 30)`, but color.js and the CSS standard do not.
- * @param value
- * @returns
  */
 function legacyTweakpaneColorStringNormalization(value: string): string {
 	const trimmed = value.trim()
@@ -264,6 +270,7 @@ function legacyTweakpaneColorStringNormalization(value: string): string {
 
 	if (trimmed.startsWith('hsl')) {
 		let index = 0
+		// eslint-disable-next-line regexp/no-unused-capturing-group
 		return trimmed.replaceAll(/([\d.]+%?)/g, (match) => {
 			if (index === 0 || match.includes('%') || index > 2) {
 				index += 1

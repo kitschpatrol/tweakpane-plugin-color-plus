@@ -1,3 +1,17 @@
+// @case-police-ignore Postcss, Typescript
+
+// eslint-disable-next-line ts/ban-ts-comment
+// @ts-nocheck
+
+/* eslint-disable ts/no-unsafe-call */
+/* eslint-disable unicorn/no-array-reduce */
+/* eslint-disable ts/no-unsafe-member-access */
+/* eslint-disable ts/no-unsafe-return */
+/* eslint-disable new-cap */
+/* eslint-disable ts/no-deprecated */
+/* eslint-disable ts/naming-convention */
+/* eslint-disable import/no-named-as-default */
+/* eslint-disable ts/no-unsafe-assignment */
 /* eslint-env node */
 
 import Alias from '@rollup/plugin-alias'
@@ -11,7 +25,7 @@ import Postcss from 'postcss'
 import Cleanup from 'rollup-plugin-cleanup'
 import * as Sass from 'sass'
 
-const Package = JSON.parse(fs.readFileSync('./package.json'))
+const Package = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
 
 async function compileCss() {
 	const css = Sass.renderSync({

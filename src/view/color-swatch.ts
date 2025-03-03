@@ -9,11 +9,11 @@ type Config = {
 const cn = ClassName('colsw')
 
 export class ColorSwatchView implements View {
-	private readonly swatchFallbackElement: HTMLDivElement
-	private readonly swatchRealElement: HTMLDivElement
 	public readonly buttonElement: HTMLButtonElement
 	public readonly element: HTMLElement
 	public readonly value: Value<ColorPlus>
+	private readonly swatchFallbackElement: HTMLDivElement
+	private readonly swatchRealElement: HTMLDivElement
 
 	constructor(doc: Document, config: Config) {
 		this.onValueChange = this.onValueChange.bind(this)

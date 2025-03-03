@@ -9,7 +9,7 @@ import { ColorController } from './controller/color.js'
 import { ColorPlus } from './model/color-plus.js'
 import { type ColorFormat, formatIsSerializable } from './model/shared.js'
 import { type ColorTupleRgb, type ColorTupleRgba } from './model/tuple.js'
-import { parseColorInputParams, validateColorInputParams } from './util.js'
+import { parseColorInputParams, validateColorInputParams } from './utilities.js'
 
 export type ColorValueExternal =
 	| ColorTupleRgb
@@ -17,7 +17,7 @@ export type ColorValueExternal =
 	| number
 	| Record<string, null | number>
 	| string
-export type ColorPlusInputParams = {
+export type ColorPlusInputParams = BaseInputParams & {
 	color?: {
 		// In the original tweakpane installation, this is only applied to number values
 		alpha?: boolean
@@ -28,16 +28,16 @@ export type ColorPlusInputParams = {
 	}
 	expanded?: boolean
 	picker?: PickerLayout
-} & BaseInputParams
+}
 
-type ColorPlusInputParamsInternal = {
+type ColorPlusInputParamsInternal = ColorPlusInputParams & {
 	format: ColorFormat
 	lastExternalValue: ColorValueExternal
 	// Misuse parameters to prevent rounding-related jitter on pane.refresh()
 	lastInternalValue: ColorPlus
-} & ColorPlusInputParams
+}
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line ts/naming-convention
 export const ColorPlusInputPlugin: InputBindingPlugin<
 	ColorPlus,
 	ColorValueExternal,
@@ -186,7 +186,9 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				if (args.params.color?.formatLocked === false) {
 					const newFormat = ColorPlus.getFormat(
 						text,
+						// eslint-disable-next-line ts/no-unnecessary-condition
 						args.params.color?.alpha,
+						// eslint-disable-next-line ts/no-unnecessary-condition
 						args.params.color?.type,
 					)
 					if (newFormat === undefined) {

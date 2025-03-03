@@ -7,10 +7,10 @@ import { type SvPaletteView } from './sv-palette.js'
 const cn = ClassName('colp')
 
 type Config = {
-	alphaViews: {
+	alphaViews: null | {
 		palette: APaletteView
 		text: NumberTextView
-	} | null
+	}
 	hPaletteView: HPaletteView
 	supportsAlpha: boolean
 	svPaletteView: SvPaletteView
@@ -19,16 +19,30 @@ type Config = {
 }
 
 export class ColorPickerView implements View {
-	private readonly alphaViews: {
+	public readonly element: HTMLElement
+
+	get allFocusableElements(): HTMLElement[] {
+		const elements = [
+			this.svPaletteView.element,
+			this.hPaletteView.element,
+			this.textsView.modeSelectElement,
+			...this.textsView.inputViews.map((v) => v.inputElement),
+		]
+		if (this.alphaViews) {
+			elements.push(this.alphaViews.palette.element, this.alphaViews.text.inputElement)
+		}
+
+		return elements
+	}
+
+	private readonly alphaViews: null | {
 		palette: APaletteView
 		text: NumberTextView
-	} | null = null
-
+	} = null
 	private readonly hPaletteView: HPaletteView
-
 	private readonly svPaletteView: SvPaletteView
+
 	private readonly textsView: ColorTextsView
-	public readonly element: HTMLElement
 
 	constructor(doc: Document, config: Config) {
 		this.element = doc.createElement('div')
@@ -78,19 +92,5 @@ export class ColorPickerView implements View {
 
 			this.element.append(aElement)
 		}
-	}
-
-	get allFocusableElements(): HTMLElement[] {
-		const elements = [
-			this.svPaletteView.element,
-			this.hPaletteView.element,
-			this.textsView.modeSelectElement,
-			...this.textsView.inputViews.map((v) => v.inputElement),
-		]
-		if (this.alphaViews) {
-			elements.push(this.alphaViews.palette.element, this.alphaViews.text.inputElement)
-		}
-
-		return elements
 	}
 }

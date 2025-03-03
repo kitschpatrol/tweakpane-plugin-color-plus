@@ -1,23 +1,25 @@
 {
 	"name": "tweakpane-plugin-color-plus",
 	"version": "0.0.0",
-	"type": "module",
 	"description": "Advanced color handling for Tweakpane.",
-	"repository": "github:kitschpatrol/tweakpane-plugin-color-plus",
+	"keywords": [
+		"npm-package",
+		"tweakpane",
+		"tweakpane-plugin"
+	],
 	"homepage": "https://github.com/kitschpatrol/tweakpane-plugin-color-plus",
 	"bugs": "https://github.com/kitschpatrol/tweakpane-plugin-color-plus/issues",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/kitschpatrol/tweakpane-plugin-color-plus"
+	},
+	"license": "MIT",
 	"author": {
 		"name": "Eric Mika",
 		"email": "eric@ericmika.com",
 		"url": "https://ericmika.com"
 	},
-	"license": "MIT",
-	"packageManager": "pnpm@9.14.2",
-	"engines": {
-		"node": ">=22.0.0",
-		"pnpm": ">=9.0.0"
-	},
-	"main": "dist/tweakpane-plugin-color-plus.js",
+	"type": "module",
 	"exports": {
 		".": {
 			"types": "./dist/types/index.d.ts",
@@ -28,14 +30,10 @@
 			"default": "./dist/tweakpane-plugin-color-plus.lite.js"
 		}
 	},
+	"main": "dist/tweakpane-plugin-color-plus.js",
 	"types": "dist/types/index.d.ts",
 	"files": [
 		"dist"
-	],
-	"keywords": [
-		"npm-package",
-		"tweakpane",
-		"tweakpane-plugin"
 	],
 	"scripts": {
 		"build": "run-p build:*",
@@ -46,8 +44,8 @@
 		"dev": "vite",
 		"dev:cdn": "vite ./demo/cdn --open",
 		"dev:npm": "vite ./demo/npm --open",
-		"fix": "shared-config --fix",
-		"lint": "shared-config --lint",
+		"fix": "kpi fix",
+		"lint": "kpi lint",
 		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
 		"start": "run-p watch dev",
 		"test": "vitest",
@@ -56,14 +54,11 @@
 		"watch:sass": "onchange --initial --kill \"src/sass/**/*.scss\" -- pnpm run build:dev",
 		"watch:ts": "onchange --initial --kill \"src/**/*.ts\" -- pnpm run build:dev"
 	},
-	"peerDependencies": {
-		"tweakpane": "^4.0.0"
-	},
 	"dependencies": {
 		"@tweakpane/core": "^2.0.5"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^4.7.12",
+		"@kitschpatrol/shared-config": "^5.0.6",
 		"@rollup/plugin-alias": "^5.1.1",
 		"@rollup/plugin-node-resolve": "^15.3.0",
 		"@rollup/plugin-replace": "^6.0.1",
@@ -72,7 +67,7 @@
 		"@types/node": "^22.9.3",
 		"autoprefixer": "^10.4.20",
 		"bumpp": "^9.8.1",
-		"colorjs.io": "link:../color.js",
+		"colorjs.io": "^0.6.0-alpha.1",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0",
 		"postcss": "^8.4.49",
@@ -80,11 +75,28 @@
 		"rollup": "^4.27.4",
 		"rollup-plugin-cleanup": "^3.2.1",
 		"sass": "^1.81.0",
-		"typescript": "^5.7.2",
+		"typescript": "~5.7.3",
 		"vite": "^5.4.11",
 		"vitest": "^2.1.5"
 	},
+	"peerDependencies": {
+		"tweakpane": "^4.0.0"
+	},
+	"packageManager": "pnpm@10.5.2",
+	"engines": {
+		"node": ">=20.9.0"
+	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"@parcel/watcher",
+			"esbuild",
+			"puppeteer"
+		],
+		"overrides": {
+			"eslint-plugin-markdown": "^5.1.0"
+		}
 	}
 }

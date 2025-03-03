@@ -8,13 +8,13 @@ type Config = {
 	viewProps: ViewProps
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line ts/naming-convention
 export class APaletteView implements View {
+	public readonly element: HTMLElement
+	public readonly value: Value<ColorPlus>
 	private readonly colorElement: HTMLDivElement
 	private readonly markerElement: HTMLDivElement
 	private readonly previewElement: HTMLDivElement
-	public readonly element: HTMLElement
-	public readonly value: Value<ColorPlus>
 
 	constructor(doc: Document, config: Config) {
 		this.onValueChange = this.onValueChange.bind(this)

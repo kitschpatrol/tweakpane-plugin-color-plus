@@ -39,16 +39,17 @@ type ColorMode = 'hsl' | 'hsv' | 'srgb'
 
 function createConstraint(mode: ColorMode, type: ColorType, index: number): Constraint<number> {
 	if (type === 'float') {
-		return new DefiniteRangeConstraint({ max: 1, min: 0 })
+		return new DefiniteRangeConstraint({ min: 0, max: 1 })
 	}
 
 	const [min, max] = getRangeForChannel(mode, index)
 
+	// eslint-disable-next-line ts/no-unnecessary-condition
 	const coefficient = type === 'int' && mode === 'srgb' ? 255 : 1
 
 	return new DefiniteRangeConstraint({
-		max: max * coefficient,
 		min: min * coefficient,
+		max: max * coefficient,
 	})
 }
 
@@ -105,8 +106,10 @@ function createComponentControllers(
 
 				comps[i] =
 					config.colorType === 'float'
-						? denormalizeCoord(config.colorMode, i, s ?? 0)
-						: (s ?? 0) / (config.colorMode === 'srgb' ? 255 : 1)
+						? // eslint-disable-next-line ts/no-unnecessary-condition
+							denormalizeCoord(config.colorMode, i, s ?? 0)
+						: // eslint-disable-next-line ts/no-unnecessary-condition
+							(s ?? 0) / (config.colorMode === 'srgb' ? 255 : 1)
 				newColor.setAll(comps, config.colorMode)
 
 				// Edge case to prevent wrapping 360 to 0 in HSL
@@ -126,8 +129,9 @@ function createComponentControllers(
 			forward(p) {
 				let rawValue = p.getAll(config.colorMode)[i] ?? 0
 
-				// Edge case to prevent wrapping 360 to 0 in HSL
 				// TODO revisit
+				// Edge case to prevent wrapping 360 to 0 in HSL
+				// eslint-disable-next-line ts/no-unnecessary-condition
 				if (i === 0 && config.colorMode === 'hsl' && (p.get('h', 'hsv') ?? 0) === 360) {
 					rawValue = 360
 				}
@@ -182,7 +186,7 @@ function createHexController(
 
 	connectValues({
 		// TODO hmm, s
-		backward(p, s) {
+		backward(_, s) {
 			return s
 		},
 		// TODO hmm
@@ -203,12 +207,12 @@ function isColorMode(mode: ColorTextsMode): mode is ColorMode {
 type ComponentValueController = ValueController<unknown, InputView>
 
 export class ColorTextsController implements ValueController<ColorPlus, ColorTextsView> {
-	private ccs: ComponentValueController[]
-	private readonly colorType: ColorType
 	public readonly colorMode: Value<ColorTextsMode>
 	public readonly value: Value<ColorPlus>
 	public readonly view: ColorTextsView
 	public readonly viewProps: ViewProps
+	private ccs: ComponentValueController[]
+	private readonly colorType: ColorType
 
 	constructor(doc: Document, config: Config) {
 		this.onModeSelectChange = this.onModeSelectChange.bind(this)

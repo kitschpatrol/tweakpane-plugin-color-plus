@@ -17,12 +17,12 @@ type Config = {
 	viewProps: ViewProps
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line ts/naming-convention
 export class APaletteController implements ValueController<ColorPlus, APaletteView> {
-	private readonly pointerHandler: PointerHandler
 	public readonly value: Value<ColorPlus>
 	public readonly view: APaletteView
 	public readonly viewProps: ViewProps
+	private readonly pointerHandler: PointerHandler
 
 	constructor(doc: Document, config: Config) {
 		this.onKeyDown = this.onKeyDown.bind(this)

@@ -90,12 +90,10 @@ it('clones the object', () => {
 	expect(id).not.toBe(getObjectId(c2))
 })
 
-function getObjectId<T extends object>(object: T): symbol {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	type ObjectWithId = { __id?: symbol } & T
+function getObjectId(object: unknown): symbol {
+	// eslint-disable-next-line ts/naming-convention
+	type ObjectWithId = { __id?: symbol }
 	const object_ = object as ObjectWithId
-
 	object_.__id ??= Symbol(Date.now().toString())
-
 	return object_.__id
 }

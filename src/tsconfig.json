@@ -1,9 +1,9 @@
 {
 	"compilerOptions": {
+		"target": "ES6",
 		"lib": ["DOM", "ES2021"],
 		"moduleResolution": "Bundler",
-		"strict": true,
-		"target": "ES6",
-		"checkJs": true
+		"checkJs": true,
+		"strict": true
 	}
 }

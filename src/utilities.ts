@@ -2,6 +2,9 @@ import { isObject, parsePickerLayout, parseRecord } from '@tweakpane/core'
 import { type ColorType } from './model/shared'
 import { type ColorPlusInputParams } from './plugin'
 
+/**
+ * TK
+ */
 export function parseColorInputParams(
 	params: Record<string, unknown>,
 ): ColorPlusInputParams | undefined {
@@ -42,6 +45,9 @@ function parseColorType(value: unknown): ColorType | undefined {
 // 	return format.alpha ?? false;
 // }
 
+/**
+ * TK
+ */
 export function validateColorInputParams(
 	params: ColorPlusInputParams,
 	colorValue: unknown,

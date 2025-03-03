@@ -187,14 +187,13 @@ function isNumberRecord(value: unknown): value is Record<string, null | number> 
 }
 
 /**
+ * Convert an unknown object to a color object
  * @param value Accepts objects or object-like strings, e.g. `'{r: 255, g: 0, b: 0, a: .5 }'`
- * @param colorType
- * @returns
  */
 export function objectToColor(
 	value: unknown,
 	colorType: ColorType,
-): { color: ColorPlusObject; format: ColorFormat } | undefined {
+): undefined | { color: ColorPlusObject; format: ColorFormat } {
 	// Handle object-like strings, too
 	const objectValue = typeof value === 'string' ? (parseObjectString(value) ?? value) : value
 

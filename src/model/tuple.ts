@@ -40,19 +40,19 @@ function isColorTuple(value: unknown): value is ColorTupleRgb | ColorTupleRgba {
 }
 
 /**
+ * Converts a tuple to a ColorPlusObject
  * @param value Accepts arrays / tuples or tuple-like strings, e.g. `'[1, 2, 3]'`
- * @param colorType
- * @returns
+ * @param colorType The color type to convert to
  */
 export function tupleToColor(
 	value: unknown,
 	colorType: ColorType,
 ):
+	| undefined
 	| {
 			color: ColorPlusObject
 			format: ColorFormat
-	  }
-	| undefined {
+	  } {
 	// Handle tuple-like strings, too
 	const tupleValue = typeof value === 'string' ? (parseTupleString(value) ?? value) : value
 
@@ -83,6 +83,9 @@ export function tupleToColor(
 	}
 }
 
+/**
+ * Converts a ColorPlusObject to a tuple
+ */
 export function colorToTuple(
 	color: ColorPlusObject,
 	format: ColorFormat,
@@ -115,6 +118,9 @@ export function colorToTuple(
 	return result as ColorTupleRgb
 }
 
+/**
+ * Converts a ColorPlusObject to a coordinate value string
+ */
 export function colorToTupleString(
 	color: ColorPlusObject,
 	format: ColorFormat,

@@ -5,7 +5,7 @@ import { stringToColor } from './string'
 export function numberToColor(
 	value: unknown,
 	hasAlpha?: boolean,
-): { color: ColorPlusObject; format: ColorFormat } | undefined {
+): undefined | { color: ColorPlusObject; format: ColorFormat } {
 	if (typeof value !== 'number' || !Number.isFinite(value)) {
 		// No need to parse strings here because stringToColor will catch them
 		return undefined

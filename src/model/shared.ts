@@ -119,9 +119,10 @@ export type TupleFormat = {
 	colorType: ColorType
 }
 
-export type NumberFormat = {
-	// Nothing for now, but important to distinguish from non-object format strings
-}
+// TODO export?
+// Nothing for now, but important to distinguish from non-object format strings
+// eslint-disable-next-line ts/no-empty-object-type
+type NumberFormat = {}
 
 /**
  * Original format and alpha state inferred from the user-provided value
@@ -271,9 +272,9 @@ export function getRangeForChannel(spaceId: ColorSpaceId, channelIndex: number):
 
 /**
  * Round a number to a certain number of significant digits after the decimal point
- * @param {number} n - The number to round
- * @param {number} decimalPrecision - Number of digits after the decimal point
- * @returns {number} The rounded number
+ * @param n - The number to round
+ * @param decimalPrecision - Number of digits after the decimal point
+ * @returns The rounded number
  * @example
  * toDecimalPrecision(3.14159, 2) // returns 3.14
  * toDecimalPrecision(10.9999, 1) // returns 11.0
@@ -282,6 +283,7 @@ export function getRangeForChannel(spaceId: ColorSpaceId, channelIndex: number):
 export function toDecimalPrecision(n: number, decimalPrecision: number | undefined): number {
 	if (
 		decimalPrecision === undefined ||
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		decimalPrecision === null ||
 		decimalPrecision < 0 ||
 		!Number.isInteger(decimalPrecision) ||
@@ -315,10 +317,12 @@ export function formatNumber(value: number, digits: number | undefined): string 
 export function isStringFormat(format: ColorFormat['format']): format is StringFormat {
 	return (
 		typeof format === 'object' &&
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		format !== null &&
 		'formatId' in format &&
 		'format' in format &&
 		typeof format.format === 'object' &&
+		// eslint-disable-next-line ts/no-unnecessary-condition
 		format.format !== null &&
 		'type' in format.format &&
 		typeof format.format.type === 'string'
@@ -329,7 +333,6 @@ export function isStringFormat(format: ColorFormat['format']): format is StringF
  *  Some formats are parsable by Color.js but not serializable, e.g. keyword
  *  formats like `'blue'`. We can accept these after the format is initialized,
  *  but not as an initial color value.
- * @param format
  * @returns true if the format is serializable
  */
 export function formatIsSerializable(format: ColorFormat): boolean {
@@ -342,6 +345,10 @@ export function formatIsSerializable(format: ColorFormat): boolean {
 	return true
 }
 
+/**
+ * Currently unused
+ * @public
+ */
 export function applyDecimalPrecision(
 	targetColor: ColorPlusObject,
 	decimalPrecision: number,
@@ -374,6 +381,10 @@ export function colorPlusObjectsAreEqual(a: ColorPlusObject, b: ColorPlusObject)
 	)
 }
 
+/**
+ * Currently unused
+ * @public
+ */
 export function denormalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
 	coords[0] = denormalizeCoord(space, 0, coords[0])
 	coords[1] = denormalizeCoord(space, 1, coords[1])
@@ -381,6 +392,10 @@ export function denormalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
 	return coords
 }
 
+/**
+ * Currently unused
+ * @public
+ */
 export function normalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
 	coords[0] = normalizeCoord(space, 0, coords[0])
 	coords[1] = normalizeCoord(space, 1, coords[1])

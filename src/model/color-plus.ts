@@ -30,6 +30,18 @@ import { colorToString, stringToColor } from './string'
 import { colorToTuple, colorToTupleString, tupleToColor } from './tuple'
 
 export class ColorPlus {
+	public get alpha(): number {
+		return this.color.alpha
+	}
+
+	public set alpha(value: number) {
+		this.color.alpha = constrainRange(value, 0, 1)
+	}
+
+	public get space(): ColorSpaceId {
+		return this.color.spaceId
+	}
+
 	private constructor(private color: ColorPlusObject) {}
 
 	public static create(
@@ -205,25 +217,13 @@ export class ColorPlus {
 			}
 		}
 	}
-
-	public get alpha(): number {
-		return this.color.alpha
-	}
-
-	public set alpha(value: number) {
-		this.color.alpha = constrainRange(value, 0, 1)
-	}
-
-	public get space(): ColorSpaceId {
-		return this.color.spaceId
-	}
 }
 
 function parseColorAndFormat(
 	value: unknown,
 	hasAlpha = false, // Numbers only
 	colorType: ColorType = 'int', // Object and tuples only
-): { color: ColorPlusObject; format: ColorFormat } | undefined {
+): undefined | { color: ColorPlusObject; format: ColorFormat } {
 	return (
 		stringToColor(value) ??
 		numberToColor(value, hasAlpha) ??

@@ -25,7 +25,7 @@ The Color Plus plugin adds support for many additional color string formats to t
 
 Currently, the plugin (almost) exactly matches the functionality, options, and control presentation of Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color) — just with support for additional parameter formats and types. This means it should work as a drop-in replacement in existing projects that need to support additional color formats, but it also means that the UI is not necessarily well-suited to manipulating the wide-gamut colors that can now be represented.
 
-Color notations for preceptually-uniform color spaces like [`oklch`](https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl) are supported, **but the current implementation clips all out-of-gamut colors to the `sRGB` color space**. Future versions of the plugin might implement additional UI and options tailored working with wide color targeting the P3 or Rec. 2020 gamuts.
+Color notations for perceptually-uniform color spaces like [`oklch`](https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl) are supported, **but the current implementation clips all out-of-gamut colors to the `sRGB` color space**. Future versions of the plugin might implement additional UI and options tailored working with wide color targeting the P3 or Rec. 2020 gamuts.
 
 The plugin was developed specifically for the benefit of [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui) and [Tweakpane CSS](https://github.com/kitschpatrol/tweakpane-css), but there's no reason it can't be used in vanilla Tweakpane projects as well.
 
@@ -90,6 +90,9 @@ pane.on('change', () => {
 <!doctype html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <title>Tweakpane Plugin Color Plus Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script type="importmap">
       {
         "imports": {
@@ -126,7 +129,7 @@ pane.on('change', () => {
 
 ### Color spaces
 
-As a trade-off between bundle size and flexibility, Color Plus only supports "predefined" color spaces included in the CSS 4 color specification, with the sole addition of `HSV` for parity with the built-in Tweakpane color input implementaiton.
+As a trade-off between bundle size and flexibility, Color Plus only supports "predefined" color spaces included in the CSS 4 color specification, with the sole addition of `HSV` for parity with the built-in Tweakpane color input implementation.
 
 Supported gamuts:
 
@@ -167,7 +170,7 @@ Supported spaces / color functions include:
 
 #### Tweakpane's built-in color handling
 
-This plugin is largely derrived from the core Tweakpane color input implementation — it (mostly) reuses the views and controllers, and only really makes significant changes to the model, where it replaces Tweakpane's bespoke color handling functionality with an implementation provided by the [Color.js](https://colorjs.io/) library.
+This plugin is largely derived from the core Tweakpane color input implementation — it (mostly) reuses the views and controllers, and only really makes significant changes to the model, where it replaces Tweakpane's bespoke color handling functionality with an implementation provided by the [Color.js](https://colorjs.io/) library.
 
 #### Pre-release Color.js version 0.6 dependency
 
