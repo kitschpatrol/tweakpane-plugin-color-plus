@@ -256,7 +256,7 @@ const functions = {
 }
 ```
 
-### Colorspace-specific functions
+### Space-specific functions
 
 You may use the modern `/`-separated format for alpha components, or the legacy `,`-separated format.
 
