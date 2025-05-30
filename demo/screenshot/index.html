@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Tweakpane Color Plus</title>
+		<style>
+			/* Pane Sizes */
+			:root {
+				--tp-blade-value-width: 65%;
+			}
+
+			/* Side-by-side */
+			body {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				justify-content: center;
+				min-height: 100vh;
+				margin: 0;
+				padding: 0;
+				background: linear-gradient(
+					in oklch 135deg,
+					oklch(60% 0.26 11deg),
+					oklch(60% 0.26 11deg / 50%)
+				);
+				background-color: black;
+			}
+
+			.box {
+				flex: 1 1 300px;
+				max-width: 400px;
+				min-height: 100px;
+				padding: 20px;
+			}
+
+			#plus {
+				border-radius: 6px;
+				box-shadow: 0 20px 40px rgb(0 0 0 / 30%);
+			}
+
+			@media (prefers-color-scheme: light) {
+				body {
+					background-color: white;
+				}
+
+				:root {
+					--tp-base-background-color: hsl(230deg 5% 90% / 100%);
+					--tp-base-shadow-color: hsl(0deg 0% 0% / 10%);
+					--tp-button-background-color: hsl(230deg 7% 75% / 100%);
+					--tp-button-background-color-active: hsl(230deg 7% 60% / 100%);
+					--tp-button-background-color-focus: hsl(230deg 7% 65% / 100%);
+					--tp-button-background-color-hover: hsl(230deg 7% 70% / 100%);
+					--tp-button-foreground-color: hsl(230deg 10% 30% / 100%);
+					--tp-container-background-color: hsl(230deg 15% 30% / 20%);
+					--tp-container-background-color-active: hsl(230deg 15% 30% / 32%);
+					--tp-container-background-color-focus: hsl(230deg 15% 30% / 28%);
+					--tp-container-background-color-hover: hsl(230deg 15% 30% / 24%);
+					--tp-container-foreground-color: hsl(230deg 10% 30% / 100%);
+					--tp-groove-foreground-color: hsl(230deg 15% 30% / 10%);
+					--tp-input-background-color: hsl(230deg 15% 30% / 10%);
+					--tp-input-background-color-active: hsl(230deg 15% 30% / 22%);
+					--tp-input-background-color-focus: hsl(230deg 15% 30% / 18%);
+					--tp-input-background-color-hover: hsl(230deg 15% 30% / 14%);
+					--tp-input-foreground-color: hsl(230deg 10% 30% / 100%);
+					--tp-label-foreground-color: hsl(230deg 10% 30% / 70%);
+					--tp-monitor-background-color: hsl(230deg 15% 30% / 10%);
+					--tp-monitor-foreground-color: hsl(230deg 10% 30% / 50%);
+				}
+			}
+		</style>
+		<script src="./index.ts" type="module"></script>
+	</head>
+	<body>
+		<div class="box">
+			<div id="plus"></div>
+		</div>
+	</body>
+</html>

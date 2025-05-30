@@ -45,6 +45,7 @@
 		"dev": "vite",
 		"dev:cdn": "vite ./demo/cdn --open",
 		"dev:npm": "vite ./demo/npm --open",
+		"dev:screenshot": "vite ./demo/screenshot --open",
 		"fix": "kpi fix",
 		"lint": "kpi lint",
 		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",

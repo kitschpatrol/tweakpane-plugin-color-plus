@@ -6,6 +6,11 @@
 
 <!-- /title -->
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/banner-dark.webp">
+  <img alt="Svelte Tweakpane UI Banner" src="./assets/banner-light.webp">
+</picture>
+
 <!-- badges -->
 
 [![NPM Package tweakpane-plugin-color-plus](https://img.shields.io/npm/v/tweakpane-plugin-color-plus.svg)](https://npmjs.com/package/tweakpane-plugin-color-plus)
@@ -25,7 +30,7 @@
 
 ## Overview
 
-The Color Plus plugin adds support for many additional color string formats to the [Tweakpane](https://tweakpane.github.io/docs/) UI library.
+The Color Plus plugin adds support for many additional color formats to the [Tweakpane](https://tweakpane.github.io/docs/) UI library.
 
 The plugin supports all [CSS Color Module Level 4](https://drafts.csswg.org/css-color-4/) formats and color spaces, and adds support for controlling colors stored as tuples / arrays, as well as additional color object formats.
 
@@ -319,7 +324,7 @@ This plugin is largely derived from the core Tweakpane library's color input imp
 
 #### Color.js v0.6.0-alpha.1 dependency
 
-Note `tweakpane-plugin-color-plus` currently bundles a pre-release version of Color.js, v0.6.0-alpha.1.
+Note that Color Plus currently bundles a pre-release version of Color.js, v0.6.0-alpha.1.
 
 (The current v0.5.2 release of the [Color.js](https://colorjs.io/) library is missing some core features on which this plugin depends — specifically retention and access to format-related metadata from the string parsing process.)
 
@@ -341,7 +346,7 @@ The [Rollup](https://rollupjs.org) configuration provided in the [Tweakpane plug
 
 Instead, it gets built into the single-file plugin artifact, which is typically what's published to NPM and imported by plugin consumers. This makes it easy to import as an ES module from a URL, but means that larger projects importing multiple Tweakpane plugins end up with duplicate bundled copies of the `@tweakpane/core` code, adding about \~100 Kb to the final minified build for each plugin after the first.
 
-To avoid this size penalty, `tweakpane-plugin-color-plus` includes a "lite" version of the build, which is configured to externalize the `@tweakpane/core` dependency. This allows multiple Tweakpane plugins to share a single instance of the `@tweakpane/core`. (I also maintain [forks of a number of popular Tweakpane plugins](https://kitschpatrol.com/svelte-tweakpane-ui/docs/plugins#bundled-plugins) with the `@tweakpane/core` dependency externalization optimization.)
+To avoid this size penalty, Color Plus includes a "lite" version of the build, which is configured to externalize the `@tweakpane/core` dependency. This allows multiple Tweakpane plugins to share a single instance of the `@tweakpane/core`. (I also maintain [forks of a number of popular Tweakpane plugins](https://kitschpatrol.com/svelte-tweakpane-ui/docs/plugins#bundled-plugins) with the `@tweakpane/core` dependency externalization optimization.)
 
 You can import the "lite" version like this:
 
