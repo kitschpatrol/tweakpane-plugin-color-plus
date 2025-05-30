@@ -21,7 +21,7 @@
 
 > [!WARNING]
 >
-> This Tweakpane plugin is a work in progress and is provided as a pre-release preview. Expect bugs and possible API / UI changes until the first 1.0.0 release.
+> This Tweakpane plugin is a work in progress and is provided as a zero-versioned pre-release preview. Expect bugs and possible API / UI changes until the first 1.0.0 release.
 
 ## Overview
 
