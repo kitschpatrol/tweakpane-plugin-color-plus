@@ -38,6 +38,7 @@ export function stringToColor(
 
 	// Is stringFormatInOut ever actually undefined?
 	const stringFormat =
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		stringFormatInOut.formatId === undefined ? undefined : (stringFormatInOut as StringFormat)
 
 	if (stringFormat === undefined) {

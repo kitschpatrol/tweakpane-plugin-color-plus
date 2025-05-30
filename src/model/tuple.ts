@@ -90,6 +90,7 @@ export function colorToTuple(
 		return undefined
 	}
 
+	// eslint-disable-next-line ts/no-unsafe-type-assertion
 	const { colorType } = format.format as TupleFormat
 	const convertedColor = convert(color, format.space) ?? color
 
@@ -106,9 +107,11 @@ export function colorToTuple(
 	]
 
 	if (alphaOverride ?? format.alpha) {
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		return [...result, convertedColor.alpha] as ColorTupleRgba
 	}
 
+	// eslint-disable-next-line ts/no-unsafe-type-assertion
 	return result as ColorTupleRgb
 }
 
@@ -126,6 +129,7 @@ export function colorToTupleString(
 		return undefined
 	}
 
+	// eslint-disable-next-line ts/no-unsafe-type-assertion
 	const precision = (format.format as TupleFormat).colorType === 'int' ? 0 : 3
 	const precisionAlpha = 3
 
@@ -146,6 +150,7 @@ function stringifyTuple(
 
 function parseTupleString(value: string): undefined | unknown[] {
 	try {
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		const { valueKey } = JSON.parse(`{"valueKey": ${value}}`) as { valueKey: unknown[] }
 		return valueKey
 	} catch {

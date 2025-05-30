@@ -1,6 +1,11 @@
 import { eslintConfig } from '@kitschpatrol/eslint-config'
 
 export default eslintConfig({
+	html: {
+		overrides: {
+			'html/use-baseline': 'off',
+		},
+	},
 	ignores: ['/src/sass/plugin.scss'],
 	ts: {
 		overrides: {

@@ -93,6 +93,7 @@ it('clones the object', () => {
 function getObjectId(object: unknown): symbol {
 	// eslint-disable-next-line ts/naming-convention
 	type ObjectWithId = { __id?: symbol }
+	// eslint-disable-next-line ts/no-unsafe-type-assertion
 	const object_ = object as ObjectWithId
 	object_.__id ??= Symbol(Date.now().toString())
 	return object_.__id

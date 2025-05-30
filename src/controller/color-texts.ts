@@ -252,7 +252,9 @@ export class ColorTextsController implements ValueController<ColorPlus, ColorTex
 	}
 
 	private onModeSelectChange(event_: Event) {
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		const selectElement = event_.currentTarget as HTMLSelectElement
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		this.colorMode.rawValue = selectElement.value as ColorMode
 
 		this.ccs = this.createComponentControllers(this.view.element.ownerDocument)

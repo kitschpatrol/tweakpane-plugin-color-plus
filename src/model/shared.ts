@@ -190,7 +190,9 @@ export function getColorPlusObjectFromColorJsObject(
 ): ColorPlusObject {
 	return {
 		alpha: colorJs.alpha ?? 1,
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		coords: [...(colorJs.coords as [number, number, number])],
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		spaceId: ('spaceId' in colorJs ? colorJs.spaceId : colorJs.space.id) as ColorSpaceId,
 	}
 }

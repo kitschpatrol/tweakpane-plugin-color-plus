@@ -240,6 +240,7 @@ export function objectToColor(
 
 				if (matchingKey) {
 					const channelValue = lowerCaseValue[matchingKey.toLowerCase()]!
+					// eslint-disable-next-line ts/no-unsafe-type-assertion
 					;(colorFormat.format as ObjectFormat).coordKeys[index] = matchingKey
 					result.coords[index] = channelValue
 				}
@@ -251,6 +252,7 @@ export function objectToColor(
 
 				if (alphaKey) {
 					// Alpha value provided
+					// eslint-disable-next-line ts/no-unsafe-type-assertion
 					;(colorFormat.format as ObjectFormat).alphaKey = alphaKey
 					colorFormat.alpha = true
 					result.alpha = lowerCaseValue[alphaKey.toLowerCase()]!
@@ -266,9 +268,11 @@ export function objectToColor(
 				// SRGB is the only supported space that's represented with 0-1 internally by ColorJS
 				if (result.spaceId === 'srgb') {
 					result.coords[index] =
+						// eslint-disable-next-line ts/no-unsafe-type-assertion
 						(colorFormat.format as ObjectFormat).colorType === 'int'
 							? mapRange(value, 0, 255, colorJsLow, colorJsHigh)
 							: value
+					// eslint-disable-next-line ts/no-unsafe-type-assertion
 				} else if ((colorFormat.format as ObjectFormat).colorType === 'float') {
 					result.coords[index] = mapRange(value, 0, 1, colorJsLow, colorJsHigh)
 				} else {
@@ -292,6 +296,7 @@ export function colorToObject(
 	alphaOverride?: boolean,
 ): Record<string, null | number> | undefined {
 	// TODO proper type guard
+	// eslint-disable-next-line ts/no-unsafe-type-assertion
 	const objectFormat = format.format as ObjectFormat
 
 	if (format.type !== 'object') {
@@ -344,6 +349,7 @@ export function colorToObjectString(
 		return undefined
 	}
 
+	// eslint-disable-next-line ts/no-unsafe-type-assertion
 	const precision = (format.format as ObjectFormat).colorType === 'int' ? 0 : 3
 	const precisionAlpha = 3
 	return stringifyObject(object, precision, precisionAlpha)
@@ -372,6 +378,7 @@ function stringifyObject(
  */
 function parseObjectString(value: string): Record<string, unknown> | undefined {
 	try {
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		return JSON.parse(value) as Record<string, unknown>
 	} catch {
 		// Manual parse

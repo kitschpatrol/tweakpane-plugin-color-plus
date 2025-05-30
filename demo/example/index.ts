@@ -242,6 +242,7 @@ for (const key of Object.keys(params)) {
 		view: 'color-plus',
 		picker: 'inline',
 		label: prettyLabel(key),
+		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		...extraProps[key as keyof typeof extraProps],
 	})
 
@@ -262,6 +263,7 @@ for (const key of Object.keys(params)) {
 			view: 'color',
 			picker: 'inline',
 			label: prettyLabel(key),
+			// eslint-disable-next-line ts/no-unsafe-type-assertion
 			...extraProps[key as keyof typeof extraProps],
 		})
 	}
