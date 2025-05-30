@@ -1,5 +1,6 @@
 /* eslint-disable no-bitwise */
-import { type ColorFormat, type ColorPlusObject, convert } from './shared'
+import type { ColorFormat, ColorPlusObject } from './shared'
+import { convert } from './shared'
 import { stringToColor } from './string'
 
 export function numberToColor(

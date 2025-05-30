@@ -1,14 +1,9 @@
-import {
-	ClassName,
-	getCanvasContext,
-	mapRange,
-	type Value,
-	type View,
-	type ViewProps,
-} from '@tweakpane/core'
+import type { Value, View, ViewProps } from '@tweakpane/core'
+import { ClassName, getCanvasContext, mapRange } from '@tweakpane/core'
 // Work directly with the colorjs.io library to optimize the per-pixel loop
-import { type ColorConstructor, getAll, set } from 'colorjs.io/fn'
-import { type ColorPlus } from '../model/color-plus'
+import type { ColorConstructor } from 'colorjs.io/fn'
+import { getAll, set } from 'colorjs.io/fn'
+import type { ColorPlus } from '../model/color-plus'
 
 const cn = ClassName('svp')
 

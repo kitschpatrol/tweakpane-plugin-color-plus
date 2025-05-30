@@ -1,11 +1,5 @@
-import {
-	bindValueMap,
-	ClassName,
-	type Foldable,
-	type PickerLayout,
-	valueToClassName,
-	type View,
-} from '@tweakpane/core'
+import type { Foldable, PickerLayout, View } from '@tweakpane/core'
+import { bindValueMap, ClassName, valueToClassName } from '@tweakpane/core'
 
 type Config = {
 	foldable: Foldable

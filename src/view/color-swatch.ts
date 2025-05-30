@@ -1,5 +1,6 @@
-import { ClassName, type Value, type View, type ViewProps } from '@tweakpane/core'
-import { type ColorPlus } from '../model/color-plus.js'
+import type { Value, View, ViewProps } from '@tweakpane/core'
+import { ClassName } from '@tweakpane/core'
+import type { ColorPlus } from '../model/color-plus.js'
 
 type Config = {
 	value: Value<ColorPlus>

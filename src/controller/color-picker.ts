@@ -1,3 +1,5 @@
+import type { Value, ValueController, ViewProps } from '@tweakpane/core'
+import type { ColorType } from '@tweakpane/core/dist/input-binding/color/model/color-model.js'
 import {
 	connectValues,
 	createNumberFormatter,
@@ -5,13 +7,9 @@ import {
 	DefiniteRangeConstraint,
 	NumberTextController,
 	parseNumber,
-	type Value,
-	type ValueController,
 	ValueMap,
-	type ViewProps,
 } from '@tweakpane/core'
-import { type ColorType } from '@tweakpane/core/dist/input-binding/color/model/color-model.js'
-import { type ColorPlus } from '../model/color-plus.js'
+import type { ColorPlus } from '../model/color-plus.js'
 import { ColorPickerView } from '../view/color-picker.js'
 import { APaletteController } from './a-palette.js'
 import { ColorTextsController } from './color-texts.js'

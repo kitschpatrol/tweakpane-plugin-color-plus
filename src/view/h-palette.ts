@@ -1,5 +1,6 @@
-import { ClassName, mapRange, type Value, type View, type ViewProps } from '@tweakpane/core'
-import { type ColorPlus } from '../model/color-plus.js'
+import type { Value, View, ViewProps } from '@tweakpane/core'
+import { ClassName, mapRange } from '@tweakpane/core'
+import type { ColorPlus } from '../model/color-plus.js'
 
 const cn = ClassName('hpl')
 

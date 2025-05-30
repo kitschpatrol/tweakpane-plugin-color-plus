@@ -1,14 +1,6 @@
 import { mapRange } from '@tweakpane/core'
-import {
-	type ColorFormat,
-	type ColorPlusObject,
-	type ColorSpaceId,
-	type ColorType,
-	convert,
-	formatNumber,
-	getRangeForChannel,
-	type ObjectFormat,
-} from './shared'
+import type { ColorFormat, ColorPlusObject, ColorSpaceId, ColorType, ObjectFormat } from './shared'
+import { convert, formatNumber, getRangeForChannel } from './shared'
 
 /**
  * Interpret object keys graciously... allow for mixes of long and short single-letter keys, plus likely aliases

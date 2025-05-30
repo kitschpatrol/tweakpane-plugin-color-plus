@@ -50,26 +50,26 @@ it('parses object colors correctly', () => {
 		],
 		[
 			{
-				blue: 102,
-				green: 0,
 				red: 255,
+				green: 0,
+				blue: 102,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 1)',
 		],
 		[
 			{
-				alpha: 0.5,
-				blue: 102,
-				green: 0,
 				red: 255,
+				green: 0,
+				blue: 102,
+				alpha: 0.5,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 0.5)',
 		],
 		[
 			{
-				r: 255,
 				b: 102,
 				green: 0,
+				r: 255,
 			},
 			'ColorPlus(srgb, [1,0,0.4], 1)',
 		],

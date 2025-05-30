@@ -1,5 +1,5 @@
-import { type Value, type ValueController, type ViewProps } from '@tweakpane/core'
-import { type ColorPlus } from '../model/color-plus.js'
+import type { Value, ValueController, ViewProps } from '@tweakpane/core'
+import type { ColorPlus } from '../model/color-plus.js'
 import { ColorSwatchView } from '../view/color-swatch.js'
 
 type Config = {

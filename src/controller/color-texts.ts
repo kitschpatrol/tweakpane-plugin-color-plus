@@ -1,29 +1,28 @@
+import type {
+	Constraint,
+	Formatter,
+	InputView,
+	Parser,
+	Value,
+	ValueController,
+	ViewProps,
+} from '@tweakpane/core'
 import {
 	connectValues,
-	type Constraint,
 	createNumberFormatter,
 	createValue,
 	DefiniteRangeConstraint,
-	type Formatter,
-	type InputView,
 	NumberTextController,
 	parseNumber,
-	type Parser,
 	TextController,
-	type Value,
-	type ValueController,
 	ValueMap,
-	type ViewProps,
 } from '@tweakpane/core'
+import type { ColorType } from '../model/shared.js'
 import { ColorPlus } from '../model/color-plus.js'
-import {
-	type ColorType,
-	denormalizeCoord,
-	getRangeForChannel,
-	normalizeCoord,
-} from '../model/shared.js'
+import { denormalizeCoord, getRangeForChannel, normalizeCoord } from '../model/shared.js'
 // Import {getKeyScaleForColor} from '../util.js';
-import { type ColorTextsMode, ColorTextsView } from '../view/color-texts.js'
+import type { ColorTextsMode } from '../view/color-texts.js'
+import { ColorTextsView } from '../view/color-texts.js'
 
 type Config = {
 	colorType: ColorType

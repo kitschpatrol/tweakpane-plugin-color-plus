@@ -1,6 +1,6 @@
 import { isObject, parsePickerLayout, parseRecord } from '@tweakpane/core'
-import { type ColorType } from './model/shared'
-import { type ColorPlusInputParams } from './plugin'
+import type { ColorType } from './model/shared'
+import type { ColorPlusInputParams } from './plugin'
 
 /**
  * TK

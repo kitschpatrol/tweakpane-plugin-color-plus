@@ -1,8 +1,11 @@
+import type {
+	ColorConstructor as ColorJsConstructor,
+	PlainColorObject as PlainColorJsObject,
+} from 'colorjs.io/fn'
 import { mapRange } from '@tweakpane/core'
 import {
 	A98RGB,
 	ColorSpace as ColorJsColorSpace,
-	type ColorConstructor as ColorJsConstructor,
 	to as colorJsConvert,
 	serialize as colorJsSerialize,
 	HSL,
@@ -15,7 +18,6 @@ import {
 	OKLab,
 	OKLCH,
 	P3,
-	type PlainColorObject as PlainColorJsObject,
 	ProPhoto,
 	REC_2020,
 	sRGB,

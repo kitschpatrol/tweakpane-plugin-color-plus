@@ -1,11 +1,5 @@
-import {
-	type ColorFormat,
-	type ColorPlusObject,
-	type ColorType,
-	convert,
-	formatNumber,
-	type TupleFormat,
-} from './shared'
+import type { ColorFormat, ColorPlusObject, ColorType, TupleFormat } from './shared'
+import { convert, formatNumber } from './shared'
 
 export type ColorTupleRgb = [null | number, null | number, null | number]
 export type ColorTupleRgba = [null | number, null | number, null | number, number]

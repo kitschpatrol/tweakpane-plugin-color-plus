@@ -1,3 +1,11 @@
+import type {
+	PointerData,
+	PointerHandlerEvents,
+	Value,
+	ValueChangeOptions,
+	ValueController,
+	ViewProps,
+} from '@tweakpane/core'
 import {
 	constrainRange,
 	getHorizontalStepKeys,
@@ -5,15 +13,9 @@ import {
 	getVerticalStepKeys,
 	isArrowKey,
 	mapRange,
-	type PointerData,
 	PointerHandler,
-	type PointerHandlerEvents,
-	type Value,
-	type ValueChangeOptions,
-	type ValueController,
-	type ViewProps,
 } from '@tweakpane/core'
-import { type ColorPlus } from '../model/color-plus.js'
+import type { ColorPlus } from '../model/color-plus.js'
 import { SvPaletteView } from '../view/sv-palette.js'
 
 type Config = {

@@ -1,5 +1,6 @@
 // Import {constrainRange} from '@tweakpane/core';
 
+import type { Ref } from 'colorjs.io/fn'
 import { constrainRange } from '@tweakpane/core'
 import {
 	get as colorJsGet,
@@ -7,19 +8,14 @@ import {
 	set as colorJsSet,
 	setAll as colorJsSetAll,
 	toGamutCSS as colorJsToGamutCss,
-	type Ref,
 } from 'colorjs.io/fn'
-import { type ColorValueExternal } from '../plugin'
+import type { ColorValueExternal } from '../plugin'
+import type { ColorFormat, ColorPlusObject, ColorSpaceId, ColorType, Coords } from './shared'
 import { colorToNumber, colorToNumberString, numberToColor } from './number'
 import { colorToObject, colorToObjectString, objectToColor } from './object'
 import {
-	type ColorFormat,
-	type ColorPlusObject,
 	colorPlusObjectsAreEqual,
-	type ColorSpaceId,
-	type ColorType,
 	convert,
-	type Coords,
 	copyColorPlusObject,
 	getColorPlusObjectFromColorJsObject,
 	serialize,

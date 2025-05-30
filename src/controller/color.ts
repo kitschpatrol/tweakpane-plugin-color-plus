@@ -1,22 +1,24 @@
+import type {
+	Formatter,
+	Parser,
+	PickerLayout,
+	Value,
+	ValueController,
+	ViewProps,
+} from '@tweakpane/core'
+import type { ColorType } from '@tweakpane/core/dist/input-binding/color/model/color-model.js'
 import {
 	bindFoldable,
 	connectValues,
 	findNextTarget,
 	Foldable,
 	forceCast,
-	type Formatter,
-	type Parser,
-	type PickerLayout,
 	PopupController,
 	supportsTouch,
 	TextController,
-	type Value,
-	type ValueController,
 	ValueMap,
-	type ViewProps,
 } from '@tweakpane/core'
-import { type ColorType } from '@tweakpane/core/dist/input-binding/color/model/color-model.js'
-import { type ColorPlus } from '../model/color-plus.js'
+import type { ColorPlus } from '../model/color-plus.js'
 import { ColorView } from '../view/color.js'
 import { ColorPickerController } from './color-picker.js'
 import { ColorSwatchController } from './color-swatch.js'

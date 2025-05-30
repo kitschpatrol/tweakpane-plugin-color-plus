@@ -1,14 +1,10 @@
-import {
-	type BaseInputParams,
-	createPlugin,
-	type InputBindingPlugin,
-	type PickerLayout,
-	writePrimitive,
-} from '@tweakpane/core'
+import type { BaseInputParams, InputBindingPlugin, PickerLayout } from '@tweakpane/core'
+import { createPlugin, writePrimitive } from '@tweakpane/core'
+import type { ColorFormat } from './model/shared.js'
+import type { ColorTupleRgb, ColorTupleRgba } from './model/tuple.js'
 import { ColorController } from './controller/color.js'
 import { ColorPlus } from './model/color-plus.js'
-import { type ColorFormat, formatIsSerializable } from './model/shared.js'
-import { type ColorTupleRgb, type ColorTupleRgba } from './model/tuple.js'
+import { formatIsSerializable } from './model/shared.js'
 import { parseColorInputParams, validateColorInputParams } from './utilities.js'
 
 export type ColorValueExternal =

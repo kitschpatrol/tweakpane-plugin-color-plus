@@ -1,13 +1,5 @@
-import {
-	bindValue,
-	ClassName,
-	createSvgIconElement,
-	type InputView,
-	removeChildElements,
-	type Value,
-	type View,
-	type ViewProps,
-} from '@tweakpane/core'
+import type { InputView, Value, View, ViewProps } from '@tweakpane/core'
+import { bindValue, ClassName, createSvgIconElement, removeChildElements } from '@tweakpane/core'
 
 export type ColorTextsMode = 'hex' | 'hsl' | 'hsv' | 'srgb'
 

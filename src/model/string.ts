@@ -1,20 +1,14 @@
+import type { ColorConstructor as ColorJsConstructor } from 'colorjs.io/fn'
 import { mapRange } from '@tweakpane/core'
+import { parse as colorJsParse, serialize as colorJsSerialize } from 'colorjs.io/fn'
+import type { ColorFormat, ColorPlusObject, CoordFormat, StringFormat } from './shared'
 import {
-	type ColorConstructor as ColorJsConstructor,
-	parse as colorJsParse,
-	serialize as colorJsSerialize,
-} from 'colorjs.io/fn'
-import {
-	type ColorFormat,
-	type ColorPlusObject,
 	convert,
-	type CoordFormat,
 	copyColorPlusObject,
 	expandHex,
 	getColorPlusObjectFromColorJsObject,
 	hexHasAlpha,
 	isStringFormat,
-	type StringFormat,
 	toDecimalPrecision,
 } from './shared'
 

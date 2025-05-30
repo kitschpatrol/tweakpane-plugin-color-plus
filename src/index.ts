@@ -1,4 +1,4 @@
-import { type TpPlugin } from '@tweakpane/core'
+import type { TpPlugin } from '@tweakpane/core'
 import { ColorPlusInputPlugin } from './plugin.js'
 
 // The identifier of the plugin bundle

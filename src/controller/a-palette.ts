@@ -1,15 +1,13 @@
-import {
-	getHorizontalStepKeys,
-	getStepForKey,
-	type PointerData,
-	PointerHandler,
-	type PointerHandlerEvents,
-	type Value,
-	type ValueChangeOptions,
-	type ValueController,
-	type ViewProps,
+import type {
+	PointerData,
+	PointerHandlerEvents,
+	Value,
+	ValueChangeOptions,
+	ValueController,
+	ViewProps,
 } from '@tweakpane/core'
-import { type ColorPlus } from '../model/color-plus.js'
+import { getHorizontalStepKeys, getStepForKey, PointerHandler } from '@tweakpane/core'
+import type { ColorPlus } from '../model/color-plus.js'
 import { APaletteView } from '../view/a-palette.js'
 
 type Config = {

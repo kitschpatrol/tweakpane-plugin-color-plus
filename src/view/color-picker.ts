@@ -1,8 +1,9 @@
-import { ClassName, type NumberTextView, type View, type ViewProps } from '@tweakpane/core'
-import { type APaletteView } from './a-palette.js'
-import { type ColorTextsView } from './color-texts.js'
-import { type HPaletteView } from './h-palette.js'
-import { type SvPaletteView } from './sv-palette.js'
+import type { NumberTextView, View, ViewProps } from '@tweakpane/core'
+import { ClassName } from '@tweakpane/core'
+import type { APaletteView } from './a-palette.js'
+import type { ColorTextsView } from './color-texts.js'
+import type { HPaletteView } from './h-palette.js'
+import type { SvPaletteView } from './sv-palette.js'
 
 const cn = ClassName('colp')
 
