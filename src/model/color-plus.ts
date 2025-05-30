@@ -9,7 +9,7 @@ import {
 	setAll as colorJsSetAll,
 	toGamutCSS as colorJsToGamutCss,
 } from 'colorjs.io/fn'
-import type { ColorValueExternal } from '../plugin'
+import type { ColorPlusValue } from '../plugin'
 import type { ColorFormat, ColorPlusObject, ColorSpaceId, ColorType, Coords } from './shared'
 import { colorToNumber, colorToNumberString, numberToColor } from './number'
 import { colorToObject, colorToObjectString, objectToColor } from './object'
@@ -194,7 +194,7 @@ export class ColorPlus {
 		return `ColorPlus(${this.color.spaceId}, [${this.color.coords.map((c) => (c === null ? 'none' : toDecimalPrecision(c, 4))).join(',')}], ${this.color.alpha})`
 	}
 
-	public toValue(format: ColorFormat, alphaOverride?: boolean): ColorValueExternal {
+	public toValue(format: ColorFormat, alphaOverride?: boolean): ColorPlusValue {
 		switch (format.type) {
 			case 'number': {
 				return colorToNumber(this.color, format, alphaOverride)!

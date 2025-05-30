@@ -12,4 +12,4 @@ export const css = '__css__'
 // Export plugins array with explicit typing
 export const plugins: TpPlugin[] = [ColorPlusInputPlugin]
 
-export { type ColorPlusInputParams } from './plugin.js'
+export { type ColorPlusInputParams, type ColorPlusValue } from './plugin.js'

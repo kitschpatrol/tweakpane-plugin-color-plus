@@ -7,7 +7,7 @@ import { ColorPlus } from './model/color-plus.js'
 import { formatIsSerializable } from './model/shared.js'
 import { parseColorInputParams, validateColorInputParams } from './utilities.js'
 
-export type ColorValueExternal =
+export type ColorPlusValue =
 	| ColorTupleRgb
 	| ColorTupleRgba
 	| number
@@ -28,7 +28,7 @@ export type ColorPlusInputParams = BaseInputParams & {
 
 type ColorPlusInputParamsInternal = ColorPlusInputParams & {
 	format: ColorFormat
-	lastExternalValue: ColorValueExternal
+	lastExternalValue: ColorPlusValue
 	// Misuse parameters to prevent rounding-related jitter on pane.refresh()
 	lastInternalValue: ColorPlus
 }
@@ -36,7 +36,7 @@ type ColorPlusInputParamsInternal = ColorPlusInputParams & {
 // eslint-disable-next-line ts/naming-convention
 export const ColorPlusInputPlugin: InputBindingPlugin<
 	ColorPlus,
-	ColorValueExternal,
+	ColorPlusValue,
 	ColorPlusInputParamsInternal
 > = createPlugin({
 	accept(value, params) {
