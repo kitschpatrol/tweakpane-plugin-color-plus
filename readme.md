@@ -108,14 +108,13 @@ pane.on('change', () => {
       {
         "imports": {
           "tweakpane": "https://cdn.jsdelivr.net/npm/tweakpane",
-          "@tweakpane/core": "https://cdn.jsdelivr.net/npm/@tweakpane/core",
-          "tweakpane-plugin-profiler": "https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus/lite"
+          "tweakpane-plugin-color-plus": "https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus"
         }
       }
     </script>
     <script type="module">
       import { Pane } from 'tweakpane'
-      import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
+      import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus'
 
       const params = {
         color: 'oklch(65% 0.26 357deg)',
