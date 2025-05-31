@@ -38,21 +38,12 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 	public readonly value: Value<ColorPlus>
 	public readonly view: ColorView
 	public readonly viewProps: ViewProps
-
-	// Used by svelte-tweakpane-ui during CLS placeholder calculation
-	// A more robust solution might expose the complete ColorFormat object...
-	get hasAlpha(): boolean {
-		return this.supportsAlphaValue
-	}
-
 	get textController(): TextController<ColorPlus> {
 		return this.textC
 	}
-
 	private readonly foldable: Foldable
 	private readonly pickerC: ColorPickerController
 	private readonly popC: null | PopupController
-	private readonly supportsAlphaValue: boolean
 	private readonly swatchC: ColorSwatchController
 
 	private readonly textC: TextController<ColorPlus>
@@ -65,7 +56,6 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 
 		this.value = config.value
 		this.viewProps = config.viewProps
-		this.supportsAlphaValue = config.supportsAlpha
 
 		// This.value.emitter.on('change', (event) => {
 		// 	console.log('----------------------------------');

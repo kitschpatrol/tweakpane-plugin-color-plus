@@ -50,10 +50,6 @@ for (const [title, sectionParams] of Object.entries(params)) {
 			}
 		}
 
-		const ref = folder.addBinding(sectionParams as Record<string, unknown>, label, bindingOptions)
-
-		if ('hasAlpha' in ref.controller.labelController.valueController) {
-			console.log(ref.controller.labelController.valueController.hasAlpha)
-		}
+		folder.addBinding(sectionParams as Record<string, unknown>, label, bindingOptions)
 	}
 }
