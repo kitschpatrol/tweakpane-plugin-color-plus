@@ -12,4 +12,8 @@ export const css = '__css__'
 // Export plugins array with explicit typing
 export const plugins: TpPlugin[] = [ColorPlusInputPlugin]
 
+// Exposed for working with color values outside of the plugin
+// E.g. used by svelte-tweakpane-ui for CLS placeholder calculation
+export { ColorPlus as ColorPlusModel } from './model/color-plus.js'
+
 export { type ColorPlusInputParams, type ColorPlusValue } from './plugin.js'
