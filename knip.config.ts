@@ -1,5 +1,10 @@
 import { knipConfig } from '@kitschpatrol/knip-config'
 
 export default knipConfig({
-	entry: ['demo/example/index.ts', 'demo/npm/index.js', 'src/scratch.ts'],
+	entry: [
+		'demo/example/index.ts',
+		'demo/npm/index.js',
+		'demo/screenshot/index.ts',
+		'src/scratch.ts',
+	],
 })

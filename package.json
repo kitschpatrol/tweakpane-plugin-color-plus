@@ -46,8 +46,8 @@
 		"dev:cdn": "vite ./demo/cdn --open",
 		"dev:npm": "vite ./demo/npm --open",
 		"dev:screenshot": "vite ./demo/screenshot --open",
-		"fix": "kpi fix",
-		"lint": "kpi lint",
+		"fix": "ksc fix",
+		"lint": "ksc lint",
 		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm run build && pnpm publish --otp $(op read 'op://Personal/Npmjs/one-time password?attribute=otp')",
 		"start": "run-p watch dev",
 		"test": "vitest",
@@ -60,33 +60,33 @@
 		"@tweakpane/core": "^2.0.5"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^5.4.2",
+		"@kitschpatrol/shared-config": "^5.7.2",
 		"@rollup/plugin-alias": "^5.1.1",
-		"@rollup/plugin-node-resolve": "^16.0.1",
+		"@rollup/plugin-node-resolve": "^16.0.2",
 		"@rollup/plugin-replace": "^6.0.2",
 		"@rollup/plugin-terser": "^0.4.4",
-		"@rollup/plugin-typescript": "^12.1.2",
-		"@types/node": "^20.17.54",
+		"@rollup/plugin-typescript": "^12.1.4",
+		"@types/node": "^20.19.19",
 		"autoprefixer": "^10.4.21",
-		"bumpp": "^10.1.1",
+		"bumpp": "^10.3.1",
 		"colorjs.io": "^0.6.0-alpha.1",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0",
-		"postcss": "^8.5.4",
+		"postcss": "^8.5.6",
 		"rimraf": "^6.0.1",
-		"rollup": "^4.41.1",
+		"rollup": "^4.52.4",
 		"rollup-plugin-cleanup": "^3.2.1",
-		"sass": "^1.89.0",
-		"typescript": "~5.8.3",
-		"vite": "^6.3.5",
-		"vitest": "^3.1.4"
+		"sass": "^1.93.2",
+		"typescript": "~5.9.3",
+		"vite": "^7.1.9",
+		"vitest": "^3.2.4"
 	},
 	"peerDependencies": {
 		"tweakpane": "^4.0.0"
 	},
-	"packageManager": "pnpm@10.11.0",
+	"packageManager": "pnpm@10.18.1",
 	"engines": {
-		"node": ">=20.9.0"
+		"node": ">=20.19.0"
 	},
 	"publishConfig": {
 		"access": "public"

@@ -38,7 +38,11 @@ export class ColorPlus {
 		return this.color.spaceId
 	}
 
-	private constructor(private color: ColorPlusObject) {}
+	private color: ColorPlusObject
+
+	private constructor(color: ColorPlusObject) {
+		this.color = color
+	}
 
 	public static create(
 		value: unknown,

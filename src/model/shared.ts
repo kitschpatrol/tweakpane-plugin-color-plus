@@ -211,10 +211,10 @@ export function hexHasAlpha(hex: string): boolean {
 
 export function expandHex(hex: string): string {
 	// Expects leading #
-	const length_ = hex.length
-	if (length_ === 4 || length_ === 5) {
+	const localLength = hex.length
+	if (localLength === 4 || localLength === 5) {
 		let result = '#'
-		for (let i = 1; i < length_; i++) {
+		for (let i = 1; i < localLength; i++) {
 			result += hex[i] + hex[i]
 		}
 
