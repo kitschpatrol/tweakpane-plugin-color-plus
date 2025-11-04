@@ -53,9 +53,13 @@ it('sets individual properties in any color space without mutating the object', 
 	expect(c).toBeDefined()
 	const id = getObjectId(c!)
 	c!.set('h', 29.233_880_279_627_84, 'oklch')
-	expect(c!.getAll()).toEqual([
-		0.999_999_999_999_999_9, 2.902_435_236_595_835e-15, 4.482_525_461_924_069_5e-17,
-	])
+	expect(c!.getAll()).toEqual(
+		[
+		  0.999_999_999_999_999_7,
+		  3.619_639_310_503_686e-15,
+		  -4.482_525_461_924_069_5e-17,
+		]
+	)
 	expect(id).toBe(getObjectId(c!))
 })
 
@@ -64,9 +68,13 @@ it('sets all properties in any color space without mutating the object', () => {
 	expect(c).toBeDefined()
 	const id = getObjectId(c!)
 	c!.setAll([45, 0.5, 0.5], 'oklch')
-	expect(c!.getAll()).toEqual([
-		126.188_372_983_131_77, 121.616_594_439_327_24, 122.737_011_281_427_07,
-	])
+	expect(c!.getAll()).toEqual(
+		[
+		  126.188_372_983_131_76,
+		  121.616_594_439_327_26,
+		  122.737_011_281_427_06,
+		]
+	)
 	expect(id).toBe(getObjectId(c!))
 })
 

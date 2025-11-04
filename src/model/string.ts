@@ -124,7 +124,6 @@ export function colorToString(
 						},
 		// InGamut: true, // TODO expose? Overrides inGamut in the format object
 		commas: stringFormat.commas,
-		// @ts-expect-error - Type definition inconsistencies
 		coords: stringFormat.types,
 		// @ts-expect-error - Type definition inconsistencies
 		format: stringFormat.format,
