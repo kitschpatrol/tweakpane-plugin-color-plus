@@ -198,7 +198,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				// ParsedColor.toGamut('srgb');
 
 				// Discard alpha if it wasn't present originally
-				if (!(args.params.format.alpha || args.params.color?.alpha === true)) {
+				if (!args.params.format.alpha && args.params.color?.alpha !== true) {
 					parsedColor.alpha = 1
 				}
 

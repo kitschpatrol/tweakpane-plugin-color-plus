@@ -161,6 +161,7 @@ function toDecimalPrecisionForFormat(
 	// Using this everywhere seems to result in some ugly rounding errors...
 	// Skip for now unless color object is RGB...
 	if (
+		// eslint-disable-next-line de-morgan/no-negated-conjunction
 		!(
 			(stringFormat.formatId === 'rgb' || stringFormat.formatId === 'rgba') &&
 			stringFormat.types.every((value) => value === '<number>[0,255]')
