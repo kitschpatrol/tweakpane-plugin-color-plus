@@ -77,7 +77,7 @@ import { Pane } from 'tweakpane'
 import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus'
 
 const params = {
-	color: 'oklch(65% 0.26 357deg)',
+  color: 'oklch(65% 0.26 357deg)',
 }
 
 const pane = new Pane()
@@ -87,9 +87,8 @@ pane.registerPlugin(TweakpanePluginColorPlus)
 pane.addBinding(params, 'color', { view: 'color-plus' })
 
 pane.on('change', () => {
-	document.documentElement.style.backgroundColor = params.color
+  document.documentElement.style.backgroundColor = params.color
 })
-
 ```
 
 <!-- /code -->
@@ -101,38 +100,37 @@ pane.on('change', () => {
 ```html
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<title>Tweakpane Plugin Color Plus Demo</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<script type="importmap">
-			{
-				"imports": {
-					"tweakpane": "https://cdn.jsdelivr.net/npm/tweakpane",
-					"tweakpane-plugin-color-plus": "https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus"
-				}
-			}
-		</script>
-		<script type="module">
-			import { Pane } from 'tweakpane'
-			import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus'
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tweakpane Plugin Color Plus Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="importmap">
+      {
+        "imports": {
+          "tweakpane": "https://cdn.jsdelivr.net/npm/tweakpane",
+          "tweakpane-plugin-color-plus": "https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus"
+        }
+      }
+    </script>
+    <script type="module">
+      import { Pane } from 'tweakpane'
+      import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus'
 
-			const params = {
-				color: 'oklch(65% 0.26 357deg)',
-			}
+      const params = {
+        color: 'oklch(65% 0.26 357deg)',
+      }
 
-			const pane = new Pane()
-			pane.registerPlugin(TweakpanePluginColorPlus)
-			pane.addBinding(params, 'color', { view: 'color-plus' })
+      const pane = new Pane()
+      pane.registerPlugin(TweakpanePluginColorPlus)
+      pane.addBinding(params, 'color', { view: 'color-plus' })
 
-			pane.on('change', () => {
-				document.documentElement.style.backgroundColor = params.color
-			})
-		</script>
-	</head>
-	<body></body>
+      pane.on('change', () => {
+        document.documentElement.style.backgroundColor = params.color
+      })
+    </script>
+  </head>
+  <body></body>
 </html>
-
 ```
 
 <!-- /code -->
@@ -369,8 +367,8 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 192.3 kB | 49.8 kB | 41.6 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 82.3 kB  | 27.7 kB | 24 kB   |
+| tweakpane-plugin-color-plus.min.js      | 192.3 kB | 49.9 kB | 41.6 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 82.3 kB  | 27.9 kB | 24 kB   |
 
 <!-- /size-table -->
 

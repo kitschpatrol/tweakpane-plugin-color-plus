@@ -7,4 +7,5 @@ export default knipConfig({
 		'demo/screenshot/index.ts',
 		'src/scratch.ts',
 	],
+	ignore: ['src/sass/plugin.scss'],
 })

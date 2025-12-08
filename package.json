@@ -60,7 +60,7 @@
 		"@tweakpane/core": "^2.0.5"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^5.9.2",
+		"@kitschpatrol/shared-config": "^5.10.0",
 		"@rollup/plugin-alias": "^6.0.0",
 		"@rollup/plugin-node-resolve": "^16.0.3",
 		"@rollup/plugin-replace": "^6.0.3",
@@ -76,16 +76,16 @@
 		"rimraf": "^6.1.2",
 		"rollup": "^4.53.3",
 		"rollup-plugin-cleanup": "^3.2.1",
-		"sass": "^1.94.2",
+		"sass": "^1.95.0",
 		"tweakpane": "^4.0.5",
 		"typescript": "~5.9.3",
-		"vite": "^7.2.6",
+		"vite": "^7.2.7",
 		"vitest": "^4.0.15"
 	},
 	"peerDependencies": {
 		"tweakpane": "^4.0.0"
 	},
-	"packageManager": "pnpm@10.24.0",
+	"packageManager": "pnpm@10.25.0",
 	"engines": {
 		"node": ">=20.19.0"
 	}
