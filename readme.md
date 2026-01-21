@@ -321,11 +321,7 @@ const functions = {
 
 This plugin is largely derived from the core Tweakpane library's color input implementation — it (mostly) reuses the views and controllers, and only really makes significant changes to the model, where it replaces Tweakpane's bespoke color handling functionality with an implementation provided by the [Color.js](https://colorjs.io/) library.
 
-#### Color.js v0.6.0-alpha.1 dependency
-
-Note that Color Plus currently bundles a pre-release version of Color.js, v0.6.0-alpha.1.
-
-(The current v0.5.2 release of the [Color.js](https://colorjs.io/) library is missing some core features on which this plugin depends — specifically retention and access to format-related metadata from the string parsing process.)
+#### Color.js v0.6.x
 
 The plugin uses Color.js' [procedural API](https://colorjs.io/docs/procedural) and [only imports a subset of available color spaces](#color-spaces) in the interest of performance and bundle size optimization.
 
