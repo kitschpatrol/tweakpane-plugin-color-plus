@@ -12,7 +12,6 @@
 /* eslint-disable ts/naming-convention */
 /* eslint-disable import/no-named-as-default */
 /* eslint-disable ts/no-unsafe-assignment */
-/* eslint-env node */
 
 import Alias from '@rollup/plugin-alias'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
