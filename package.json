@@ -39,9 +39,9 @@
 	],
 	"scripts": {
 		"build": "run-p build:*",
-		"build:dev": "rollup --config rollup.config.js",
+		"build:dev": "rollup --config rollup.config.ts",
 		"build:dts": "rimraf ./dist/types && tsc --project src/tsconfig-dts.json",
-		"build:prod": "rollup --config rollup.config.js --environment BUILD:production",
+		"build:prod": "rollup --config rollup.config.ts --environment BUILD:production",
 		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"dev": "vite",
 		"dev:cdn": "vite ./demo/cdn --open",
@@ -89,5 +89,11 @@
 	"packageManager": "pnpm@10.32.1",
 	"engines": {
 		"node": ">=20.19.0"
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": ">=22.6.0"
+		}
 	}
 }

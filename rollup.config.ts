@@ -1,36 +1,25 @@
 // @case-police-ignore Postcss, Typescript
 
-// eslint-disable-next-line ts/ban-ts-comment
-// @ts-nocheck
-
-/* eslint-disable ts/no-unsafe-call */
-/* eslint-disable unicorn/no-array-reduce */
-/* eslint-disable ts/no-unsafe-member-access */
-/* eslint-disable ts/no-unsafe-return */
-/* eslint-disable new-cap */
-/* eslint-disable ts/no-deprecated */
 /* eslint-disable ts/naming-convention */
 /* eslint-disable import/no-named-as-default */
-/* eslint-disable ts/no-unsafe-assignment */
 
+import type { LoggingFunction, Plugin, RollupLog } from 'rollup'
 import Alias from '@rollup/plugin-alias'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import Replace from '@rollup/plugin-replace'
 import terser from '@rollup/plugin-terser'
 import Typescript from '@rollup/plugin-typescript'
 import Autoprefixer from 'autoprefixer'
-import fs from 'node:fs'
 import Postcss from 'postcss'
 import Cleanup from 'rollup-plugin-cleanup'
 import * as Sass from 'sass'
+import Package from './package.json' with { type: 'json' }
 
-const Package = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
-
-async function compileCss() {
-	const css = Sass.renderSync({
-		file: 'src/sass/plugin.scss',
-		outputStyle: 'compressed',
-	}).css.toString()
+async function compileCss(): Promise<string> {
+	const { css } = Sass.compile('src/sass/plugin.scss', {
+		silenceDeprecations: ['global-builtin', 'color-functions', 'import'],
+		style: 'compressed',
+	})
 
 	const result = await Postcss([Autoprefixer]).process(css, {
 		from: undefined,
@@ -38,8 +27,8 @@ async function compileCss() {
 	return result.css.replaceAll("'", String.raw`\'`).trim()
 }
 
-function getPlugins(css, shouldMinify, includeAlias = true) {
-	const plugins = []
+function getPlugins(css: string, shouldMinify: boolean, includeAlias = true): Plugin[] {
+	const plugins: Plugin[] = []
 
 	if (includeAlias) {
 		plugins.push(
@@ -78,12 +67,12 @@ function getPlugins(css, shouldMinify, includeAlias = true) {
 	]
 }
 
-function getDistributionName(packageName) {
+function getDistributionName(packageName: string): string {
 	// `@tweakpane/plugin-foobar` -> `tweakpane-plugin-foobar`
 	// `tweakpane-plugin-foobar`  -> `tweakpane-plugin-foobar`
 	return packageName
 		.split(/[/@-]/)
-		.reduce((comps, comp) => (comp === '' ? comps : [...comps, comp]), [])
+		.filter((comp) => comp !== '')
 		.join('-')
 }
 
@@ -99,7 +88,7 @@ export default async () => {
 	const baseConfig = {
 		input: 'src/index.ts',
 		// Suppress `Circular dependency` warning
-		onwarn(warning, rollupWarn) {
+		onwarn(warning: RollupLog, rollupWarn: LoggingFunction) {
 			if (warning.code === 'CIRCULAR_DEPENDENCY') {
 				return
 			}
