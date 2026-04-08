@@ -222,8 +222,13 @@ const extraProps = {
 	},
 }
 
+const CAPITAL_LETTER_REGEX = /([A-Z])/g
+const DOT_PREFIX_REGEX = /^./
+
 function prettyLabel(label: string): string {
-	return label.replaceAll(/([A-Z])/g, ' $1').replace(/^./, (string_) => string_.toUpperCase())
+	return label
+		.replaceAll(CAPITAL_LETTER_REGEX, ' $1')
+		.replace(DOT_PREFIX_REGEX, (string_) => string_.toUpperCase())
 }
 
 const paneColorPlus = new Pane({

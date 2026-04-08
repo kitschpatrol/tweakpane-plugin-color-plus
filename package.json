@@ -39,9 +39,9 @@
 	],
 	"scripts": {
 		"build": "run-p build:*",
-		"build:dev": "rollup --config rollup.config.ts",
+		"build:dev": "tsdown",
 		"build:dts": "rimraf ./dist/types && tsc --project src/tsconfig-dts.json",
-		"build:prod": "rollup --config rollup.config.ts --environment BUILD:production",
+		"build:prod": "cross-env BUILD=production tsdown",
 		"clean": "git rm -f pnpm-lock.yaml ; git clean -fdX",
 		"dev": "vite",
 		"dev:cdn": "vite ./demo/cdn --open",
@@ -51,7 +51,7 @@
 		"lint": "ksc lint",
 		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm run build && NPM_AUTH_TOKEN=$(op read 'op://Personal/npm/token') && pnpm publish",
 		"start": "run-p watch dev",
-		"test": "vitest",
+		"test": "vitest run",
 		"watch": "run-p watch:*",
 		"watch:dts": "onchange --initial --kill \"src/**/*.ts\" -- pnpm run build:dts",
 		"watch:sass": "onchange --initial --kill \"src/sass/**/*.scss\" -- pnpm run build:dev",
@@ -61,39 +61,34 @@
 		"@tweakpane/core": "^2.0.5"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^6.0.3",
-		"@rollup/plugin-alias": "^6.0.0",
-		"@rollup/plugin-node-resolve": "^16.0.3",
-		"@rollup/plugin-replace": "^6.0.3",
-		"@rollup/plugin-terser": "^1.0.0",
-		"@rollup/plugin-typescript": "^12.3.0",
-		"@types/node": "^20.19.37",
+		"@kitschpatrol/shared-config": "^7.2.0",
+		"@types/node": "^20.19.39",
 		"autoprefixer": "^10.4.27",
-		"bumpp": "^10.4.1",
+		"bumpp": "^11.0.1",
 		"colorjs.io": "^0.6.1",
+		"cross-env": "^10.1.0",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0",
-		"postcss": "^8.5.8",
+		"postcss": "^8.5.9",
 		"rimraf": "^6.1.3",
-		"rollup": "^4.59.0",
-		"rollup-plugin-cleanup": "^3.2.1",
-		"sass": "^1.98.0",
+		"sass": "^1.99.0",
+		"tsdown": "^0.21.7",
 		"tweakpane": "^4.0.5",
 		"typescript": "~5.9.3",
-		"vite": "^8.0.0",
-		"vitest": "^4.1.0"
+		"vite": "^8.0.7",
+		"vitest": "^4.1.3"
 	},
 	"peerDependencies": {
 		"tweakpane": "^4.0.0"
 	},
-	"packageManager": "pnpm@10.32.1",
+	"packageManager": "pnpm@10.33.0",
 	"engines": {
 		"node": ">=20.19.0"
 	},
 	"devEngines": {
 		"runtime": {
 			"name": "node",
-			"version": ">=22.6.0"
+			"version": ">=22.18.0"
 		}
 	}
 }
