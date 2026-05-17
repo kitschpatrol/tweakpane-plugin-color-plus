@@ -50,6 +50,7 @@ for (const [title, sectionParams] of Object.entries(params)) {
 			}
 		}
 
+		// eslint-disable-next-line ts/no-unnecessary-type-assertion
 		folder.addBinding(sectionParams as Record<string, unknown>, label, bindingOptions)
 	}
 }

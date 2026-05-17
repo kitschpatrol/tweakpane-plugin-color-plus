@@ -136,7 +136,10 @@ export type ColorFormat = {
 	type: 'number' | 'object' | 'string' | 'tuple'
 }
 
-/** Returns a new color object only if conversion is needed, otherwise returns undefined */
+/**
+ * Returns a new color object only if conversion is needed, otherwise returns
+ * undefined
+ */
 export function convert(
 	color: ColorPlusObject,
 	spaceId: ColorSpaceId,
@@ -275,14 +278,18 @@ export function getRangeForChannel(spaceId: ColorSpaceId, channelIndex: number):
 }
 
 /**
- * Round a number to a certain number of significant digits after the decimal point
+ * Round a number to a certain number of significant digits after the decimal
+ * point
+ *
+ * @example
+ * 	toDecimalPrecision(3.14159, 2) // returns 3.14
+ * 	toDecimalPrecision(10.9999, 1) // returns 11.0
+ * 	toDecimalPrecision(123.456, 0) // returns 123
+ *
  * @param n - The number to round
  * @param decimalPrecision - Number of digits after the decimal point
+ *
  * @returns The rounded number
- * @example
- * toDecimalPrecision(3.14159, 2) // returns 3.14
- * toDecimalPrecision(10.9999, 1) // returns 11.0
- * toDecimalPrecision(123.456, 0) // returns 123
  */
 export function toDecimalPrecision(n: number, decimalPrecision: number | undefined): number {
 	if (
@@ -334,10 +341,11 @@ export function isStringFormat(format: ColorFormat['format']): format is StringF
 }
 
 /**
- *  Some formats are parsable by Color.js but not serializable, e.g. keyword
- *  formats like `'blue'`. We can accept these after the format is initialized,
- *  but not as an initial color value.
- * @returns true if the format is serializable
+ * Some formats are parsable by Color.js but not serializable, e.g. keyword
+ * formats like `'blue'`. We can accept these after the format is initialized,
+ * but not as an initial color value.
+ *
+ * @returns True if the format is serializable
  */
 export function formatIsSerializable(format: ColorFormat): boolean {
 	// Reimplement canSerialize() from colorjs
@@ -351,6 +359,7 @@ export function formatIsSerializable(format: ColorFormat): boolean {
 
 /**
  * Currently unused
+ *
  * @public
  */
 export function applyDecimalPrecision(
@@ -387,6 +396,7 @@ export function colorPlusObjectsAreEqual(a: ColorPlusObject, b: ColorPlusObject)
 
 /**
  * Currently unused
+ *
  * @public
  */
 export function denormalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
@@ -398,6 +408,7 @@ export function denormalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
 
 /**
  * Currently unused
+ *
  * @public
  */
 export function normalizeCoords(space: ColorSpaceId, coords: Coords): Coords {

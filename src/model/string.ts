@@ -75,7 +75,8 @@ export function stringToColor(
 }
 
 /**
- * Converts a color object into a CSS color string, using the provided format metadata
+ * Converts a color object into a CSS color string, using the provided format
+ * metadata
  */
 export function colorToString(
 	color: ColorPlusObject,
@@ -150,8 +151,7 @@ type DecimalPrecision = {
 
 /**
  * Special case for RGB integer-style values
- * https://github.com/color-js/color.js/issues/203
- * Returns a new color object
+ * https://github.com/color-js/color.js/issues/203 Returns a new color object
  */
 function toDecimalPrecisionForFormat(
 	color: ColorPlusObject,
@@ -254,8 +254,11 @@ function toDecimalPrecisionForCoordinate(
 
 /**
  * Transforms the input string to expand supported import formats
+ *
  * - 0x-prefixed hex string support
- * - Legacy HSL compatibility: The built-in Tweakpane color input control accepts HSL strings without `%` units, e.g. `hsl(20, 15, 30)`, but color.js and the CSS standard do not.
+ * - Legacy HSL compatibility: The built-in Tweakpane color input control accepts
+ *   HSL strings without `%` units, e.g. `hsl(20, 15, 30)`, but color.js and the
+ *   CSS standard do not.
  */
 function legacyTweakpaneColorStringNormalization(value: string): string {
 	const trimmed = value.trim()

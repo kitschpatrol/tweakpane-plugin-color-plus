@@ -237,6 +237,7 @@ export class ColorTextsController implements ValueController<ColorPlus, ColorTex
 	private createComponentControllers(doc: Document): ComponentValueController[] {
 		const mode = this.colorMode.rawValue
 		if (isColorMode(mode)) {
+			// eslint-disable-next-line ts/no-unnecessary-type-assertion
 			return createComponentControllers(doc, {
 				colorMode: mode,
 				colorType: this.colorType,

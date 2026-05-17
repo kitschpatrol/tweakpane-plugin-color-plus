@@ -12,7 +12,7 @@
 <!-- badges -->
 
 [![NPM Package tweakpane-plugin-color-plus](https://img.shields.io/npm/v/tweakpane-plugin-color-plus.svg)](https://npmjs.com/package/tweakpane-plugin-color-plus)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
 [![CI](https://github.com/kitschpatrol/tweakpane-plugin-color-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/tweakpane-plugin-color-plus/actions/workflows/ci.yml)
 
 <!-- /badges -->
@@ -362,14 +362,14 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 188.5 kB | 49.4 kB | 41.1 kB |
+| tweakpane-plugin-color-plus.min.js      | 188.5 kB | 49.4 kB | 41.2 kB |
 | tweakpane-plugin-color-plus.lite.min.js | 80.3 kB  | 27.5 kB | 23.7 kB |
 
 <!-- /size-table -->
 
 ## Maintainers
 
-[@kitschpatrol](https://github.com/kitschpatrol)
+[kitschpatrol](https://github.com/kitschpatrol)
 
 ## Acknowledgments
 
@@ -381,10 +381,14 @@ Thanks also to [Lea Verou](http://lea.verou.me/) and [contributors](https://gith
 
 ## Contributing
 
-[Issues](https://github.com/kitschpatrol/tweakpane-plugin-color-plus/issues) and pull requests are welcome.
+[Issues](https://github.com/kitschpatrol/tweakpane-plugin-color-plus/issues) are welcome and appreciated.
+
+Please open an issue to discuss changes before submitting a pull request. Unsolicited PRs (especially AI-generated ones) are unlikely to be merged.
+
+This repository uses [@kitschpatrol/shared-config](https://github.com/kitschpatrol/shared-config) (via its `ksc` CLI) for linting and formatting, plus [MDAT](https://github.com/kitschpatrol/mdat) for readme placeholder expansion.
 
 ## License
 
-[MIT](license.txt) © Eric Mika
+[MIT](license.txt) © [Eric Mika](https://ericmika.com)
 
 <!-- /footer -->

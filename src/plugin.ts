@@ -217,7 +217,9 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 // Optimized for shape of types we're going to see
 function deepEquals(a: unknown, b: unknown): boolean {
 	// Handle primitives and exact equality
-	if (a === b) return true
+	if (a === b) {
+		return true
+	}
 
 	// Handle arrays
 	if (Array.isArray(a) && Array.isArray(b)) {
@@ -226,10 +228,10 @@ function deepEquals(a: unknown, b: unknown): boolean {
 
 	// Handle objects
 	if (typeof a === 'object' && a !== null && typeof b === 'object' && b !== null) {
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
+		// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unnecessary-type-assertion
 		const keys = Object.keys(a as Record<string, unknown>)
 		return (
-			// eslint-disable-next-line ts/no-unsafe-type-assertion
+			// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unnecessary-type-assertion
 			keys.length === Object.keys(b as Record<string, unknown>).length &&
 			keys.every(
 				// eslint-disable-next-line ts/no-unsafe-type-assertion

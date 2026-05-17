@@ -35,7 +35,9 @@ function isColorTuple(value: unknown): value is ColorTupleRgb | ColorTupleRgba {
 
 /**
  * Converts a tuple to a ColorPlusObject
- * @param value Accepts arrays / tuples or tuple-like strings, e.g. `'[1, 2, 3]'`
+ *
+ * @param value Accepts arrays / tuples or tuple-like strings, e.g. `'[1, 2,
+ *   3]'`
  * @param colorType The color type to convert to
  */
 export function tupleToColor(

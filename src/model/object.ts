@@ -3,7 +3,8 @@ import type { ColorFormat, ColorPlusObject, ColorSpaceId, ColorType, ObjectForma
 import { convert, formatNumber, getRangeForChannel } from './shared'
 
 /**
- * Interpret object keys graciously... allow for mixes of long and short single-letter keys, plus likely aliases
+ * Interpret object keys graciously... allow for mixes of long and short
+ * single-letter keys, plus likely aliases
  */
 const colorObjectKeys: Array<{
 	channels: Array<{ externalKeys: string[]; internalKey: string }>
@@ -174,13 +175,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isNumberRecord(value: unknown): value is Record<string, null | number> {
-	if (!isRecord(value)) return false
+	if (!isRecord(value)) {
+		return false
+	}
+
 	return Object.values(value).every((v) => v === null || typeof v === 'number')
 }
 
 /**
  * Convert an unknown object to a color object
- * @param value Accepts objects or object-like strings, e.g. `'{r: 255, g: 0, b: 0, a: .5 }'`
+ *
+ * @param value Accepts objects or object-like strings, e.g. `'{r: 255, g: 0, b:
+ *   0, a: .5 }'`
  */
 export function objectToColor(
 	value: unknown,
@@ -189,7 +195,9 @@ export function objectToColor(
 	// Handle object-like strings, too
 	const objectValue = typeof value === 'string' ? (parseObjectString(value) ?? value) : value
 
-	if (!isNumberRecord(objectValue)) return undefined
+	if (!isNumberRecord(objectValue)) {
+		return undefined
+	}
 
 	const lowerCaseValue = Object.fromEntries(
 		Object.entries(objectValue).map(([k, v]) => [k.toLowerCase(), v]),
@@ -261,7 +269,9 @@ export function objectToColor(
 
 			// Map between float and int if needed
 			for (const [index, value] of result.coords.entries()) {
-				if (value === null) continue
+				if (value === null) {
+					continue
+				}
 
 				const [colorJsLow, colorJsHigh] = getRangeForChannel(result.spaceId, index)
 
@@ -373,8 +383,9 @@ function stringifyObject(
 }
 
 /**
- * Takes a semi-naive JSON5-esque color-like string object, and attempts to parse it into an object
- * If the bespoke parse pass fails, it will try to use `JSON.parse` instead.
+ * Takes a semi-naive JSON5-esque color-like string object, and attempts to
+ * parse it into an object If the bespoke parse pass fails, it will try to use
+ * `JSON.parse` instead.
  */
 function parseObjectString(value: string): Record<string, unknown> | undefined {
 	try {
