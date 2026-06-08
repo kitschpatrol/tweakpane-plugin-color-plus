@@ -5,15 +5,15 @@ import { Pane } from 'tweakpane'
 import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
 
 const params: Record<string, unknown> = {
-	// hex strings
+	// Hex strings
 	hexString: '#ff0066',
 	hexStringAlpha: '#ff00667f',
 
-	// numbers
+	// Numbers
 	number: 0xff_00_66,
 	numberAlpha: 0xff_00_66_7f,
 
-	// objects
+	// Objects
 	object: {
 		r: 255,
 		g: 0,
@@ -62,14 +62,13 @@ const params: Record<string, unknown> = {
 		h: 14,
 	},
 
-	// tuples
+	// Tuples
 	tuple: [255, 0, 102],
 	tupleAlpha: [255, 0, 102, 0.5],
 	tupleFloat: [1, 0, 0.4],
 	tupleFloatAlpha: [1, 0, 0.4, 0.5],
 
-	// color() strings
-	colorPrefixHsv: 'color(--hsv 336deg 100% 100)',
+	// CSS-compatible color() strings
 	colorA98Rgb: 'color(a98-rgb 0.86 0 0.39)',
 	colorDisplayP3: 'color(display-p3 0.92 0.2 0.41)',
 	colorProphotoRgb: 'color(prophoto-rgb 0.72 0.28 0.33)',
@@ -79,49 +78,53 @@ const params: Record<string, unknown> = {
 	colorXyz: 'color(xyz 0.44 0.22 0.15)',
 	colorXyzD50: 'color(xyz-d50 0.46 0.23 0.11)',
 	colorXyzD65: 'color(xyz-d65 0.44 0.22 0.15)',
-	colorHsl: 'color(hsl 336 100% 50%)',
-	colorHwb: 'color(hwb 336 0% 0%)',
-	colorLab: 'color(lab 55 66% 16%)',
-	colorLabD65: 'color(lab-d65 54 66% 15%)',
-	colorLch: 'color(lch 55 56% 4%)',
-	colorOklab: 'color(oklab 0.64 0.25 0.05)',
-	colorOklch: 'color(oklch 60% 0.24 13deg)',
 
-	// hsl() strings (Tweakpane built-in)
+	// Color.js-compatible color() strings (not actually valid CSS, but supported
+	// by Tweakpane Plugin Color Plus)
+	colorPrefixHsv: 'color(--hsv 336deg 100% 100)', // Invalid CSS
+	colorHsl: 'color(hsl 336 100% 50%)', // Invalid CSS
+	colorHwb: 'color(hwb 336 0% 0%)', // Invalid CSS
+	colorLab: 'color(lab 55 66% 16%)', // Invalid CSS
+	colorLabD65: 'color(lab-d65 54 66% 15%)', // Invalid CSS
+	colorLch: 'color(lch 55 56% 4%)', // Invalid CSS
+	colorOklab: 'color(oklab 0.64 0.25 0.05)', // Invalid CSS
+	colorOklch: 'color(oklch 60% 0.24 13deg)', // Invalid CSS
+
+	// hsl() strings (Tweakpane built-in, CSS-compatible)
 	funcHslLegacy: 'hsl(336, 100%, 50%)',
 	funcHsl: 'hsl(336 100% 50%)',
 	funcHslAlpha: 'hsl(336 100% 50% / 0.5)',
 	funcHslLegacyNoUnits: 'hsl(336, 100, 50)',
 	funcHslFancyUnits: 'hsl(336deg 100% 50% / .5)',
 
-	// hsla() strings (Tweakpane built-in)
+	// hsla() strings (Tweakpane built-in, CSS-compatible)
 	funcHslaLegacy: 'hsla(336, 100%, 50%, 0.5)',
 	funcHsla: 'hsla(336 100% 50% / 0.5)',
-	funcHslaLegacyNoUnits: 'hsla(336, 100, 50, 0.5)',
+	funcHslaLegacyNoUnits: 'hsla(336, 100, 50, 0.5)', // Invalid CSS
 	funcHslaFancyUnits: 'hsla(336deg 100% 50% / 0.5)',
 
 	// hwb() strings
-	funcHwbLegacy: 'hwb(336, 0%, 0%)',
+	funcHwbLegacy: 'hwb(336, 0%, 0%)', // Invalid CSS
 	funcHwb: 'hwb(336 0% 0%)',
 	funcHwbAlpha: 'hwb(336 0% 0% / 0.5)',
 
 	// lab() strings
-	funcLabLegacy: 'lab(55%, 83, 21)',
+	funcLabLegacy: 'lab(55%, 83, 21)', // Invalid CSS
 	funcLab: 'lab(55% 83 21)',
 	funcLabAlpha: 'lab(55% 83 21 / 0.5)',
 
 	// lch() strings
-	funcLchLegacy: 'lch(55, 85, 14)',
+	funcLchLegacy: 'lch(55, 85, 14)', // Invalid CSS
 	funcLch: 'lch(55 85 14)',
 	funcLchAlpha: 'lch(55 85 14 / 0.5)',
 
 	// oklab() strings
-	funcOklabLegacy: 'oklab(0.64, 0.25, 0.05)',
+	funcOklabLegacy: 'oklab(0.64, 0.25, 0.05)', // Invalid CSS
 	funcOklab: 'oklab(0.64 0.25 0.05)',
 	funcOklabAlpha: 'oklab(0.64 0.25 0.05 / 0.5)',
 
 	// oklch() strings
-	funcOklchLegacy: 'oklch(60%, 0.26, 11deg)',
+	funcOklchLegacy: 'oklch(60%, 0.26, 11deg)', // Invalid CSS
 	funcOklch: 'oklch(60% 0.26 11deg)',
 	funcOklchAlpha: 'oklch(60% 0.26 11deg / 0.5)',
 
