@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Color Plus Playground</title>
+		<style>
+			:root {
+				--tp-blade-value-width: 65%;
+			}
+
+			body {
+				display: flex;
+				flex-direction: column;
+				gap: 16px;
+				align-items: center;
+				box-sizing: border-box;
+				min-height: 100vh;
+				margin: 0;
+				padding: 24px 0;
+				font-family: sans-serif;
+			}
+
+			.box {
+				width: 320px;
+			}
+		</style>
+		<script src="./index.ts" type="module"></script>
+	</head>
+	<body>
+		<div class="box">
+			<div id="picker"></div>
+		</div>
+		<div class="box">
+			<div id="controls"></div>
+		</div>
+	</body>
+</html>

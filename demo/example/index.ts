@@ -6,8 +6,15 @@ import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
 
 const params: Record<string, unknown> = {
 	// Hex strings
-	hexString: '#ff0066',
+	hexString: '#a73663',
 	hexStringAlpha: '#ff00667f',
+
+	// Picker config demos (color-plus only)
+	pickerStretch: '#3366ff',
+	pickerGamutsSrgbOnly: '#3366ff',
+	pickerGamutsWide: 'oklch(0.7 0.3 30)',
+	pickerSwapAxes: '#3366ff',
+	pickerHuePlane: '#3366ff',
 
 	// Numbers
 	number: 0xff_00_66,
@@ -188,6 +195,7 @@ const ignoredParams = new Set([
 	'objectLongKeys',
 	'objectLongKeysAlpha',
 	'objectMixedKeys',
+	'pickerGamutsWide',
 	'tuple',
 	'tupleAlpha',
 	'tupleFloat',
@@ -202,6 +210,21 @@ const extraProps = {
 		color: {
 			alpha: true,
 		},
+	},
+	pickerStretch: {
+		paletteProjection: 'stretch',
+	},
+	pickerGamutsSrgbOnly: {
+		gamuts: ['srgb'],
+	},
+	pickerGamutsWide: {
+		gamuts: ['srgb', 'p3', 'rec2020', 'prophoto'],
+	},
+	pickerSwapAxes: {
+		paletteChannels: 'CL_H',
+	},
+	pickerHuePlane: {
+		paletteChannels: 'HL_C',
 	},
 	objectFloat: {
 		color: {
