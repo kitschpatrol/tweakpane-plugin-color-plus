@@ -281,6 +281,9 @@ export class PlanePaletteView implements View {
 			const value = axisFractionToUnit(this.band.iterAxis === 'x' ? xf : yf, this.band.iterAxis)
 			const sat = axisFractionToUnit(this.band.bandAxis === 'x' ? xf : yf, this.band.bandAxis)
 			this.lastOkhsvSaturation = sat
+			// Every pick along the black edge resolves to the identical color, so no
+			// change event will reposition the marker; refresh it for the new carry.
+			this.positionMarker()
 			const [l, c] = okhsvToLightnessChroma(this.okhsvProfileFor(slider), sat, value)
 			// The OKHSV boundary is a piecewise-linear sample of maxChroma, so its top
 			// edge (value 1) can sit a rounding step past the true gamut; clamp chroma
@@ -305,6 +308,9 @@ export class PlanePaletteView implements View {
 			// band collapses at a pole (the resulting achromatic color forgets the x).
 			const unit = axisFractionToUnit(bandFraction, this.band.bandAxis)
 			this.lastBandUnit = unit
+			// At a collapsed band (black/white pole) every pick resolves to the same
+			// color, so no change event will reposition the marker; refresh it here.
+			this.positionMarker()
 			let bandValue = widest === undefined ? 0 : widest[0] + unit * (widest[1] - widest[0])
 			// The interpolated band can overshoot the true frontier between grid
 			// samples by a rounding step, so a pick on the plane's edge would land
