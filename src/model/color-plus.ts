@@ -1,5 +1,3 @@
-// Import {constrainRange} from '@tweakpane/core';
-
 import type { Ref } from 'colorjs.io/fn'
 import { constrainRange } from '@tweakpane/core'
 import {
@@ -7,10 +5,17 @@ import {
 	getAll as colorJsGetAll,
 	set as colorJsSet,
 	setAll as colorJsSetAll,
-	toGamutCSS as colorJsToGamutCss,
+	toGamut as colorJsToGamut,
 } from 'colorjs.io/fn'
 import type { ColorPlusValue } from '../plugin'
-import type { ColorFormat, ColorPlusObject, ColorSpaceId, ColorType, Coords } from './shared'
+import type {
+	ColorFormat,
+	ColorPlusObject,
+	ColorSpaceId,
+	ColorType,
+	Coords,
+	GamutMethod,
+} from './shared'
 import { colorToNumber, colorToNumberString, numberToColor } from './number'
 import { colorToObject, colorToObjectString, objectToColor } from './object'
 import {
@@ -49,7 +54,6 @@ export class ColorPlus {
 		hasAlpha?: boolean,
 		colorType?: ColorType,
 	): ColorPlus | undefined {
-		// TODO faster path? TODO memoization?
 		const parsed = parseColorAndFormat(value, hasAlpha, colorType)
 
 		if (parsed === undefined) {
@@ -81,26 +85,13 @@ export class ColorPlus {
 	}
 
 	public get(prop: Ref, space?: ColorSpaceId): number {
-		// TODO good idea to toDecimalPrecision here?
 		return colorJsGet(convert(this.color, space ?? this.color.spaceId) ?? this.color, prop)
 	}
 
 	public getAll(space?: ColorSpaceId): Coords {
-		// TODO constrain space
-		// TODO check for 'none' values?
-
-		// We handle conversion manually because of achromatic color rounding issues
+		// Convert via the local helper (not colorjs's space option) to keep
+		// achromatic hue handling consistent
 		return colorJsGetAll(convert(this.color, space ?? this.color.spaceId) ?? this.color)
-
-		// TODO copy check?
-		// return colorJsGetAll(
-		// 	space === undefined || space === this.color.spaceId
-		// 		? this.color
-		// 		: copyColorPlusObject(this.color),
-		// 	{
-		// 		space,
-		// 	},
-		// ) as [number, number, number];
 	}
 
 	public serialize(format: ColorFormat, alphaOverride?: boolean): string {
@@ -128,18 +119,11 @@ export class ColorPlus {
 		}
 	}
 
-	public set(
-		prop: Ref,
-		value: ((coord: number) => number) | number,
-		space?: ColorSpaceId,
-		// Clip?: boolean,
-	): void {
+	public set(prop: Ref, value: ((coord: number) => number) | number, space?: ColorSpaceId): void {
 		// Alpha always constrained to [0, 1]
 		if (prop === 'alpha') {
 			this.alpha = constrainRange(typeof value === 'number' ? value : value(this.alpha), 0, 1)
 		} else {
-			// TODO room to optimize here? What does colorJsSet do to the class color object?
-
 			// Convert to target color space
 			let converted =
 				convert(this.color, space ?? this.color.spaceId) ?? copyColorPlusObject(this.color)
@@ -148,41 +132,23 @@ export class ColorPlus {
 			// Convert back to original color space
 			converted = convert(converted, this.color.spaceId) ?? converted
 
-			// If (clip !== false) {
-			// 	toGamut(converted, {
-			// 		method: 'css',
-			// 	});
-			// }
-
 			setFromColorPlusObject(this.color, converted)
 		}
 	}
 
-	public setAll(
-		coords: Coords,
-		space?: ColorSpaceId,
-		// Clip?: boolean,
-	): void {
-		// TODO constrain space
-		// TODO room to optimize here? What does colorJsSet do to the class color object?
+	public setAll(coords: Coords, space?: ColorSpaceId): void {
 		const targetColor = copyColorPlusObject(this.color)
 		colorJsSetAll(targetColor, space ?? this.color.spaceId, coords)
-
-		// If (clip !== false) {
-		// 	toGamut(targetColor, {
-		// 		method: 'css',
-		// 	});
-		// }
 
 		setFromColorPlusObject(this.color, getColorPlusObjectFromColorJsObject(targetColor))
 	}
 
-	public toGamut(space?: ColorSpaceId): void {
+	public toGamut(space?: ColorSpaceId, method: GamutMethod = 'css'): void {
 		const originalSpace = this.color.spaceId
 		const gamutSpace = space ?? originalSpace
 
 		this.color = getColorPlusObjectFromColorJsObject(
-			colorJsToGamutCss(this.color, { space: gamutSpace }),
+			colorJsToGamut(copyColorPlusObject(this.color), { method, space: gamutSpace }),
 		)
 
 		if (gamutSpace !== originalSpace) {

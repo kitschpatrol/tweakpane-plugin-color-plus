@@ -1,64 +1,31 @@
 /* stylelint-disable */
-// Import core styles
 @use '../../node_modules/@tweakpane/core/lib/sass/tp';
 
-// Additional style for the plugin
-// .#{tp.$prefix}-tmpv {
-// 	// Extend a general input view style
-// 	@extend %tp-input;
+// The OKLCH picker plane reuses Tweakpane's native SV-palette classes (tp-svpv on
+// the container, tp-svpv_c on the canvas, tp-svpv_m on the marker) so its
+// rounding, crosshair cursor, sizing, and marker styling come from the
+// already-loaded core CSS. The channel slider reuses tp-hplv (+ _c / _m) and the
+// alpha strip reuses tp-aplv. The only thing the canvases need on top is
+// touch-action, so dragging the plane or slider doesn't scroll the page on touch
+// devices.
+.#{tp.$prefix}-plpv_c,
+.#{tp.$prefix}-hplv_c {
+	touch-action: none;
+}
 
-// 	cursor: pointer;
-// 	display: grid;
-// 	grid-template-columns: repeat(10, 1fr);
-// 	grid-template-rows: repeat(auto-fit, 10px);
-// 	height: calc(#{tp.cssVar('container-unit-size')} * 3);
-// 	overflow: hidden;
-// 	position: relative;
+// Perceptual mode leaves the out-of-gamut area transparent; show the Tweakpane
+// input background through it so the plane matches a text entry field.
+.#{tp.$prefix}-plpv-perceptual {
+	background-color: tp.cssVar('input-bg');
+}
 
-// 	&.#{tp.$prefix}-v-disabled {
-// 		opacity: 0.5;
-// 	}
-
-// 	&_text {
-// 		// You can use CSS variables for styling. See declarations for details:
-// 		// ../../node_modules/@tweakpane/core/lib/sass/common/_defs.scss
-// 		color: tp.cssVar('input-fg');
-
-// 		bottom: 2px;
-// 		font-size: 0.9em;
-// 		line-height: 0.9;
-// 		opacity: 0.5;
-// 		position: absolute;
-// 		right: 2px;
-// 	}
-
-// 	&_dot {
-// 		height: 10px;
-// 		line-height: 10px;
-// 		position: relative;
-// 		text-align: center;
-
-// 		&::before {
-// 			background-color: tp.cssVar('input-fg');
-// 			content: '';
-// 			border-radius: 1px;
-// 			height: 2px;
-// 			left: 50%;
-// 			margin-left: -1px;
-// 			margin-top: -1px;
-// 			position: absolute;
-// 			top: 50%;
-// 			width: 2px;
-// 		}
-// 	}
-
-// 	&_frac {
-// 		background-color: tp.cssVar('input-fg');
-// 		border-radius: 1px;
-// 		height: 2px;
-// 		left: 50%;
-// 		margin-top: -1px;
-// 		position: absolute;
-// 		top: 50%;
-// 	}
-// }
+// Minimum-representable-gamut readout, inset into the plane's bottom-left corner.
+// Font size inherits from the pane; color and the corner inset come from the theme.
+.#{tp.$prefix}-plpv_label {
+	bottom: tp.cssVar('container-v-padding');
+	color: tp.cssVar('label-fg');
+	left: tp.cssVar('container-h-padding');
+	line-height: 1;
+	pointer-events: none;
+	position: absolute;
+}

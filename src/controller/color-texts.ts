@@ -8,7 +8,6 @@ import type {
 	ViewProps,
 } from '@tweakpane/core'
 import {
-	connectValues,
 	createNumberFormatter,
 	createValue,
 	DefiniteRangeConstraint,
@@ -18,25 +17,63 @@ import {
 	ValueMap,
 } from '@tweakpane/core'
 import type { ColorType } from '../model/shared.js'
-import { ColorPlus } from '../model/color-plus.js'
-import { denormalizeCoord, getRangeForChannel, normalizeCoord } from '../model/shared.js'
-// Import {getKeyScaleForColor} from '../util.js';
 import type { ColorTextsMode } from '../view/color-texts.js'
+import { ColorPlus } from '../model/color-plus.js'
+import { CHROMA_CEILING } from '../model/gamut.js'
+import { denormalizeCoord, getRangeForChannel, normalizeCoord } from '../model/shared.js'
+import { connectValues } from '../model/value-sync.js'
 import { ColorTextsView } from '../view/color-texts.js'
 
 type Config = {
 	colorType: ColorType
+	supportsAlpha: boolean
+	textsMode: ColorTextsMode
 	value: Value<ColorPlus>
 	viewProps: ViewProps
 }
 
-function createFormatter(type: ColorType): Formatter<number> {
+type ColorMode = 'hsl' | 'hsv' | 'okhsv' | 'oklch' | 'srgb'
+
+/**
+ * The OK modes show raw colorjs coordinates: the int/float `colorType` only
+ * encodes sRGB-era conventions (0–255 vs 0–1) that don't apply to them.
+ */
+function isOkMode(mode: ColorMode): boolean {
+	return mode === 'okhsv' || mode === 'oklch'
+}
+
+function isHueChannel(mode: ColorMode, index: number): boolean {
+	return (mode === 'oklch' && index === 2) || (mode === 'okhsv' && index === 0)
+}
+
+function createFormatter(mode: ColorMode, type: ColorType, index: number): Formatter<number> {
+	if (isOkMode(mode)) {
+		return createNumberFormatter(isHueChannel(mode, index) ? 1 : 3)
+	}
+
 	return createNumberFormatter(type === 'float' ? 3 : 0)
 }
 
-type ColorMode = 'hsl' | 'hsv' | 'srgb'
+function channelScale(mode: ColorMode, type: ColorType, index: number): number {
+	if (isOkMode(mode)) {
+		return isHueChannel(mode, index) ? 1 : 0.01
+	}
+
+	return type === 'float' ? 0.01 : 1
+}
 
 function createConstraint(mode: ColorMode, type: ColorType, index: number): Constraint<number> {
+	if (isOkMode(mode)) {
+		// Colorjs's OKLCH chroma reference range tops out at 0.4, below real
+		// wide-gamut chroma, so use the picker's ceiling instead
+		if (mode === 'oklch' && index === 1) {
+			return new DefiniteRangeConstraint({ min: 0, max: CHROMA_CEILING })
+		}
+
+		const [min, max] = getRangeForChannel(mode, index)
+		return new DefiniteRangeConstraint({ min, max })
+	}
+
 	if (type === 'float') {
 		return new DefiniteRangeConstraint({ min: 0, max: 1 })
 	}
@@ -62,13 +99,14 @@ function createComponentController(
 	},
 	index: number,
 ): NumberTextController {
+	const scale = channelScale(config.colorMode, config.colorType, index)
 	return new NumberTextController(doc, {
 		arrayPosition: index === 0 ? 'fst' : index === 3 - 1 ? 'lst' : 'mid',
 		parser: config.parser,
 		props: ValueMap.fromObject({
-			formatter: createFormatter(config.colorType),
-			keyScale: config.colorType === 'float' ? 0.01 : 1, // TODO revisit was getKeyScaleForColor(false)
-			pointerScale: config.colorType === 'float' ? 0.01 : 1,
+			formatter: createFormatter(config.colorMode, config.colorType, index),
+			keyScale: scale,
+			pointerScale: scale,
 		}),
 		value: createValue(0, {
 			constraint: createConstraint(config.colorMode, config.colorType, index),
@@ -85,30 +123,29 @@ function createComponentControllers(
 		value: Value<ColorPlus>
 		viewProps: ViewProps
 	},
-): NumberTextController[] {
+): ComponentControllerSet {
 	const cc = {
 		colorMode: config.colorMode,
 		colorType: config.colorType,
 		parser: parseNumber,
 		viewProps: config.viewProps,
 	}
-	return [0, 1, 2].map((i) => {
+	const disconnects: Array<() => void> = []
+	const controllers = [0, 1, 2].map((i) => {
 		const c = createComponentController(doc, cc, i)
-		connectValues({
+		const disconnect = connectValues({
 			// Number in text field to ColorPlus model
 			backward(p, s) {
-				// Number / channel to ColorPlus object
-				// Note edge case for int srgb representation
-				// TODO setChannel method on ColorPlus?
 				const newColor = p.clone()
 				const comps = newColor.getAll(config.colorMode)
 
-				comps[i] =
-					config.colorType === 'float'
-						? // eslint-disable-next-line ts/no-unnecessary-condition
-							denormalizeCoord(config.colorMode, i, s ?? 0)
-						: // eslint-disable-next-line ts/no-unnecessary-condition
-							(s ?? 0) / (config.colorMode === 'srgb' ? 255 : 1)
+				// eslint-disable-next-line ts/no-unnecessary-condition
+				const typed = s ?? 0
+				comps[i] = isOkMode(config.colorMode)
+					? typed
+					: config.colorType === 'float'
+						? denormalizeCoord(config.colorMode, i, typed)
+						: typed / (config.colorMode === 'srgb' ? 255 : 1)
 				newColor.setAll(comps, config.colorMode)
 
 				// Edge case to prevent wrapping 360 to 0 in HSL
@@ -117,22 +154,23 @@ function createComponentControllers(
 					config.colorMode === 'hsl' &&
 					((config.colorType === 'int' && s === 360) || (config.colorType === 'float' && s === 1))
 				) {
-					console.log('edge')
 					newColor.set('h', 360)
 				}
 
 				return newColor
 			},
-			// From HSV ColorPlus model to number in text field
-			// Note edge case for int srgb representation
+			// ColorPlus model to number in text field
 			forward(p) {
 				let rawValue = p.getAll(config.colorMode)[i] ?? 0
 
-				// TODO revisit
 				// Edge case to prevent wrapping 360 to 0 in HSL
 				// eslint-disable-next-line ts/no-unnecessary-condition
 				if (i === 0 && config.colorMode === 'hsl' && (p.get('h', 'hsv') ?? 0) === 360) {
 					rawValue = 360
+				}
+
+				if (isOkMode(config.colorMode)) {
+					return rawValue
 				}
 
 				return config.colorType === 'float'
@@ -143,13 +181,23 @@ function createComponentControllers(
 			// Like the 'view'
 			secondary: c.value,
 		})
+		disconnects.push(disconnect)
 		return c
 	})
+	return {
+		controllers,
+		disconnect() {
+			for (const disconnect of disconnects) {
+				disconnect()
+			}
+		},
+	}
 }
 
 function createHexController(
 	doc: Document,
 	config: {
+		supportsAlpha: boolean
 		value: Value<ColorPlus>
 		viewProps: ViewProps
 	},
@@ -162,16 +210,22 @@ function createHexController(
 				return null
 			}
 
-			parsedColor.convert('hsv')
-			// ParsedColor.toGamut('srgb');
-			parsedColor.alpha = config.value.rawValue.alpha
+			parsedColor.convert('oklch')
+
+			// A typed hex only carries alpha when it has alpha digits (#rgba or
+			// #rrggbbaa) and the binding supports alpha; otherwise keep the
+			// color's current alpha rather than resetting it to opaque.
+			const isAlphaInText = ColorPlus.getFormat(text)?.alpha ?? false
+			if (!config.supportsAlpha || !isAlphaInText) {
+				parsedColor.alpha = config.value.rawValue.alpha
+			}
 
 			return parsedColor
 		},
 		props: ValueMap.fromObject({
 			formatter(value: ColorPlus): string {
 				const serialized = value.serialize({
-					alpha: false,
+					alpha: config.supportsAlpha,
 					format: 'hex',
 					space: 'srgb',
 					type: 'string',
@@ -183,12 +237,10 @@ function createHexController(
 		viewProps: config.viewProps,
 	})
 
-	connectValues({
-		// TODO hmm, s
+	const disconnect = connectValues({
 		backward(_, s) {
 			return s
 		},
-		// TODO hmm
 		forward(p) {
 			return p.clone()
 		},
@@ -196,7 +248,10 @@ function createHexController(
 		secondary: c.value,
 	})
 
-	return [c] as ComponentValueController[]
+	return {
+		controllers: [c] as ComponentValueController[],
+		disconnect,
+	}
 }
 
 function isColorMode(mode: ColorTextsMode): mode is ColorMode {
@@ -205,6 +260,11 @@ function isColorMode(mode: ColorTextsMode): mode is ColorMode {
 
 type ComponentValueController = ValueController<unknown, InputView>
 
+type ComponentControllerSet = {
+	controllers: ComponentValueController[]
+	disconnect: () => void
+}
+
 export class ColorTextsController implements ValueController<ColorPlus, ColorTextsView> {
 	public readonly colorMode: Value<ColorTextsMode>
 	public readonly value: Value<ColorPlus>
@@ -212,41 +272,48 @@ export class ColorTextsController implements ValueController<ColorPlus, ColorTex
 	public readonly viewProps: ViewProps
 	private ccs: ComponentValueController[]
 	private readonly colorType: ColorType
+	private disconnectCcs: () => void
+	private readonly supportsAlpha: boolean
 
 	constructor(doc: Document, config: Config) {
 		this.onModeSelectChange = this.onModeSelectChange.bind(this)
 
 		this.colorType = config.colorType
+		this.supportsAlpha = config.supportsAlpha
 		this.value = config.value
 		this.viewProps = config.viewProps
 
-		// HMM, initial color setting?
-		// this.colorMode = createValue(this.value.rawValue.mode as ColorTextsMode);
-		this.colorMode = createValue('srgb')
-		this.ccs = this.createComponentControllers(doc)
+		this.colorMode = createValue<ColorTextsMode>(config.textsMode)
+		const { controllers, disconnect } = this.createComponentControllers(doc)
+		this.ccs = controllers
+		this.disconnectCcs = disconnect
 
 		this.view = new ColorTextsView(doc, {
-			inputViews: [this.ccs[0].view, this.ccs[1].view, this.ccs[2].view],
+			inputViews: this.ccs.map((cc) => cc.view),
 			mode: this.colorMode,
 			viewProps: this.viewProps,
 		})
 
 		this.view.modeSelectElement.addEventListener('change', this.onModeSelectChange)
+
+		config.viewProps.handleDispose(() => {
+			this.disconnectCcs()
+		})
 	}
 
-	private createComponentControllers(doc: Document): ComponentValueController[] {
+	private createComponentControllers(doc: Document): ComponentControllerSet {
 		const mode = this.colorMode.rawValue
 		if (isColorMode(mode)) {
-			// eslint-disable-next-line ts/no-unnecessary-type-assertion
 			return createComponentControllers(doc, {
 				colorMode: mode,
 				colorType: this.colorType,
 				value: this.value,
 				viewProps: this.viewProps,
-			}) as ComponentValueController[]
+			})
 		}
 
 		return createHexController(doc, {
+			supportsAlpha: this.supportsAlpha,
 			value: this.value,
 			viewProps: this.viewProps,
 		})
@@ -258,7 +325,14 @@ export class ColorTextsController implements ValueController<ColorPlus, ColorTex
 		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		this.colorMode.rawValue = selectElement.value as ColorMode
 
-		this.ccs = this.createComponentControllers(this.view.element.ownerDocument)
+		// Unhook the previous mode's controllers from the shared color value so
+		// their change handlers don't accumulate across mode switches
+		this.disconnectCcs()
+		const { controllers, disconnect } = this.createComponentControllers(
+			this.view.element.ownerDocument,
+		)
+		this.ccs = controllers
+		this.disconnectCcs = disconnect
 		this.view.inputViews = this.ccs.map((cc) => cc.view)
 	}
 }

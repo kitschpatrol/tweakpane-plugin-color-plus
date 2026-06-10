@@ -45,6 +45,10 @@ export class APaletteView implements View {
 		this.previewElement.classList.add(cn('p'))
 		this.markerElement.append(this.previewElement)
 
+		config.viewProps.handleDispose(() => {
+			this.value.emitter.off('change', this.onValueChange)
+		})
+
 		this.update()
 	}
 

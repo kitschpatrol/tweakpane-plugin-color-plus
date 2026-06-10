@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest'
 import { ColorPlus } from '../src/model/color-plus.js'
+import { clampColorToGamut } from '../src/utilities.js'
 
 it('converts to a simple string', () => {
 	const c = ColorPlus.create('#f00')
@@ -98,3 +99,20 @@ function getObjectId(object: unknown): symbol {
 	localObject.__id ??= Symbol(Date.now().toString())
 	return localObject.__id
 }
+
+it('clamps a color into the widest configured gamut by shedding chroma', () => {
+	const c = ColorPlus.create('oklch(65% 0.4 13)')
+	expect(c).toBeDefined()
+	expect(clampColorToGamut(c!, ['srgb', 'p3', 'rec2020'])).toBe(true)
+	const [l, chroma, h] = c!.getAll('oklch')
+	expect(l).toBeCloseTo(0.65, 10)
+	expect(h).toBeCloseTo(13, 10)
+	expect(chroma).toBeLessThan(0.4)
+	expect(chroma).toBeGreaterThan(0)
+
+	// An in-gamut color is left untouched.
+	const inGamut = ColorPlus.create('oklch(65% 0.1 13)')
+	expect(inGamut).toBeDefined()
+	expect(clampColorToGamut(inGamut!, ['srgb'])).toBe(false)
+	expect(inGamut!.getAll('oklch')[1]).toBeCloseTo(0.1, 10)
+})

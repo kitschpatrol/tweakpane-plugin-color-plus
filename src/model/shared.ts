@@ -39,7 +39,7 @@ ColorJsColorSpace.register(Lab) // Lab(), lab, (implicitly lab-d50, but the 'lab
 ColorJsColorSpace.register(LCH) // Lch(), lch
 ColorJsColorSpace.register(OKLab) // Oklab(), oklab
 ColorJsColorSpace.register(OKLCH) // Oklch(), oklch
-ColorJsColorSpace.register(Okhsv) // ?
+ColorJsColorSpace.register(Okhsv) // Color(--okhsv ...) strings
 ColorJsColorSpace.register(P3) // Display-p3
 ColorJsColorSpace.register(ProPhoto) // Prophoto-rgb
 ColorJsColorSpace.register(REC_2020) // Rec2020
@@ -61,7 +61,11 @@ export type ColorSpaceId =
 	| 'lab-d50'
 	| 'lab-d65'
 	| 'lch'
-	| 'okhsv' // Used for internal representation, TODO add to docs and examples
+	// Standard sRGB-referenced OKHSV, used for color(--okhsv ...) strings and
+	// the OKHSV text fields; the internal representation is OKLCH, and the
+	// picker plane's OKHSV mode uses the gamut-generalized projection in
+	// ./okhsv.ts, not this sRGB-locked space
+	| 'okhsv'
 	| 'oklab'
 	| 'oklch'
 	| 'prophoto-rgb'
@@ -73,6 +77,15 @@ export type ColorSpaceId =
 	| 'xyz-d65'
 
 export type Coords = [null | number, null | number, null | number]
+
+/**
+ * How an out-of-gamut color is forced into gamut. `clip` clamps each channel to
+ * its range (what browsers do when painting, so it matches what you see on
+ * screen); `css` applies the CSS Color 4 gamut-mapping algorithm (chroma
+ * reduction at constant lightness and hue), which is more colorimetrically
+ * faithful but differs from on-screen rendering.
+ */
+export type GamutMethod = 'clip' | 'css'
 
 export type ColorPlusObject = {
 	alpha: number
@@ -161,6 +174,22 @@ export function convert(
 		if (converted.coords[2] !== null && Math.abs(converted.coords[2]) < 1e-8) {
 			converted.coords[0] = lastHue
 			converted.coords[2] = 0
+		}
+	}
+
+	// Polar perceptual spaces (lightness, chroma, hue): an achromatic color has a
+	// powerless hue that colorjs may return as null/NaN. Pin it to lastHue so grays
+	// keep a usable hue for the picker instead of snapping to 0.
+	if (spaceId === 'oklch' || spaceId === 'lch') {
+		const hue = converted.coords[2]
+		const chroma = converted.coords[1]
+		if (hue === null || Number.isNaN(hue)) {
+			converted.coords[2] = lastHue
+		}
+
+		if (chroma !== null && Math.abs(chroma) < 1e-8) {
+			converted.coords[1] = 0
+			converted.coords[2] = lastHue
 		}
 	}
 

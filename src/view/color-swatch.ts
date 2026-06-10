@@ -1,8 +1,10 @@
 import type { Value, View, ViewProps } from '@tweakpane/core'
 import { ClassName } from '@tweakpane/core'
 import type { ColorPlus } from '../model/color-plus.js'
+import type { GamutMethod } from '../model/shared.js'
 
 type Config = {
+	swatchFallback: GamutMethod
 	value: Value<ColorPlus>
 	viewProps: ViewProps
 }
@@ -13,6 +15,7 @@ export class ColorSwatchView implements View {
 	public readonly buttonElement: HTMLButtonElement
 	public readonly element: HTMLElement
 	public readonly value: Value<ColorPlus>
+	private readonly swatchFallback: GamutMethod
 	private readonly swatchFallbackElement: HTMLDivElement
 	private readonly swatchRealElement: HTMLDivElement
 
@@ -21,6 +24,7 @@ export class ColorSwatchView implements View {
 
 		config.value.emitter.on('change', this.onValueChange)
 		this.value = config.value
+		this.swatchFallback = config.swatchFallback
 
 		this.element = doc.createElement('div')
 		this.element.classList.add(cn())
@@ -42,6 +46,10 @@ export class ColorSwatchView implements View {
 		this.element.append(buttonElement)
 		this.buttonElement = buttonElement
 
+		config.viewProps.handleDispose(() => {
+			this.value.emitter.off('change', this.onValueChange)
+		})
+
 		this.update()
 	}
 
@@ -61,7 +69,7 @@ export class ColorSwatchView implements View {
 		})
 
 		const fallbackColor = value.clone()
-		fallbackColor.toGamut('srgb')
+		fallbackColor.toGamut('srgb', this.swatchFallback)
 		this.swatchFallbackElement.style.backgroundColor = fallbackColor.serialize({
 			alpha: false,
 			format: 'oklch',

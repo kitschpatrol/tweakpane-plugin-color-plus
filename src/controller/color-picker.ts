@@ -1,5 +1,4 @@
 import type { Value, ValueController, ViewProps } from '@tweakpane/core'
-import type { ColorType } from '@tweakpane/core/dist/input-binding/color/model/color-model.js'
 import {
 	connectValues,
 	createNumberFormatter,
@@ -9,49 +8,69 @@ import {
 	parseNumber,
 	ValueMap,
 } from '@tweakpane/core'
+import type { PaletteProjection, PlaneLayout } from '../model/channel.js'
 import type { ColorPlus } from '../model/color-plus.js'
+import type { ColorType } from '../model/shared.js'
+import type { ColorTextsMode } from '../view/color-texts.js'
+import type { GamutLines } from '../view/plane-palette.js'
 import { ColorPickerView } from '../view/color-picker.js'
 import { APaletteController } from './a-palette.js'
+import { ChannelSliderController } from './channel-slider.js'
 import { ColorTextsController } from './color-texts.js'
-import { HPaletteController } from './h-palette.js'
-import { SvPaletteController } from './sv-palette.js'
+import { PlanePaletteController } from './plane-palette.js'
 
 type Config = {
 	colorType: ColorType
+	constrain: boolean
+	gamutLabel: boolean
+	gamutLines: GamutLines
+	gamuts: string[]
+	paletteChannels: PlaneLayout
+	paletteProjection: PaletteProjection
 	supportsAlpha: boolean
+	textFields: boolean
+	textsMode: ColorTextsMode
 	value: Value<ColorPlus>
 	viewProps: ViewProps
 }
 
+type AlphaControllers = {
+	palette: APaletteController
+	text: NumberTextController
+}
+
 export class ColorPickerController implements ValueController<ColorPlus, ColorPickerView> {
 	public readonly value: Value<ColorPlus>
-
 	public readonly view: ColorPickerView
 	public readonly viewProps: ViewProps
-	get textsController(): ColorTextsController {
-		return this.textsC
-	}
-	private readonly alphaIcs: null | {
-		palette: APaletteController
-		text: NumberTextController
-	}
-	private readonly hPaletteC: HPaletteController
-	private readonly svPaletteC: SvPaletteController
-
-	private readonly textsC: ColorTextsController
+	private readonly alphaIcs: AlphaControllers | undefined
+	private readonly planeC: PlanePaletteController
+	private readonly sliderC: ChannelSliderController
+	private readonly textsC: ColorTextsController | undefined
 
 	constructor(doc: Document, config: Config) {
 		this.value = config.value
 		this.viewProps = config.viewProps
 
-		this.hPaletteC = new HPaletteController(doc, {
+		this.planeC = new PlanePaletteController(doc, {
+			constrain: config.constrain,
+			gamutLabel: config.gamutLabel,
+			gamutLines: config.gamutLines,
+			gamuts: config.gamuts,
+			paletteChannels: config.paletteChannels,
+			paletteProjection: config.paletteProjection,
 			value: this.value,
 			viewProps: this.viewProps,
 		})
-		this.svPaletteC = new SvPaletteController(doc, {
+		this.sliderC = new ChannelSliderController(doc, {
+			constrain: config.constrain,
+			gamuts: config.gamuts,
+			paletteChannels: config.paletteChannels,
+			paletteProjection: config.paletteProjection,
 			value: this.value,
 			viewProps: this.viewProps,
 		})
+
 		this.alphaIcs = config.supportsAlpha
 			? {
 					palette: new APaletteController(doc, {
@@ -71,7 +90,7 @@ export class ColorPickerController implements ValueController<ColorPlus, ColorPi
 						viewProps: this.viewProps,
 					}),
 				}
-			: null
+			: undefined
 		if (this.alphaIcs) {
 			connectValues({
 				backward(p, s) {
@@ -84,11 +103,15 @@ export class ColorPickerController implements ValueController<ColorPlus, ColorPi
 			})
 		}
 
-		this.textsC = new ColorTextsController(doc, {
-			colorType: config.colorType,
-			value: this.value,
-			viewProps: this.viewProps,
-		})
+		this.textsC = config.textFields
+			? new ColorTextsController(doc, {
+					colorType: config.colorType,
+					supportsAlpha: config.supportsAlpha,
+					textsMode: config.textsMode,
+					value: this.value,
+					viewProps: this.viewProps,
+				})
+			: undefined
 
 		this.view = new ColorPickerView(doc, {
 			alphaViews: this.alphaIcs
@@ -96,11 +119,11 @@ export class ColorPickerController implements ValueController<ColorPlus, ColorPi
 						palette: this.alphaIcs.palette.view,
 						text: this.alphaIcs.text.view,
 					}
-				: null,
-			hPaletteView: this.hPaletteC.view,
+				: undefined,
+			planeView: this.planeC.view,
+			sliderView: this.sliderC.view,
 			supportsAlpha: config.supportsAlpha,
-			svPaletteView: this.svPaletteC.view,
-			textsView: this.textsC.view,
+			textsView: this.textsC?.view,
 			viewProps: this.viewProps,
 		})
 	}

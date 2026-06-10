@@ -1,21 +1,23 @@
 import type { NumberTextView, View, ViewProps } from '@tweakpane/core'
 import { ClassName } from '@tweakpane/core'
 import type { APaletteView } from './a-palette.js'
+import type { ChannelSliderView } from './channel-slider.js'
 import type { ColorTextsView } from './color-texts.js'
-import type { HPaletteView } from './h-palette.js'
-import type { SvPaletteView } from './sv-palette.js'
+import type { PlanePaletteView } from './plane-palette.js'
 
 const cn = ClassName('colp')
 
+type AlphaViews = {
+	palette: APaletteView
+	text: NumberTextView
+}
+
 type Config = {
-	alphaViews: null | {
-		palette: APaletteView
-		text: NumberTextView
-	}
-	hPaletteView: HPaletteView
+	alphaViews: AlphaViews | undefined
+	planeView: PlanePaletteView
+	sliderView: ChannelSliderView
 	supportsAlpha: boolean
-	svPaletteView: SvPaletteView
-	textsView: ColorTextsView
+	textsView: ColorTextsView | undefined
 	viewProps: ViewProps
 }
 
@@ -23,12 +25,14 @@ export class ColorPickerView implements View {
 	public readonly element: HTMLElement
 
 	get allFocusableElements(): HTMLElement[] {
-		const elements = [
-			this.svPaletteView.element,
-			this.hPaletteView.element,
-			this.textsView.modeSelectElement,
-			...this.textsView.inputViews.map((v) => v.inputElement),
-		]
+		const elements = [this.planeView.element, this.sliderView.element]
+		if (this.textsView) {
+			elements.push(
+				this.textsView.modeSelectElement,
+				...this.textsView.inputViews.map((v) => v.inputElement),
+			)
+		}
+
 		if (this.alphaViews) {
 			elements.push(this.alphaViews.palette.element, this.alphaViews.text.inputElement)
 		}
@@ -36,59 +40,49 @@ export class ColorPickerView implements View {
 		return elements
 	}
 
-	private readonly alphaViews: null | {
-		palette: APaletteView
-		text: NumberTextView
-	} = null
-	private readonly hPaletteView: HPaletteView
-	private readonly svPaletteView: SvPaletteView
-
-	private readonly textsView: ColorTextsView
+	private readonly alphaViews: AlphaViews | undefined
+	private readonly planeView: PlanePaletteView
+	private readonly sliderView: ChannelSliderView
+	private readonly textsView: ColorTextsView | undefined
 
 	constructor(doc: Document, config: Config) {
 		this.element = doc.createElement('div')
 		this.element.classList.add(cn())
 		config.viewProps.bindClassModifiers(this.element)
 
-		const hsvElement = doc.createElement('div')
-		hsvElement.classList.add(cn('hsv'))
+		this.planeView = config.planeView
+		const planeElement = doc.createElement('div')
+		planeElement.classList.add(cn('lc'))
+		planeElement.append(this.planeView.element)
+		this.element.append(planeElement)
 
-		const svElement = doc.createElement('div')
-		svElement.classList.add(cn('sv'))
-		this.svPaletteView = config.svPaletteView
-		svElement.append(this.svPaletteView.element)
-		hsvElement.append(svElement)
+		this.sliderView = config.sliderView
+		const sliderElement = doc.createElement('div')
+		sliderElement.classList.add(cn('h'))
+		sliderElement.append(this.sliderView.element)
+		this.element.append(sliderElement)
 
-		const hElement = doc.createElement('div')
-		hElement.classList.add(cn('h'))
-		this.hPaletteView = config.hPaletteView
-		hElement.append(this.hPaletteView.element)
-		hsvElement.append(hElement)
-		this.element.append(hsvElement)
-
-		const rgbElement = doc.createElement('div')
-		rgbElement.classList.add(cn('rgb'))
 		this.textsView = config.textsView
-		rgbElement.append(this.textsView.element)
-		this.element.append(rgbElement)
+		if (this.textsView) {
+			const rgbElement = doc.createElement('div')
+			rgbElement.classList.add(cn('rgb'))
+			rgbElement.append(this.textsView.element)
+			this.element.append(rgbElement)
+		}
 
+		this.alphaViews = config.alphaViews
 		if (config.alphaViews) {
-			this.alphaViews = {
-				palette: config.alphaViews.palette,
-				text: config.alphaViews.text,
-			}
-
 			const aElement = doc.createElement('div')
 			aElement.classList.add(cn('a'))
 
 			const apElement = doc.createElement('div')
 			apElement.classList.add(cn('ap'))
-			apElement.append(this.alphaViews.palette.element)
+			apElement.append(config.alphaViews.palette.element)
 			aElement.append(apElement)
 
 			const atElement = doc.createElement('div')
 			atElement.classList.add(cn('at'))
-			atElement.append(this.alphaViews.text.element)
+			atElement.append(config.alphaViews.text.element)
 			aElement.append(atElement)
 
 			this.element.append(aElement)

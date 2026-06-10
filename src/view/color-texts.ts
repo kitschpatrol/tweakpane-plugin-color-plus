@@ -1,7 +1,7 @@
 import type { InputView, Value, View, ViewProps } from '@tweakpane/core'
 import { bindValue, ClassName, createSvgIconElement, removeChildElements } from '@tweakpane/core'
 
-export type ColorTextsMode = 'hex' | 'hsl' | 'hsv' | 'srgb'
+export type ColorTextsMode = 'hex' | 'hsl' | 'hsv' | 'okhsv' | 'oklch' | 'srgb'
 
 type Config = {
 	inputViews: InputView[]
@@ -18,7 +18,8 @@ function createModeSelectElement(doc: Document): HTMLSelectElement {
 		{ text: 'HSL', value: 'hsl' },
 		{ text: 'HSV', value: 'hsv' },
 		{ text: 'HEX', value: 'hex' },
-		// {text: 'OKLCH', value: 'oklch'},
+		{ text: 'OKLCH', value: 'oklch' },
+		{ text: 'OKHSV', value: 'okhsv' },
 	]
 	selectElement.append(
 		// eslint-disable-next-line unicorn/no-array-reduce

@@ -6,7 +6,6 @@ import type {
 	ValueController,
 	ViewProps,
 } from '@tweakpane/core'
-import type { ColorType } from '@tweakpane/core/dist/input-binding/color/model/color-model.js'
 import {
 	bindFoldable,
 	connectValues,
@@ -18,18 +17,32 @@ import {
 	TextController,
 	ValueMap,
 } from '@tweakpane/core'
+import type { PaletteProjection, PlaneLayout } from '../model/channel.js'
 import type { ColorPlus } from '../model/color-plus.js'
+import type { ColorType, GamutMethod } from '../model/shared.js'
+import type { ColorTextsMode } from '../view/color-texts.js'
+import type { GamutLines } from '../view/plane-palette.js'
+import { clampColorToGamut } from '../utilities.js'
 import { ColorView } from '../view/color.js'
 import { ColorPickerController } from './color-picker.js'
 import { ColorSwatchController } from './color-swatch.js'
 
 type Config = {
 	colorType: ColorType
+	constrain: boolean
 	expanded: boolean
 	formatter: Formatter<ColorPlus>
+	gamutLabel: boolean
+	gamutLines: GamutLines
+	gamuts: string[]
+	paletteChannels: PlaneLayout
+	paletteProjection: PaletteProjection
 	parser: Parser<ColorPlus>
 	pickerLayout: PickerLayout
 	supportsAlpha: boolean
+	swatchFallback: GamutMethod
+	textFields: boolean
+	textsMode: ColorTextsMode
 	value: Value<ColorPlus>
 	viewProps: ViewProps
 }
@@ -57,14 +70,21 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 		this.value = config.value
 		this.viewProps = config.viewProps
 
-		// This.value.emitter.on('change', (event) => {
-		// 	console.log('----------------------------------');
-		// 	console.log(String(event.rawValue));
-		// });
+		// With gamut constraining on, pull a held out-of-gamut color (initial
+		// value, or a rebuild after constrain is toggled on) into the
+		// widest configured gamut and write it back, so the bound value never
+		// starts out of gamut.
+		if (config.constrain) {
+			const clamped = this.value.rawValue.clone()
+			if (clampColorToGamut(clamped, config.gamuts)) {
+				this.value.setRawValue(clamped, { forceEmit: true, last: true })
+			}
+		}
 
 		this.foldable = Foldable.create(config.expanded)
 
 		this.swatchC = new ColorSwatchController(doc, {
+			swatchFallback: config.swatchFallback,
 			value: this.value,
 			viewProps: this.viewProps,
 		})
@@ -97,7 +117,15 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 
 		const pickerC = new ColorPickerController(doc, {
 			colorType: config.colorType,
+			constrain: config.constrain,
+			gamutLabel: config.gamutLabel,
+			gamutLines: config.gamutLines,
+			gamuts: config.gamuts,
+			paletteChannels: config.paletteChannels,
+			paletteProjection: config.paletteProjection,
 			supportsAlpha: config.supportsAlpha,
+			textFields: config.textFields,
+			textsMode: config.textsMode,
 			value: this.value,
 			viewProps: this.viewProps,
 		})
