@@ -4,10 +4,7 @@
 
 <!-- /title -->
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/banner-dark.webp">
-  <img alt="Svelte Tweakpane UI Banner" src="./assets/banner-light.webp">
-</picture>
+<img alt="Svelte Tweakpane UI Banner" src="./assets/banner.webp">
 
 <!-- badges -->
 
@@ -29,15 +26,13 @@
 
 ## Overview
 
-The Color Plus plugin adds support for many additional color formats to the [Tweakpane](https://tweakpane.github.io/docs/) UI library.
+The Color Plus plugin adds support for handling wide color and many additional color formats to the [Tweakpane](https://tweakpane.github.io/docs/) UI library.
 
-The plugin supports all [CSS Color Module Level 4](https://drafts.csswg.org/css-color-4/) formats and color spaces, and adds support for controlling colors stored as tuples / arrays, as well as additional color object formats.
+The plugin supports all [CSS Color Module Level 4](https://drafts.csswg.org/css-color-4/) formats and color spaces, and adds support for controlling colors stored as tuples / arrays, as well as additional color object formats. It also subtly revises the color picker UI to handle wide gamut colors.
 
-Currently, the plugin (almost) exactly matches the functionality, options, and control presentation of Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color) — just with support for additional parameter formats and types. This means it should work as a drop-in replacement in existing projects that need to support additional color formats, but it also means that the current UI is not necessarily well-suited to manipulating the wide-gamut colors that can now be represented.
+The plugin is a clean superset of the functionality, options, and control presentation of Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color), in the hope that it can work as a minimally-invasive drop-in replacement in existing projects that need support for modern color.
 
-Color notations for perceptually-uniform color spaces like [`oklch`](https://evilmartians.com/chronicles/oklch-in-css-why-quit-rgb-hsl) are supported, **but the current implementation clips all out-of-gamut colors to the `sRGB` color space**. Future versions of the plugin might implement additional UI and options tailored working with wide color targeting the P3 or Rec. 2020 gamuts.
-
-The plugin was developed specifically for the benefit of [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui) and [Tweakpane CSS](https://github.com/kitschpatrol/tweakpane-css), but there's no reason it can't be used in vanilla Tweakpane projects as well.
+The plugin was developed for the benefit of [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui) and [Tweakpane CSS](https://github.com/kitschpatrol/tweakpane-css), but there's no reason it can't be used in vanilla Tweakpane projects as well.
 
 ## Getting started
 
@@ -134,7 +129,115 @@ pane.on('change', () => {
 
 <!-- /code -->
 
-### Features
+### Options
+
+In addition to Tweakpane's standard binding options, Color Plus accepts the options below.
+
+_Note that some defaults adapt to the gamut reach of the bound color's model: a color in an sRGB-bound model (hex, `rgb()`, `hsl()`, ...) gets a simple sRGB picker, while a color in a wide or perceptual model (`oklch()`, `lab()`, `display-p3`, ...) gets the full wide-gamut treatment. You're free to override these default assumptions via the `gamuts` array option. The affected options are noted below\._
+
+#### Built-in color options
+
+These options mirror Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color), and behave the same way here.
+
+##### `color.alpha`
+
+For number values only: treat the number as carrying an alpha component in its lowest byte (e.g. `0xff00667f`). Default `false`.
+
+```ts
+pane.addBinding(params, 'color', { view: 'color-plus', color: { alpha: true } })
+```
+
+##### `color.type`
+
+For object and tuple / array values only: whether channels are integers from 0–255 (`'int'`, the default) or floats from 0–1 (`'float'`). _(The built-in input only applies this to objects; tuple / array support is a Color Plus extension.)_
+
+```ts
+pane.addBinding(params, 'color', { view: 'color-plus', color: { type: 'float' } })
+```
+
+##### `expanded`
+
+Start with the picker expanded. Default `false`.
+
+##### `picker`
+
+Where the picker appears: `'popup'` (default) or `'inline'`.
+
+#### Color Plus options
+
+These options are added by the plugin.
+
+##### `color.formatLocked`
+
+By default (`true`), any valid color entered in the widget's text field is converted back to the bound value's original format. Set to `false` to let a typed value switch the binding's format to match what was typed. _(Experimental!)_
+
+##### `constrain`
+
+Keep the color inside the widest configured gamut (see [`gamuts`](#gamuts)): picks on the palette plane snap to the in-gamut frontier, while slider moves, typed text, and externally bound values shed chroma (at constant lightness and hue) to fit. Set to `false` to allow out-of-gamut colors. Default `true`.
+
+##### `gamuts`
+
+The RGB gamuts whose boundaries the OKLCH picker draws, as an array of ids. Both colorjs ids and their CSS aliases are accepted: `'srgb'`, `'p3'` / `'display-p3'`, `'a98rgb'` / `'a98-rgb'`, `'rec2020'`, and `'prophoto'` / `'prophoto-rgb'`.
+
+_Adaptive default:_ `['srgb', 'p3']` when the bound color uses a wide or perceptual model, `['srgb']` when it uses an sRGB-bound model.
+
+```ts
+pane.addBinding(params, 'color', { view: 'color-plus', gamuts: ['srgb', 'p3', 'rec2020'] })
+```
+
+##### `gamutLabel`
+
+Draw the name of the narrowest configured gamut that holds the current color in the picker plane's bottom-left corner. There are some contrast and legibility issues with this to be resolved in a future version.
+
+_Adaptive default:_ `true` when the bound color uses a wide or perceptual model, `false` when it's sRGB-bound.
+
+##### `gamutLines`
+
+Which configured gamut boundaries are stroked over the picker plane:
+
+| Value               | Behavior                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| `'inner'` (default) | Draws the narrower gamuts' lines.                                                    |
+| `'outer'`           | Draws the widest gamut's line (otherwise redundant with the drawn plane's own edge). |
+| `'all'`             | Draws both.                                                                          |
+| `'none'`            | Hides every line.                                                                    |
+
+##### `paletteChannels`
+
+Which OKLCH channels map to the picker plane's axes and the slider, as `[X][Y]_[slider]`: one of `'CL_H'` (default), `'LC_H'`, `'LH_C'`, `'HL_C'`, `'HC_L'`, or `'CH_L'`. All permutations are currently included, but this option will likely be abstracted away into curated choices in a 1.0 release.
+
+##### `paletteProjection`
+
+How the picker plane projects the gamut volume onto its rectangle:
+
+| Value               | Behavior                                                                                                                                                                                                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'okhsv'` (default) | Uses an OKHSV saturation / value projection on lightness × chroma layouts (the vivid cusp lands in the corner), falling back to `'stretch'` on other layouts. This is the most similar to Tweakpane's built-in color palette. |
+| `'perceptual'`      | Keeps absolute OKLCH spacing — the gamut sits as an irregular region within the plane. This is the most similar to the [oklch.com](https://oklch.com/) graphs.                                                                |
+| `'stretch'`         | Fills the plane with the widest gamut, row by row.                                                                                                                                                                            |
+
+##### `swatchFallback`
+
+The active color swatch is split along its diagonal: the upper-left triangle shows the color as your browser renders it, and the lower-right triangle shows the color's sRGB fallback. `swatchFallback` controls how an out-of-gamut color is forced into sRGB for that fallback triangle. It only affects the swatch preview, never the color value itself.
+
+| Value              | Behavior                                                                                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'clip'` (default) | Clamps each channel to its range — the same thing browsers do when painting an out-of-gamut color, so the fallback matches what you actually see on screen. |
+| `'css'`            | Applies the [CSS Color 4 gamut-mapping algorithm](https://www.w3.org/TR/css-color-4/#gamut-mapping) (chroma reduction at constant lightness and hue).       |
+
+```ts
+pane.addBinding(params, 'color', { view: 'color-plus', swatchFallback: 'clip' })
+```
+
+**Why two methods, and why `'clip'` is the default:** the two algorithms resolve out-of-gamut colors differently, and they can disagree dramatically. The CSS algorithm preserves lightness and hue while reducing chroma, so a vivid color at full lightness like `oklch(100% 0.439 13)` maps to **white** — at lightness 1.0 the OKLCH gamut tapers to a single point, and the only in-gamut color is white. Browsers don't run that algorithm when painting; they clip the channels instead, which keeps the color vivid (a saturated magenta, in this example) at the cost of silently shifting its lightness. Because `'clip'` mirrors the browser, it's the default so the fallback swatch matches on-screen rendering. Choose `'css'` if you'd rather see the colorimetrically faithful gamut mapping that CSS specifies (but that no browser actually performs on screen).
+
+##### `textFields`
+
+Show the color model drop-down and per-channel text inputs below the picker palette. Set to `false` to hide them for a more compact, pointer-only picker. (The alpha slider's text input, if present, is unaffected.) Default `true`.
+
+```ts
+pane.addBinding(params, 'color', { view: 'color-plus', textFields: false })
+```
 
 ### Color spaces
 
@@ -237,18 +340,13 @@ const tuples = {
 
 The Color Plus plugin supports all [CSS 4 `color()` function strings](https://drafts.csswg.org/css-color-4/#funcdef-color) for the supported color spaces:
 
+_Browsers will consider some of these formats to be invalid as noted below\._
+
 ```ts
 const functions = {
+  // Browser-compatible CSS color() strings
   colorA98Rgb: 'color(a98-rgb 0.86 0 0.39)',
   colorDisplayP3: 'color(display-p3 0.92 0.2 0.41)',
-  colorHsl: 'color(hsl 336 100% 50%)',
-  colorHwb: 'color(hwb 336 0% 0%)',
-  colorLab: 'color(lab 55 66% 16%)',
-  colorLabD65: 'color(lab-d65 54 66% 15%)',
-  colorLch: 'color(lch 55 56% 4%)',
-  colorOklab: 'color(oklab 0.64 0.25 0.05)',
-  colorOklch: 'color(oklch 60% 0.24 13deg)',
-  colorPrefixHsv: 'color(--hsv 336deg 100% 100)',
   colorProphotoRgb: 'color(prophoto-rgb 0.72 0.28 0.33)',
   colorRec2020: 'color(rec2020 0.8 0.23 0.35)',
   colorSrgb: 'color(srgb 1 0% 40%)',
@@ -256,6 +354,18 @@ const functions = {
   colorXyz: 'color(xyz 0.44 0.22 0.15)',
   colorXyzD50: 'color(xyz-d50 0.46 0.23 0.11)',
   colorXyzD65: 'color(xyz-d65 0.44 0.22 0.15)',
+
+  // Plugin-compatible color() string
+  // (Works in plugin, but invalid in CSS:
+  // use dedicated color functions instead)
+  colorPrefixHsv: 'color(--hsv 336deg 100% 100)',
+  colorHsl: 'color(hsl 336 100% 50%)',
+  colorHwb: 'color(hwb 336 0% 0%)',
+  colorLab: 'color(lab 55 66% 16%)',
+  colorLabD65: 'color(lab-d65 54 66% 15%)',
+  colorLch: 'color(lch 55 56% 4%)',
+  colorOklab: 'color(oklab 0.64 0.25 0.05)',
+  colorOklch: 'color(oklch 60% 0.24 13deg)',
 }
 ```
 
@@ -316,13 +426,11 @@ const functions = {
 
 ### Implementation notes
 
-#### Tweakpane's built-in color handling
-
-This plugin is largely derived from the core Tweakpane library's color input implementation — it (mostly) reuses the views and controllers, and only really makes significant changes to the model, where it replaces Tweakpane's bespoke color handling functionality with an implementation provided by the [Color.js](https://colorjs.io/) library.
-
 #### Color.js v0.6.x
 
 The plugin uses Color.js' [procedural API](https://colorjs.io/docs/procedural) and [only imports a subset of available color spaces](#color-spaces) in the interest of performance and bundle size optimization.
+
+This dependency is bundled and tree-shaken, so there are no external third-party dependencies in the plugin (except Tweakpane itself).
 
 #### Other JavaScript color libraries
 
@@ -362,8 +470,8 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 188.5 kB | 49.4 kB | 41.2 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 80.3 kB  | 27.5 kB | 23.7 kB |
+| tweakpane-plugin-color-plus.min.js      | 209.3 kB | 55.6 kB | 46.9 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 101 kB   | 33.4 kB | 29.3 kB |
 
 <!-- /size-table -->
 
@@ -376,6 +484,8 @@ You can see the effect of externalization on the minified library's size below:
 Thank you to [Hiroki Kokubun](https://cocopon.me) for creating and maintaining the excellent [Tweakpane](https://tweakpane.github.io/docs/) library.
 
 Thanks also to [Lea Verou](http://lea.verou.me/) and [contributors](https://github.com/color-js/color.js/graphs/contributors) for creating the [Color.js](https://colorjs.io/) library.
+
+Ryan Kiley's recent [tweakpane-plugin-wide-gamut](https://github.com/ryankiley/tweakpane-plugin-wide-gamut) inspired me to finally get around to updating the view layer of this plugin to handle wide color. Ultimately, the [OKLCH Color Picker & Converter](https://oklch.com/) informed the revised view implementation, in combination with Björn Ottosson's [color picker comparison](https://bottosson.github.io/misc/colorpicker/) and accompanying [blog post](https://bottosson.github.io/posts/colorpicker/).
 
 <!-- footer -->
 

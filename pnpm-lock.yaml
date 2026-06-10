@@ -2018,6 +2018,9 @@ packages:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
     engines: {node: '>= 8'}
 
+  anynum@1.0.0:
+    resolution: {integrity: sha512-xjR9/zBVnUOP6ztMIIgShjsxui80nQUQH+5xJnvrYLs+90bF25/KJqaAi8mk+B4RDtX1Nspi6fmp4YTEts8SfA==}
+
   are-docs-informative@0.0.2:
     resolution: {integrity: sha512-ixiS0nLNNG5jNQzgZJNoUpBKdo9yTYZMGJ+QgT2jmjR7G7+QHRCc4v6LQ3NgE7EBJq+o0ams3waJwkrlBom8Ig==}
     engines: {node: '>=14'}
@@ -5212,8 +5215,8 @@ packages:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
 
-  strnum@2.3.0:
-    resolution: {integrity: sha512-ums3KNd42PGyx5xaoVTO1mjU1bH3NpY4vsrVlnv9PNGqQj8wd7rJ6nEypLrJ7z5vxK5RP0yMLo6J/Gsm62DI5Q==}
+  strnum@2.4.0:
+    resolution: {integrity: sha512-sHrVyWWdq28RbhjuJdZsA1SnGRJV6NiXbk6AXBxDOsgAcA+lmpUZCYjOdLBxkXMwis6RRe7dlZt4VlIWFVzkmg==}
 
   stylelint-config-clean-order@10.0.0:
     resolution: {integrity: sha512-FKV94g3B1EMSTt0++15jgtU4YwxyeNTAxTRfDW8nx+MvgIWjT9bHRB5SoaNKmVV/hl6CmSjvgtM98lc6Z68KYw==}
@@ -7981,6 +7984,8 @@ snapshots:
       normalize-path: 3.0.0
       picomatch: 2.3.2
 
+  anynum@1.0.0: {}
+
   are-docs-informative@0.0.2: {}
 
   arg@4.1.3: {}
@@ -9286,7 +9291,7 @@ snapshots:
       '@nodable/entities': 2.1.1
       fast-xml-builder: 1.2.0
       path-expression-matcher: 1.5.0
-      strnum: 2.3.0
+      strnum: 2.4.0
       xml-naming: 0.1.0
 
   fastest-levenshtein@1.0.16: {}
@@ -12117,7 +12122,9 @@ snapshots:
 
   strip-json-comments@5.0.3: {}
 
-  strnum@2.3.0: {}
+  strnum@2.4.0:
+    dependencies:
+      anynum: 1.0.0
 
   stylelint-config-clean-order@10.0.0(stylelint-order@8.1.1(stylelint@17.13.0(typescript@5.9.3)))(stylelint@17.13.0(typescript@5.9.3)):
     dependencies:

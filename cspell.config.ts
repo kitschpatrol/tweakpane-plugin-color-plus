@@ -1,5 +1,20 @@
 import { cspellConfig } from '@kitschpatrol/cspell-config'
 
 export default cspellConfig({
-	words: ['blueyellow', 'colp', 'colsw', 'coltxt', 'huelucinations', 'prophoto'],
+	words: [
+		'blueyellow',
+		'colorimetrically',
+		'colp',
+		'colsw',
+		'coltxt',
+		'gmax',
+		'hplv',
+		'huelucinations',
+		'Kiley',
+		'OKHSL',
+		'Ottosson',
+		'plpv',
+		'prophoto',
+		'rrggbbaa',
+	],
 })
