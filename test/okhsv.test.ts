@@ -10,12 +10,13 @@ import {
 
 it('round-trips saturation/value through a hue profile', () => {
 	const profile = buildOkhsvProfile(30, 'srgb')
-	for (const [s, v] of [
+	const cases: Array<[number, number]> = [
 		[0.3, 0.8],
 		[1, 1],
 		[0, 1],
 		[0.5, 0.5],
-	]) {
+	]
+	for (const [s, v] of cases) {
 		const [l, c] = okhsvToLightnessChroma(profile, s, v)
 		const [s2, v2] = lightnessChromaToOkhsv(profile, l, c)
 		expect(s2).toBeCloseTo(s, 6)

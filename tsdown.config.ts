@@ -11,7 +11,7 @@ function getDistributionName(packageName: string): string {
 	// `@tweakpane/plugin-foobar` -> `tweakpane-plugin-foobar`
 	// `tweakpane-plugin-foobar`  -> `tweakpane-plugin-foobar`
 	return packageName
-		.split(/[/@-]/)
+		.split(/[\/@\-]/v)
 		.filter((comp) => comp !== '')
 		.join('-')
 }
@@ -38,9 +38,8 @@ function cssReplacePlugin() {
 	return {
 		name: 'css-replace',
 		transform(code: string) {
-			if (code.includes('__css__')) {
-				return { code: code.replaceAll('__css__', css) }
-			}
+			// Function replacement so `$`-sequences in the CSS aren't treated as patterns
+			return code.includes('__css__') ? { code: code.replaceAll('__css__', () => css) } : undefined
 		},
 	}
 }
@@ -64,8 +63,8 @@ export default defineConfig([
 		outDir: 'dist',
 		platform: 'browser',
 		plugins: [cssReplacePlugin()],
-		target: 'es2020',
-		tsconfig: 'src/tsconfig.json',
+		target: 'es2022',
+		tsconfig: 'tsconfig.build.json',
 	},
 	// Build with bundled @tweakpane/core
 	{
@@ -83,7 +82,7 @@ export default defineConfig([
 		outDir: 'dist',
 		platform: 'browser',
 		plugins: [cssReplacePlugin()],
-		target: 'es2020',
-		tsconfig: 'src/tsconfig.json',
+		target: 'es2022',
+		tsconfig: 'tsconfig.build.json',
 	},
 ])

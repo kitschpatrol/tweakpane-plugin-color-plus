@@ -170,6 +170,30 @@ const colorObjectKeys: Array<{
 	},
 ]
 
+/**
+ * Map user-facing coordinate values (0-255 ints or 0-1 floats) in place to the
+ * ranges colorjs uses internally for the color's space
+ */
+function mapCoordsToColorJsRanges(color: ColorPlusObject, colorType: ColorType): void {
+	for (const [index, coordValue] of color.coords.entries()) {
+		if (coordValue === null) {
+			continue
+		}
+
+		const [colorJsLow, colorJsHigh] = getRangeForChannel(color.spaceId, index)
+
+		// SRGB is the only supported space that's represented with 0-1 internally by ColorJS
+		if (color.spaceId === 'srgb') {
+			color.coords[index] =
+				colorType === 'int' ? mapRange(coordValue, 0, 255, colorJsLow, colorJsHigh) : coordValue
+		} else if (colorType === 'float') {
+			color.coords[index] = mapRange(coordValue, 0, 1, colorJsLow, colorJsHigh)
+		} else {
+			color.coords[index] = coordValue
+		}
+	}
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -246,9 +270,9 @@ export function objectToColor(
 			for (const [index, channel] of regularChannels.entries()) {
 				const matchingKey = channel.externalKeys.find((key) => inputKeys.has(key.toLowerCase()))
 
-				if (matchingKey) {
+				if (matchingKey !== undefined) {
 					const channelValue = lowerCaseValue[matchingKey.toLowerCase()]!
-					// eslint-disable-next-line ts/no-unsafe-type-assertion
+
 					;(colorFormat.format as ObjectFormat).coordKeys[index] = matchingKey
 					result.coords[index] = channelValue
 				}
@@ -258,9 +282,9 @@ export function objectToColor(
 			if (alphaChannel) {
 				const alphaKey = alphaChannel.externalKeys.find((key) => inputKeys.has(key.toLowerCase()))
 
-				if (alphaKey) {
+				if (alphaKey !== undefined) {
 					// Alpha value provided
-					// eslint-disable-next-line ts/no-unsafe-type-assertion
+
 					;(colorFormat.format as ObjectFormat).alphaKey = alphaKey
 					colorFormat.alpha = true
 					result.alpha = lowerCaseValue[alphaKey.toLowerCase()]!
@@ -268,27 +292,7 @@ export function objectToColor(
 			}
 
 			// Map between float and int if needed
-			for (const [index, value] of result.coords.entries()) {
-				if (value === null) {
-					continue
-				}
-
-				const [colorJsLow, colorJsHigh] = getRangeForChannel(result.spaceId, index)
-
-				// SRGB is the only supported space that's represented with 0-1 internally by ColorJS
-				if (result.spaceId === 'srgb') {
-					result.coords[index] =
-						// eslint-disable-next-line ts/no-unsafe-type-assertion
-						(colorFormat.format as ObjectFormat).colorType === 'int'
-							? mapRange(value, 0, 255, colorJsLow, colorJsHigh)
-							: value
-					// eslint-disable-next-line ts/no-unsafe-type-assertion
-				} else if ((colorFormat.format as ObjectFormat).colorType === 'float') {
-					result.coords[index] = mapRange(value, 0, 1, colorJsLow, colorJsHigh)
-				} else {
-					result.coords[index] = value
-				}
-			}
+			mapCoordsToColorJsRanges(result, (colorFormat.format as ObjectFormat).colorType)
 
 			return {
 				color: result,
@@ -305,19 +309,18 @@ export function colorToObject(
 	format: ColorFormat,
 	alphaOverride?: boolean,
 ): Record<string, null | number> | undefined {
-	// TODO proper type guard
-	// eslint-disable-next-line ts/no-unsafe-type-assertion
-	const objectFormat = format.format as ObjectFormat
-
 	if (format.type !== 'object') {
 		console.warn(`Invalid format type: ${format.type}`)
 		return undefined
 	}
 
-	if (!colorObjectKeys.some((keys) => keys.spaceId === format.space)) {
+	if (colorObjectKeys.every((keys) => keys.spaceId !== format.space)) {
 		console.warn(`Invalid color space for object conversion: ${format.space}`)
 		return undefined
 	}
+
+	// TODO proper type guard
+	const objectFormat = format.format as ObjectFormat
 
 	const result: Record<string, null | number> = {}
 
@@ -325,19 +328,20 @@ export function colorToObject(
 
 	// Map between float and int if needed
 	for (const [index, value] of convertedColor.coords.entries()) {
-		if (value !== null) {
-			const [colorJsLow, colorJsHigh] = getRangeForChannel(format.space, index)
+		const coordKey = objectFormat.coordKeys[index]
+		if (value === null || coordKey === undefined) {
+			continue
+		}
 
-			if (format.space === 'srgb') {
-				result[objectFormat.coordKeys[index]] =
-					objectFormat.colorType === 'int'
-						? mapRange(value, colorJsLow, colorJsHigh, 0, 255)
-						: value
-			} else if (objectFormat.colorType === 'float') {
-				result[objectFormat.coordKeys[index]] = mapRange(value, colorJsLow, colorJsHigh, 0, 1)
-			} else {
-				result[objectFormat.coordKeys[index]] = value
-			}
+		const [colorJsLow, colorJsHigh] = getRangeForChannel(format.space, index)
+
+		if (format.space === 'srgb') {
+			result[coordKey] =
+				objectFormat.colorType === 'int' ? mapRange(value, colorJsLow, colorJsHigh, 0, 255) : value
+		} else if (objectFormat.colorType === 'float') {
+			result[coordKey] = mapRange(value, colorJsLow, colorJsHigh, 0, 1)
+		} else {
+			result[coordKey] = value
 		}
 	}
 
@@ -359,7 +363,6 @@ export function colorToObjectString(
 		return undefined
 	}
 
-	// eslint-disable-next-line ts/no-unsafe-type-assertion
 	const precision = (format.format as ObjectFormat).colorType === 'int' ? 0 : 3
 	const precisionAlpha = 3
 	return stringifyObject(object, precision, precisionAlpha)
@@ -389,13 +392,12 @@ function stringifyObject(
  */
 function parseObjectString(value: string): Record<string, unknown> | undefined {
 	try {
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		return JSON.parse(value) as Record<string, unknown>
 	} catch {
 		// Manual parse
 		// Strip certain characters and trim whitespace
 		const parts = value
-			.replaceAll(/["%',:{}]/g, '')
+			.replaceAll(/["%',:\{\}]/gv, '')
 			.split(' ')
 			.map((part: string) => part.trim())
 			.filter((part: string) => part !== '')
@@ -413,12 +415,16 @@ function parseObjectString(value: string): Record<string, unknown> | undefined {
 				return undefined
 			}
 
-			const value = parts[i + 1]
+			const part = parts[i + 1]
+			if (part === undefined) {
+				return undefined
+			}
 
-			if (value === 'null') {
+			if (part === 'null') {
 				object[key] = null
 			} else {
-				const number = Number.parseFloat(value)
+				// eslint-disable-next-line unicorn/prefer-number-coercion -- parseFloat's tolerance of trailing units (e.g. `270deg`) is part of this parser's graciousness
+				const number = Number.parseFloat(part)
 				if (Number.isNaN(number)) {
 					return undefined
 				}

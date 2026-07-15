@@ -470,8 +470,8 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 209.3 kB | 55.6 kB | 47 kB   |
-| tweakpane-plugin-color-plus.lite.min.js | 101.1 kB | 33.4 kB | 29.3 kB |
+| tweakpane-plugin-color-plus.min.js      | 210.5 kB | 55.9 kB | 47.3 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 102.2 kB | 33.7 kB | 29.6 kB |
 
 <!-- /size-table -->
 

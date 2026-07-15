@@ -90,9 +90,7 @@ for (const [title, sectionParams] of Object.entries(paramsPalettes)) {
 				gamuts: ['srgb', 'p3', 'rec2020'],
 				expanded: true,
 			}
-		}
-
-		if (label === 'Perceptual Plane') {
+		} else if (label === 'Perceptual Plane') {
 			bindingOptions = {
 				...bindingOptions,
 				gamuts: ['srgb', 'p3'],

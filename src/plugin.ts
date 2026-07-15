@@ -18,11 +18,7 @@ import {
 } from './utilities.js'
 
 export type ColorPlusValue =
-	| ColorTupleRgb
-	| ColorTupleRgba
-	| number
-	| Record<string, null | number>
-	| string
+	ColorTupleRgb | ColorTupleRgba | number | Record<string, null | number> | string
 export type ColorPlusInputParams = BaseInputParams & {
 	color?: {
 		// In the original tweakpane installation, this is only applied to number values
@@ -221,8 +217,8 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 						target.writeProperty(String(index), element)
 					}
 				} else {
-					for (const key of Object.keys(args.params.lastExternalValue)) {
-						target.writeProperty(key, args.params.lastExternalValue[key])
+					for (const [key, value] of Object.entries(args.params.lastExternalValue)) {
+						target.writeProperty(key, value)
 					}
 				}
 			}
@@ -305,13 +301,12 @@ function deepEquals(a: unknown, b: unknown): boolean {
 
 	// Handle objects
 	if (typeof a === 'object' && a !== null && typeof b === 'object' && b !== null) {
-		// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unnecessary-type-assertion
+		// eslint-disable-next-line ts/no-unnecessary-type-assertion
 		const keys = Object.keys(a as Record<string, unknown>)
 		return (
-			// eslint-disable-next-line ts/no-unsafe-type-assertion, ts/no-unnecessary-type-assertion
+			// eslint-disable-next-line ts/no-unnecessary-type-assertion
 			keys.length === Object.keys(b as Record<string, unknown>).length &&
 			keys.every(
-				// eslint-disable-next-line ts/no-unsafe-type-assertion
 				(key) => (a as Record<string, unknown>)[key] === (b as Record<string, unknown>)[key],
 			)
 		)

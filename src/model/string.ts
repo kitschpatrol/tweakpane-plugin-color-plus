@@ -38,7 +38,6 @@ export function stringToColor(
 
 	// Is stringFormatInOut ever actually undefined?
 	const stringFormat =
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		stringFormatInOut.formatId === undefined ? undefined : (stringFormatInOut as StringFormat)
 
 	if (stringFormat === undefined) {
@@ -174,9 +173,9 @@ function toDecimalPrecisionForFormat(
 
 	// eslint-disable-next-line ts/no-unnecessary-condition
 	if (stringFormat.types !== undefined) {
-		for (let index = 0; index < newColor.coords.length; index++) {
+		for (const [index, coordValue] of newColor.coords.entries()) {
 			newColor.coords[index] = toDecimalPrecisionForCoordinate(
-				newColor.coords[index],
+				coordValue,
 				stringFormat,
 				index,
 				precision,
@@ -199,7 +198,7 @@ function getCoordFormat(format: StringFormat, index: number): CoordFormat | unde
 		return format.format.coords[index]
 	}
 
-	const targetFormat = format.types[index].split('[')[0]
+	const targetFormat = format.types[index]?.split('[', 1)[0]
 	return format.format.coords[index].find((coordFormat) => coordFormat.type === targetFormat)
 }
 
@@ -268,8 +267,7 @@ function legacyTweakpaneColorStringNormalization(value: string): string {
 
 	if (trimmed.startsWith('hsl')) {
 		let index = 0
-		// eslint-disable-next-line regexp/no-unused-capturing-group
-		return trimmed.replaceAll(/([\d.]+%?)/g, (match) => {
+		return trimmed.replaceAll(/[\d.]+%?/gv, (match) => {
 			if (index === 0 || match.includes('%') || index > 2) {
 				index += 1
 				return match

@@ -84,10 +84,10 @@ function boundaryAlongRay(profile: OkhsvProfile, slope: number): [number, number
 	const last = chromaByLightness.length - 1
 	const startIndex = Math.max(0, Math.floor(cuspLightness * last))
 	let previousLightness = startIndex / last
-	let previousGap = chromaByLightness[startIndex] - slope * previousLightness
+	let previousGap = (chromaByLightness[startIndex] ?? 0) - slope * previousLightness
 	for (let i = startIndex + 1; i <= last; i++) {
 		const l = i / last
-		const gap = chromaByLightness[i] - slope * l
+		const gap = (chromaByLightness[i] ?? 0) - slope * l
 		if (gap <= 0) {
 			const t = previousGap > gap ? previousGap / (previousGap - gap) : 0
 			const lightness = previousLightness + (l - previousLightness) * t

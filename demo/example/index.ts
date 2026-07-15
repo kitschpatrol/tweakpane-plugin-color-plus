@@ -248,8 +248,8 @@ const extraProps = {
 	},
 }
 
-const CAPITAL_LETTER_REGEX = /([A-Z])/g
-const DOT_PREFIX_REGEX = /^./
+const CAPITAL_LETTER_REGEX = /([A-Z])/gv
+const DOT_PREFIX_REGEX = /^./v
 
 function prettyLabel(label: string): string {
 	return label
@@ -268,12 +268,12 @@ const paneColorOriginal = new Pane({
 	title: 'Tweakpane Integrated Color',
 })
 
-for (const key of Object.keys(params)) {
+for (const [key, value] of Object.entries(params)) {
 	paneColorPlus.addBinding(params, key, {
 		view: 'color-plus',
 		picker: 'inline',
 		label: prettyLabel(key),
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
+
 		...extraProps[key as keyof typeof extraProps],
 	})
 
@@ -281,7 +281,7 @@ for (const key of Object.keys(params)) {
 	if (ignoredParams.has(key)) {
 		paneColorOriginal.addBinding(
 			{
-				value: `${isObject(params[key]) ? JSON.stringify(params[key]) : String(params[key])} (Unsupported)`,
+				value: `${isObject(value) ? JSON.stringify(value) : String(value)} (Unsupported)`,
 			},
 			'value',
 			{
@@ -294,7 +294,7 @@ for (const key of Object.keys(params)) {
 			view: 'color',
 			picker: 'inline',
 			label: prettyLabel(key),
-			// eslint-disable-next-line ts/no-unsafe-type-assertion
+
 			...extraProps[key as keyof typeof extraProps],
 		})
 	}

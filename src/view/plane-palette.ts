@@ -143,7 +143,7 @@ export class PlanePaletteView implements View {
 	// every saturation, so it can't be recovered from the color; this keeps the
 	// marker sliding along the black edge instead of snapping to the corner.
 	private lastOkhsvSaturation = 0
-	private lastPaintedSlider = Number.NaN
+	private lastPaintedSlider = NaN
 	private readonly markerElement: HTMLDivElement
 	private offscreenCanvas: HTMLCanvasElement | undefined
 	private offscreenHeight = 0
@@ -213,7 +213,7 @@ export class PlanePaletteView implements View {
 
 		if (typeof ResizeObserver !== 'undefined') {
 			this.resizeObserver = new ResizeObserver(() => {
-				this.lastPaintedSlider = Number.NaN
+				this.lastPaintedSlider = NaN
 				this.schedulePaint()
 			})
 			this.resizeObserver.observe(canvasElement)
@@ -471,7 +471,7 @@ export class PlanePaletteView implements View {
 		const flushRun = (start: number, end: number): void => {
 			for (let s = start; s <= end; s++) {
 				const sample = samples[s]
-				if (sample.band === undefined) {
+				if (sample?.band === undefined) {
 					continue
 				}
 
@@ -485,7 +485,7 @@ export class PlanePaletteView implements View {
 
 			for (let s = end; s >= start; s--) {
 				const sample = samples[s]
-				if (sample.band === undefined) {
+				if (sample?.band === undefined) {
 					continue
 				}
 
@@ -626,9 +626,9 @@ export class PlanePaletteView implements View {
 		const sliderValue = this.currentSlider()
 		this.lastPaintedSlider = sliderValue
 
-		const dpr = window.devicePixelRatio || 1
-		const cssWidth = canvas.clientWidth || 200
-		const cssHeight = canvas.clientHeight || 150
+		const dpr = window.devicePixelRatio > 0 ? window.devicePixelRatio : 1
+		const cssWidth = canvas.clientWidth > 0 ? canvas.clientWidth : 200
+		const cssHeight = canvas.clientHeight > 0 ? canvas.clientHeight : 150
 		const backingWidth = Math.round(cssWidth * dpr)
 		const backingHeight = Math.round(cssHeight * dpr)
 		const width = Math.max(1, Math.round(backingWidth / SUBSAMPLE))
@@ -754,14 +754,14 @@ export class PlanePaletteView implements View {
 		yFraction: number,
 		sliderValue: number,
 	): Record<Channel, number> {
-		const width = this.canvasElement.clientWidth || 1
-		const height = this.canvasElement.clientHeight || 1
+		const width = this.canvasElement.clientWidth > 0 ? this.canvasElement.clientWidth : 1
+		const height = this.canvasElement.clientHeight > 0 ? this.canvasElement.clientHeight : 1
 		const px = xFraction * width
 		const py = yFraction * height
 
 		let bestIter = 0
 		let bestBand = 0
-		let bestDistance = Number.POSITIVE_INFINITY
+		let bestDistance = Infinity
 		const consider = (iterValue: number, bandValue: number): void => {
 			const point = this.positionFor(iterValue, bandValue)
 			const dx = point.x * width - px
@@ -826,14 +826,13 @@ export class PlanePaletteView implements View {
 				const coords = this.pixelColor(xFraction, yFraction, sliderValue, band)
 				if (coords === undefined) {
 					pixels[offset + 3] = 0
-					continue
+				} else {
+					const [r, g, b] = oklchToRgb(coords[0], coords[1], coords[2], target)
+					pixels[offset] = clampByte(r)
+					pixels[offset + 1] = clampByte(g)
+					pixels[offset + 2] = clampByte(b)
+					pixels[offset + 3] = 255
 				}
-
-				const [r, g, b] = oklchToRgb(coords[0], coords[1], coords[2], target)
-				pixels[offset] = clampByte(r)
-				pixels[offset + 1] = clampByte(g)
-				pixels[offset + 2] = clampByte(b)
-				pixels[offset + 3] = 255
 			}
 		}
 
@@ -973,7 +972,7 @@ export class PlanePaletteView implements View {
 		// loop above always emits BAND_STEPS + 1 samples, so both ends exist.
 		const blackVertex = sv[0]
 		const nextSample = sv[1]
-		if (blackVertex[1] <= 1e-6) {
+		if (blackVertex !== undefined && nextSample !== undefined && blackVertex[1] <= 1e-6) {
 			blackVertex[0] = nextSample[0]
 		}
 
@@ -1071,8 +1070,8 @@ export class PlanePaletteView implements View {
 		const i = Math.floor(pos)
 		const j = Math.min(i + 1, samples.length - 1)
 		const frac = pos - i
-		const a = samples[i].band
-		const b = samples[j].band
+		const a = samples[i]?.band
+		const b = samples[j]?.band
 		if (a === undefined || b === undefined) {
 			return undefined
 		}

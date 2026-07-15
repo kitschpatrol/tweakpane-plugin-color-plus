@@ -168,7 +168,7 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 	private onButtonClick() {
 		this.foldable.set('expanded', !this.foldable.get('expanded'))
 		if (this.foldable.get('expanded')) {
-			this.pickerC.view.allFocusableElements[0].focus()
+			this.pickerC.view.allFocusableElements[0]?.focus()
 		}
 	}
 

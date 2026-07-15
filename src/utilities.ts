@@ -172,26 +172,32 @@ function parsePaletteChannels(value: unknown): PlaneLayout {
 	return 'CL_H'
 }
 
+const GAMUT_LINES_VALUES = ['all', 'inner', 'none', 'outer'] as const
+
 /**
  * Resolve a gamutLines string, warning and falling back to the default when it
  * isn't a known value.
  */
 function parseGamutLines(value: unknown): GamutLines {
-	if (value === 'all' || value === 'inner' || value === 'none' || value === 'outer') {
-		return value
+	const match = GAMUT_LINES_VALUES.find((id) => id === value)
+	if (match !== undefined) {
+		return match
 	}
 
 	console.warn(`ColorPlus: unknown gamutLines "${String(value)}"... using inner`)
 	return 'inner'
 }
 
+const PALETTE_PROJECTION_VALUES = ['okhsv', 'perceptual', 'stretch'] as const
+
 /**
  * Resolve a paletteProjection string, warning and falling back to the default
  * when it isn't a known value.
  */
 function parsePaletteProjection(value: unknown): PaletteProjection {
-	if (value === 'okhsv' || value === 'perceptual' || value === 'stretch') {
-		return value
+	const match = PALETTE_PROJECTION_VALUES.find((id) => id === value)
+	if (match !== undefined) {
+		return match
 	}
 
 	console.warn(`ColorPlus: unknown paletteProjection "${String(value)}"... using okhsv`)

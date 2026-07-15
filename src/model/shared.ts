@@ -30,6 +30,7 @@ import {
 // - In the CSS 4 spec
 // - Available in CSS function() style colors
 // - Used by Tweakpane's original implementation
+/* eslint-disable unicorn/no-top-level-side-effects -- Registration must happen at import time, and it must live in this module (whose exports are in use): the package declares `sideEffects: false`, so a dedicated side-effect-only module gets tree-shaken out of the bundle */
 ColorJsColorSpace.register(A98RGB) // A98-rgb
 ColorJsColorSpace.register(HSL) // Hsl(), hsla(), hsl,
 ColorJsColorSpace.register(HSV) // --hsv (Tweakpane legacy)
@@ -47,6 +48,7 @@ ColorJsColorSpace.register(sRGB_Linear) // Srgb-linear
 ColorJsColorSpace.register(sRGB) // Rgb(), rgba(), srgb
 ColorJsColorSpace.register(XYZ_D50) // Xyz-d50
 ColorJsColorSpace.register(XYZ_D65) // Xyz, xyz-d65
+/* eslint-enable unicorn/no-top-level-side-effects */
 
 export type ColorType = 'float' | 'int'
 
@@ -175,12 +177,10 @@ export function convert(
 			converted.coords[0] = lastHue
 			converted.coords[2] = 0
 		}
-	}
-
-	// Polar perceptual spaces (lightness, chroma, hue): an achromatic color has a
-	// powerless hue that colorjs may return as null/NaN. Pin it to lastHue so grays
-	// keep a usable hue for the picker instead of snapping to 0.
-	if (spaceId === 'oklch' || spaceId === 'lch') {
+	} else if (spaceId === 'oklch' || spaceId === 'lch') {
+		// Polar perceptual spaces (lightness, chroma, hue): an achromatic color has a
+		// powerless hue that colorjs may return as null/NaN. Pin it to lastHue so grays
+		// keep a usable hue for the picker instead of snapping to 0.
 		const hue = converted.coords[2]
 		const chroma = converted.coords[1]
 		if (hue === null || Number.isNaN(hue)) {
@@ -222,9 +222,7 @@ export function getColorPlusObjectFromColorJsObject(
 ): ColorPlusObject {
 	return {
 		alpha: colorJs.alpha ?? 1,
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		coords: [...(colorJs.coords as [number, number, number])],
-		// eslint-disable-next-line ts/no-unsafe-type-assertion
 		spaceId: ('spaceId' in colorJs ? colorJs.spaceId : colorJs.space.id) as ColorSpaceId,
 	}
 }
@@ -247,7 +245,8 @@ export function expandHex(hex: string): string {
 	if (localLength === 4 || localLength === 5) {
 		let result = '#'
 		for (let i = 1; i < localLength; i++) {
-			result += hex[i] + hex[i]
+			const digit = hex[i] ?? ''
+			result += digit + digit
 		}
 
 		return result
