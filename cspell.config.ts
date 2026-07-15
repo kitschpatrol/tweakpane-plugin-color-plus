@@ -15,6 +15,7 @@ export default cspellConfig({
 		'Ottosson',
 		'plpv',
 		'prophoto',
+		'rebeccapurple',
 		'rrggbbaa',
 	],
 })

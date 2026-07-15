@@ -426,7 +426,7 @@ const functions = {
 
 ### Implementation notes
 
-#### Color.js v0.6.x
+#### Color.js v0.7.x
 
 The plugin uses Color.js' [procedural API](https://colorjs.io/docs/procedural) and [only imports a subset of available color spaces](#color-spaces) in the interest of performance and bundle size optimization.
 
@@ -470,8 +470,8 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 210.5 kB | 55.9 kB | 47.3 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 102.2 kB | 33.7 kB | 29.6 kB |
+| tweakpane-plugin-color-plus.min.js      | 218.2 kB | 59.4 kB | 50.3 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 110 kB   | 37.4 kB | 32.6 kB |
 
 <!-- /size-table -->
 

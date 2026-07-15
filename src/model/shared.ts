@@ -1,5 +1,6 @@
 import type {
 	ColorConstructor as ColorJsConstructor,
+	ParseOptions as ColorJsParseOptions,
 	PlainColorObject as PlainColorJsObject,
 } from 'colorjs.io/fn'
 import { mapRange } from '@tweakpane/core'
@@ -95,34 +96,34 @@ export type ColorPlusObject = {
 	spaceId: ColorSpaceId
 }
 
-// Not yet correctly typed in colorjs.io
-// This is a partial type based on inspection of the code
+/**
+ * Parse metadata that colorjs fills in via the `parseMeta` option, exported and
+ * typed as of colorjs.io 0.7.0
+ */
+export type ColorJsParseMeta = NonNullable<ColorJsParseOptions['parseMeta']>
+
+/**
+ * One alternative of a format's coordinate grammar (a colorjs `Type` instance).
+ * colorjs's own d.ts declares `coordRange` and `range` as always present, but
+ * at runtime either may be missing (e.g. a bare `<number>` with no range), so
+ * this local structural type keeps the accurate optionality.
+ */
 export type CoordFormat = {
 	coordRange: [number, number] | undefined
 	range: [number, number] | undefined
 	type: string
 }
 
-// Not yet correctly typed in colorjs.io
-// This is a partial type based on inspection of the code
-export type StringFormat = {
-	alphaType?: string
-	commas?: boolean
-	format: {
-		alpha?: boolean | Record<string, unknown> | string
-		coords: Array<CoordFormat | CoordFormat[]>
-		name: string
-		spaceCoords: number[] | undefined
-		toGamut?: boolean
-		type: string
-		// Test: [Function: test],
-		// parse: [Function: parse],
-		// serialize: [Function: serialize],
-		// space: [RGBColorSpace],
-		// [Symbol(instance)]: [Circular *1]
-	}
+/**
+ * Parse metadata for string-format colors: colorjs's `ParseMeta` with the
+ * fields guaranteed after a successful parse made required. (`types` is
+ * normalized to an empty array for custom formats like hex, which don't report
+ * coordinate types.)
+ */
+export type StringFormat = ColorJsParseMeta & {
+	format: NonNullable<ColorJsParseMeta['format']>
 	formatId: string
-	types: string[]
+	types: NonNullable<ColorJsParseMeta['types']>
 }
 
 export type ObjectFormat = {
@@ -239,22 +240,6 @@ export function hexHasAlpha(hex: string): boolean {
 	return hex.length === 5 || hex.length === 9
 }
 
-export function expandHex(hex: string): string {
-	// Expects leading #
-	const localLength = hex.length
-	if (localLength === 4 || localLength === 5) {
-		let result = '#'
-		for (let i = 1; i < localLength; i++) {
-			const digit = hex[i] ?? ''
-			result += digit + digit
-		}
-
-		return result
-	}
-
-	return hex
-}
-
 // Generic serialization...
 export function serialize(
 	color: ColorPlusObject,
@@ -268,13 +253,12 @@ export function serialize(
 
 	const convertedColor = convert(color, format.space) ?? color
 
-	const result = colorJsSerialize(convertedColor, {
+	return colorJsSerialize(convertedColor, {
 		alpha: alphaOverride ?? format.alpha,
+		// Never collapse hex to #f06-style shorthand
+		collapse: false,
 		format: format.format,
 	})
-
-	// Special case for hex to avoid #0f0-style truncation
-	return format.format === 'hex' ? expandHex(result) : result
 }
 
 function getColorJsColorSpaceById(spaceId: ColorSpaceId): ColorJsColorSpace | undefined {
@@ -354,18 +338,8 @@ export function formatNumber(value: number, digits: number | undefined): string 
  * Type check for string format object type
  */
 export function isStringFormat(format: ColorFormat['format']): format is StringFormat {
-	return (
-		typeof format === 'object' &&
-		// eslint-disable-next-line ts/no-unnecessary-condition
-		format !== null &&
-		'formatId' in format &&
-		'format' in format &&
-		typeof format.format === 'object' &&
-		// eslint-disable-next-line ts/no-unnecessary-condition
-		format.format !== null &&
-		'type' in format.format &&
-		typeof format.format.type === 'string'
-	)
+	// Only string formats carry parse metadata with a `formatId`
+	return typeof format === 'object' && 'formatId' in format && 'format' in format
 }
 
 /**
@@ -376,9 +350,10 @@ export function isStringFormat(format: ColorFormat['format']): format is StringF
  * @returns True if the format is serializable
  */
 export function formatIsSerializable(format: ColorFormat): boolean {
-	// Reimplement canSerialize() from colorjs
+	// The parse-time Format instance knows (canSerialize returns the custom
+	// serialize function itself when one exists, hence the coercion)
 	if (isStringFormat(format.format)) {
-		return format.format.format.type === 'function' || 'serialize' in format.format.format
+		return Boolean(format.format.format.canSerialize())
 	}
 
 	// Assume all other formats are serializable

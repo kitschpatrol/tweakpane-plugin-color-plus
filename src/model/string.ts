@@ -1,11 +1,16 @@
 import type { ColorConstructor as ColorJsConstructor } from 'colorjs.io/fn'
 import { mapRange } from '@tweakpane/core'
 import { parse as colorJsParse, serialize as colorJsSerialize } from 'colorjs.io/fn'
-import type { ColorFormat, ColorPlusObject, CoordFormat, StringFormat } from './shared'
+import type {
+	ColorFormat,
+	ColorJsParseMeta,
+	ColorPlusObject,
+	CoordFormat,
+	StringFormat,
+} from './shared'
 import {
 	convert,
 	copyColorPlusObject,
-	expandHex,
 	getColorPlusObjectFromColorJsObject,
 	hexHasAlpha,
 	isStringFormat,
@@ -24,30 +29,28 @@ export function stringToColor(
 
 	const normalizedValue = legacyTweakpaneColorStringNormalization(value)
 
-	const stringFormatInOut: Partial<StringFormat> = {}
+	const parseMeta: ColorJsParseMeta = {}
 	let colorJs: ColorJsConstructor | undefined
 
 	try {
-		colorJs = colorJsParse(normalizedValue, {
-			// @ts-expect-error - Type definition inconsistencies
-			parseMeta: stringFormatInOut,
-		})
+		colorJs = colorJsParse(normalizedValue, { parseMeta })
 	} catch {
 		return undefined
 	}
 
-	// Is stringFormatInOut ever actually undefined?
-	const stringFormat =
-		stringFormatInOut.formatId === undefined ? undefined : (stringFormatInOut as StringFormat)
+	const { format: parsedFormat, formatId } = parseMeta
 
-	if (stringFormat === undefined) {
+	if (parsedFormat === undefined || formatId === undefined) {
 		console.warn('Could not parse meta')
 		return undefined
 	}
 
-	if (stringFormat.format.alpha !== undefined && typeof stringFormat.format.alpha !== 'boolean') {
-		console.warn('Alpha metadata is not boolean?')
-		return undefined
+	const stringFormat: StringFormat = {
+		...parseMeta,
+		format: parsedFormat,
+		formatId,
+		// Custom formats like hex don't report coordinate types
+		types: parseMeta.types ?? [],
 	}
 
 	const hasAlpha =
@@ -108,8 +111,7 @@ export function colorToString(
 	// Fancy format objects
 	// See color.js/src/serialize.js
 
-	const result = colorJsSerialize(convertedColor, {
-		// @ts-expect-error - Type definition inconsistencies
+	return colorJsSerialize(convertedColor, {
 		alpha:
 			// Erase alpha from output
 			alphaOverride === false
@@ -122,21 +124,17 @@ export function colorToString(
 							include: alphaOverride ?? format.alpha,
 							type: stringFormat.alphaType,
 						},
+		// Never collapse hex to #f06-style shorthand
+		collapse: false,
 		// InGamut: true, // TODO expose? Overrides inGamut in the format object
 		commas: stringFormat.commas,
 		coords: stringFormat.types,
-		// @ts-expect-error - Type definition inconsistencies
-		format: stringFormat.format,
+		// The id resolves to the same Format object captured at parse time
+		// (SerializeOptions doesn't accept Format class instances directly)
+		format: stringFormat.formatId,
 		// Precision is total significant digits, not decimal places, so stick with default?
 		precision: 3,
 	})
-
-	// Special case for hex to avoid #0f0-style truncation
-	if (stringFormat.formatId === 'hex') {
-		return expandHex(result)
-	}
-
-	return result
 }
 
 type DecimalPrecision = {
@@ -171,16 +169,13 @@ function toDecimalPrecisionForFormat(
 
 	const newColor = copyColorPlusObject(color)
 
-	// eslint-disable-next-line ts/no-unnecessary-condition
-	if (stringFormat.types !== undefined) {
-		for (const [index, coordValue] of newColor.coords.entries()) {
-			newColor.coords[index] = toDecimalPrecisionForCoordinate(
-				coordValue,
-				stringFormat,
-				index,
-				precision,
-			)
-		}
+	for (const [index, coordValue] of newColor.coords.entries()) {
+		newColor.coords[index] = toDecimalPrecisionForCoordinate(
+			coordValue,
+			stringFormat,
+			index,
+			precision,
+		)
 	}
 
 	// TODO
@@ -194,12 +189,10 @@ function toDecimalPrecisionForFormat(
 }
 
 function getCoordFormat(format: StringFormat, index: number): CoordFormat | undefined {
-	if (!Array.isArray(format.format.coords[index])) {
-		return format.format.coords[index]
-	}
-
+	// Each coordinate's grammar is a list of alternatives (e.g. <number> |
+	// <percentage>); find the one matching the type captured at parse time
 	const targetFormat = format.types[index]?.split('[', 1)[0]
-	return format.format.coords[index].find((coordFormat) => coordFormat.type === targetFormat)
+	return format.format.coords[index]?.find((coordFormat) => coordFormat.type === targetFormat)
 }
 
 function toDecimalPrecisionForCoordinate(
@@ -212,8 +205,7 @@ function toDecimalPrecisionForCoordinate(
 		return value
 	}
 
-	const coordFormat = getCoordFormat(format, index)!
-	// eslint-disable-next-line ts/no-unnecessary-condition
+	const coordFormat = getCoordFormat(format, index)
 	if (coordFormat === undefined) {
 		console.error('coordFormat undefined')
 		return value
