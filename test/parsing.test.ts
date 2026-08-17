@@ -79,9 +79,9 @@ it('parses object colors correctly', () => {
 		[{ a: 83, b: 21, l: 55 }, 'ColorPlus(lab, [55,83,21], 1)'],
 		[
 			{
+				l: 55,
 				c: 85,
 				h: 14,
-				l: 55,
 			},
 			'ColorPlus(lch, [55,85,14], 1)',
 		],

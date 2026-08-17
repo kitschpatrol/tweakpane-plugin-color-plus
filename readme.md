@@ -8,8 +8,8 @@
 
 <!-- badges -->
 
-[![NPM Package tweakpane-plugin-color-plus](https://img.shields.io/npm/v/tweakpane-plugin-color-plus.svg)](https://npmjs.com/package/tweakpane-plugin-color-plus)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit/)
+[![NPM Package tweakpane-plugin-color-plus](https://img.shields.io/npm/v/tweakpane-plugin-color-plus.svg)](https://www.npmjs.com/package/tweakpane-plugin-color-plus)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit)
 [![CI](https://github.com/kitschpatrol/tweakpane-plugin-color-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/tweakpane-plugin-color-plus/actions/workflows/ci.yml)
 
 <!-- /badges -->
@@ -279,7 +279,7 @@ const hexStrings = {
 
 `0x`-prefixed hex strings like `'0xff0066'` are also supported, but will be normalized to `#`-prefixed representation.
 
-You can input any CSS [`<named-color>`](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color) string like `rebeccapurple` in the widget's text field, but these may not currently be used as initial parameter values, and will be converted to the widget's initial representation format. (Future versions might add additional support for named colors.)
+You can input any CSS [`<named-color>`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/named-color) string like `rebeccapurple` in the widget's text field, but these may not currently be used as initial parameter values, and will be converted to the widget's initial representation format. (Future versions might add additional support for named colors.)
 
 #### Number formats
 
@@ -438,7 +438,7 @@ I investigated a number of libraries to back the internal color representation i
 
 - [ChromaJS](https://gka.github.io/chroma.js/) by [Gregor Aisch](https://driven-by-data.net/)
 
-- [Culori](https://culorijs.org/) by [Dan Burzo](http://danburzo.ro/)
+- [Culori](https://culorijs.org/) by [Dan Burzo](https://danburzo.ro/)
 
 - [thi.ng/color](https://github.com/thi-ng/umbrella/tree/develop/packages/color#readme) by [Karsten Schmidt](https://mastodon.thi.ng/@toxi)
 
@@ -456,7 +456,7 @@ You can import the "lite" version like this:
 import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
 ```
 
-If you're not using a bundler, direct ESM imports from URLs can still work by defining the `@tweakpane/core` dependency manually in an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap).
+If you're not using a bundler, direct ESM imports from URLs can still work by defining the `@tweakpane/core` dependency manually in an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap).
 
 Or, if you're just using a single plugin and would rather not think about it, a "classic" all-inclusive build is exported by default to match the typical behavior of a Tweakpane plugin:
 
@@ -471,7 +471,7 @@ You can see the effect of externalization on the minified library's size below:
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
 | tweakpane-plugin-color-plus.min.js      | 218.2 kB | 59.4 kB | 50.3 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 110 kB   | 37.4 kB | 32.6 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 110 kB   | 37.4 kB | 32.5 kB |
 
 <!-- /size-table -->
 
@@ -483,7 +483,7 @@ You can see the effect of externalization on the minified library's size below:
 
 Thank you to [Hiroki Kokubun](https://cocopon.me) for creating and maintaining the excellent [Tweakpane](https://tweakpane.github.io/docs/) library.
 
-Thanks also to [Lea Verou](http://lea.verou.me/) and [contributors](https://github.com/color-js/color.js/graphs/contributors) for creating the [Color.js](https://colorjs.io/) library.
+Thanks also to [Lea Verou](https://lea.verou.me/) and [contributors](https://github.com/color-js/color.js/graphs/contributors) for creating the [Color.js](https://colorjs.io/) library.
 
 Ryan Kiley's recent [tweakpane-plugin-wide-gamut](https://github.com/ryankiley/tweakpane-plugin-wide-gamut) inspired me to finally get around to updating the view layer of this plugin to handle wide color. Ultimately, the [OKLCH Color Picker & Converter](https://oklch.com/) informed the revised view implementation, in combination with Björn Ottosson's [color picker comparison](https://bottosson.github.io/misc/colorpicker/) and accompanying [blog post](https://bottosson.github.io/posts/colorpicker/).
 

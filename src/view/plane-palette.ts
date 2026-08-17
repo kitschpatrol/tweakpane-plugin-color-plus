@@ -260,7 +260,7 @@ export class PlanePaletteView implements View {
 		// from it would snap to the achromatic corner. Reuse the last picked band
 		// fraction so the marker slides along the top/bottom edge instead, the
 		// stretch analogue of the OKHSV lastOkhsvSaturation carry above.
-		if (this.stretch && widest !== undefined && widest[1] - widest[0] <= 1e-9) {
+		if (widest !== undefined && this.stretch && widest[1] - widest[0] <= 1e-9) {
 			const bandFraction = unitToAxisFraction(this.lastBandUnit, this.band.bandAxis)
 			return this.band.bandAxis === 'x'
 				? { x: bandFraction, y: iterFraction }
@@ -288,7 +288,7 @@ export class PlanePaletteView implements View {
 			// The OKHSV boundary is a piecewise-linear sample of maxChroma, so its top
 			// edge (value 1) can sit a rounding step past the true gamut; clamp chroma
 			// to the in-gamut maximum so a pick never lands out of gamut.
-			return { c: Math.min(c, maxChroma(l, slider, this.widestGamutId, gmax)), h: slider, l }
+			return { l, c: Math.min(c, maxChroma(l, slider, this.widestGamutId, gmax)), h: slider }
 		}
 
 		if (this.stretch) {
@@ -333,7 +333,7 @@ export class PlanePaletteView implements View {
 		}
 
 		const [l, c, h] = positionToOklch(this.roles, xf, yf, slider, gmax)
-		const coords: Record<Channel, number> = { c, h, l }
+		const coords: Record<Channel, number> = { l, c, h }
 		// When gamut constraining is off, let the position map straight to its
 		// (possibly out-of-gamut) color instead of snapping back onto the gamut
 		// frontier.
@@ -610,7 +610,7 @@ export class PlanePaletteView implements View {
 
 	private oklchCoords(): Record<Channel, number> {
 		const [l, c, h] = this.value.rawValue.getAll('oklch')
-		return { c: finite(c), h: finite(h), l: finite(l) }
+		return { l: finite(l), c: finite(c), h: finite(h) }
 	}
 
 	private onValueChange(): void {
@@ -1055,7 +1055,7 @@ export class PlanePaletteView implements View {
 			return
 		}
 
-		const { c, h, l } = this.oklchCoords()
+		const { l, c, h } = this.oklchCoords()
 		const id = minimumGamut(l, c, h, this.gamutIds)
 		this.labelElement.textContent = id === undefined ? 'Out of gamut' : (GAMUT_LABELS[id] ?? id)
 	}

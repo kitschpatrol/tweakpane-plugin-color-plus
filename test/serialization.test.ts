@@ -28,15 +28,15 @@ const roundTrips: string[] = [
 	'color(--hsv 336 100% 100)',
 ]
 
-it('round-trips string formats through parse and serialize', () => {
-	for (const value of roundTrips) {
-		const color = ColorPlus.create(value)
-		const format = ColorPlus.getFormat(value)
-		expect(color, value).toBeDefined()
-		expect(format, value).toBeDefined()
-		const serialized = color!.serialize(format!)
-		expect(serialized, value).toBe(value.startsWith('#f06') ? '#ff0066' : value)
-	}
+it.each(roundTrips)('round-trips %s through parse and serialize', (value) => {
+	const color = ColorPlus.create(value)
+	const format = ColorPlus.getFormat(value)
+
+	expect(color).toBeDefined()
+	expect(format).toBeDefined()
+
+	const serialized = color!.serialize(format!)
+	expect(serialized).toBe(value.startsWith('#f06') ? '#ff0066' : value)
 })
 
 it('reports keyword formats as unserializable', () => {

@@ -213,7 +213,7 @@ export function validateColorInputParams(
 	params: ColorPlusInputParams,
 	colorValue: unknown,
 ): ColorPlusInputParams {
-	if (params.color?.alpha !== undefined && typeof colorValue !== 'number') {
+	if (typeof colorValue !== 'number' && params.color?.alpha !== undefined) {
 		console.warn('ColorPlus: alpha mode is only supported for number values... ignoring')
 		params.color.alpha = undefined
 	}

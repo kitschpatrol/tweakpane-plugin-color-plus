@@ -152,7 +152,7 @@ function createComponentControllers(
 				if (
 					i === 0 &&
 					config.colorMode === 'hsl' &&
-					((config.colorType === 'int' && s === 360) || (config.colorType === 'float' && s === 1))
+					((s === 360 && config.colorType === 'int') || (s === 1 && config.colorType === 'float'))
 				) {
 					newColor.set('h', 360)
 				}
@@ -216,7 +216,7 @@ function createHexController(
 			// #rrggbbaa) and the binding supports alpha; otherwise keep the
 			// color's current alpha rather than resetting it to opaque.
 			const isAlphaInText = ColorPlus.getFormat(text)?.alpha ?? false
-			if (!config.supportsAlpha || !isAlphaInText) {
+			if (!isAlphaInText || !config.supportsAlpha) {
 				parsedColor.alpha = config.value.rawValue.alpha
 			}
 

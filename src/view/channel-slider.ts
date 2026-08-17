@@ -98,7 +98,7 @@ export class ChannelSliderView implements View {
 
 	private oklchCoords(): Record<Channel, number> {
 		const [l, c, h] = this.value.rawValue.getAll('oklch')
-		return { c: finite(c), h: finite(h), l: finite(l) }
+		return { l: finite(l), c: finite(c), h: finite(h) }
 	}
 
 	private onValueChange(): void {
@@ -113,7 +113,7 @@ export class ChannelSliderView implements View {
 		// The hue ramp holds lightness and chroma fixed so every hue stays a legible
 		// target; the lightness and chroma ramps preview the actual color path.
 		const base: Record<Channel, number> =
-			this.channel === 'h' ? { c: HUE_RAMP_CHROMA, h: coords.h, l: HUE_RAMP_LIGHTNESS } : coords
+			this.channel === 'h' ? { l: HUE_RAMP_LIGHTNESS, c: HUE_RAMP_CHROMA, h: coords.h } : coords
 
 		if (context !== null) {
 			const pixels = new Uint8ClampedArray(RAMP_SAMPLES * 4)
