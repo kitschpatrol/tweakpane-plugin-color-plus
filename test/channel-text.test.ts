@@ -81,6 +81,21 @@ it('round-trips float and OK-mode writes', () => {
 	])
 })
 
+it('treats an HSL hue of 360 as 0', () => {
+	// The working color is OKLCH, so HSL hues 360 and 0 are one color (red)
+	// and the field reads back 0; there is no separate 360 to preserve
+	const magenta = color('hsl(300 100% 50%)')
+	const full = withChannelValue(magenta, hslInt, 0, 360)
+	const zero = withChannelValue(magenta, hslInt, 0, 0)
+	expect(full.serialize(hex)).toBe('#ff0000')
+	expect(channels(full, hslInt)).toEqual(channels(zero, hslInt))
+	expect(channels(full, hslInt)).toEqual([0, 100, 50])
+
+	const fullFloat = withChannelValue(magenta, hslFloat, 0, 1)
+	expect(fullFloat.serialize(hex)).toBe('#ff0000')
+	expect(channels(fullFloat, hslFloat)).toEqual([0, 1, 0.5])
+})
+
 it('constrains a typed OKLCH chroma into the widest configured gamut unless disabled', () => {
 	const c = color('oklch(65% 0.1 13)')
 

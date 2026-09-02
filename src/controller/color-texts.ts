@@ -74,13 +74,7 @@ function isHueChannel(mode: ColorMode, index: number): boolean {
  */
 export function channelValue(color: ColorPlus, config: ChannelTextConfig, index: number): number {
 	const { colorMode, colorType } = config
-	let rawValue = color.getAll(colorMode)[index] ?? 0
-
-	// Edge case to prevent wrapping 360 to 0 in HSL
-	// eslint-disable-next-line ts/no-unnecessary-condition
-	if (index === 0 && colorMode === 'hsl' && (color.get('h', 'hsv') ?? 0) === 360) {
-		rawValue = 360
-	}
+	const rawValue = color.getAll(colorMode)[index] ?? 0
 
 	if (isOkMode(colorMode)) {
 		return rawValue
@@ -112,15 +106,6 @@ export function withChannelValue(
 			? denormalizeCoord(colorMode, index, value)
 			: value / (colorMode === 'srgb' ? 255 : 1)
 	next.setAll(comps, colorMode)
-
-	// Edge case to prevent wrapping 360 to 0 in HSL
-	if (
-		index === 0 &&
-		colorMode === 'hsl' &&
-		((value === 360 && colorType === 'int') || (value === 1 && colorType === 'float'))
-	) {
-		next.set('h', 360)
-	}
 
 	if (config.constrain) {
 		clampColorToGamut(next, config.gamuts)
