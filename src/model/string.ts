@@ -263,15 +263,15 @@ function toDecimalPrecisionForCoordinate(
 /**
  * Transforms the input string to expand supported import formats
  *
- * - 0x-prefixed hex string support
+ * - `0x`- and `0X`-prefixed hex string support
  * - Legacy HSL compatibility: The built-in Tweakpane color input control accepts
  *   HSL strings without `%` units, e.g. `hsl(20, 15, 30)`, but color.js and the
  *   CSS standard do not.
  */
 function legacyTweakpaneColorStringNormalization(value: string): string {
 	const trimmed = value.trim()
-	if (trimmed.startsWith('0x')) {
-		return trimmed.replace('0x', '#')
+	if (trimmed.startsWith('0x') || trimmed.startsWith('0X')) {
+		return `#${trimmed.slice(2)}`
 	}
 
 	if (trimmed.startsWith('hsl')) {

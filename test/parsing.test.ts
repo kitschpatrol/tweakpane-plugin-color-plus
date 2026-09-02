@@ -16,6 +16,8 @@ it('parses hex colors correctly', () => {
 		['0xf068', 'ColorPlus(srgb, [1,0,0.4], 0.5333333333333333)'],
 		['0xff0066', 'ColorPlus(srgb, [1,0,0.4], 1)'],
 		['0xff006688', 'ColorPlus(srgb, [1,0,0.4], 0.5333333333333333)'],
+		['0XFF0066', 'ColorPlus(srgb, [1,0,0.4], 1)'],
+		['0Xff006688', 'ColorPlus(srgb, [1,0,0.4], 0.5333333333333333)'],
 	]
 
 	for (const [input, expected] of tests) {
@@ -320,6 +322,10 @@ it('parses object-like strings graciously', () => {
 		// Units and percent signs are tolerated
 		['{ h: 270deg, s: 100%, l: 50% }', 'ColorPlus(hsl, [270,100,50], 1)'],
 		['{r: 255, g: 0, b: null}', 'ColorPlus(srgb, [1,0,none], 1)'],
+		// Typed without spaces
+		['{r:255,g:0,b:102}', 'ColorPlus(srgb, [1,0,0.4], 1)'],
+		['{r:255,g:0,b:102,a:0.5}', 'ColorPlus(srgb, [1,0,0.4], 0.5)'],
+		['{h:270deg,s:100%,l:50%}', 'ColorPlus(hsl, [270,100,50], 1)'],
 	]
 
 	for (const [input, expected] of tests) {
