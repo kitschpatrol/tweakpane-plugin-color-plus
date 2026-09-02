@@ -32,7 +32,7 @@ import { serializeKeyword } from './keywords.js'
 // - In the CSS 4 spec
 // - Available in CSS function() style colors
 // - Used by Tweakpane's original implementation
-/* eslint-disable unicorn/no-top-level-side-effects -- Registration must happen at import time, and it must live in this module (whose exports are in use): the package declares `sideEffects: false`, so a dedicated side-effect-only module gets tree-shaken out of the bundle */
+/* eslint-disable unicorn/no-top-level-side-effects -- Registration must happen at import time; package.json declares `sideEffects: true` so bundlers keep it */
 
 // Colorjs ships the keyword (CSS named-color) format parse-only; attaching a
 // serializer before registration makes canSerialize() truthy, so named colors
@@ -71,7 +71,6 @@ export type ColorSpaceId =
 	| 'hsv'
 	| 'hwb'
 	| 'lab'
-	| 'lab-d50'
 	| 'lab-d65'
 	| 'lch'
 	// Standard sRGB-referenced OKHSV, used for color(--okhsv ...) strings and
@@ -227,15 +226,6 @@ export function setFromColorPlusObject(
 	targetColor.coords[2] = sourceColor.coords[2]
 	targetColor.alpha = sourceColor.alpha
 }
-
-// Export function validateColorJsObject(
-// 	colorJs: PlainColorJsObject | ColorJsConstructor,
-// ): boolean {
-// 	if (colorJs.coords.some((c) => c === null)) {
-// 		return false;
-// 	}
-// 	return true;
-// }
 
 /** Does not validate! */
 export function getColorPlusObjectFromColorJsObject(
@@ -413,33 +403,6 @@ export function formatsShareShape(a: ColorFormat, b: ColorFormat): boolean {
 	return a.type === b.type
 }
 
-/**
- * Currently unused
- *
- * @public
- */
-export function applyDecimalPrecision(
-	targetColor: ColorPlusObject,
-	decimalPrecision: number,
-	includeAlpha = true,
-): void {
-	targetColor.coords[0] =
-		targetColor.coords[0] === null
-			? null
-			: toDecimalPrecision(targetColor.coords[0], decimalPrecision)
-	targetColor.coords[1] =
-		targetColor.coords[1] === null
-			? null
-			: toDecimalPrecision(targetColor.coords[1], decimalPrecision)
-	targetColor.coords[2] =
-		targetColor.coords[2] === null
-			? null
-			: toDecimalPrecision(targetColor.coords[2], decimalPrecision)
-	if (includeAlpha) {
-		targetColor.alpha = toDecimalPrecision(targetColor.alpha, decimalPrecision)
-	}
-}
-
 export function colorPlusObjectsAreEqual(a: ColorPlusObject, b: ColorPlusObject): boolean {
 	return (
 		a.spaceId === b.spaceId &&
@@ -448,30 +411,6 @@ export function colorPlusObjectsAreEqual(a: ColorPlusObject, b: ColorPlusObject)
 		a.coords[1] === b.coords[1] &&
 		a.coords[2] === b.coords[2]
 	)
-}
-
-/**
- * Currently unused
- *
- * @public
- */
-export function denormalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
-	coords[0] = denormalizeCoord(space, 0, coords[0])
-	coords[1] = denormalizeCoord(space, 1, coords[1])
-	coords[2] = denormalizeCoord(space, 2, coords[2])
-	return coords
-}
-
-/**
- * Currently unused
- *
- * @public
- */
-export function normalizeCoords(space: ColorSpaceId, coords: Coords): Coords {
-	coords[0] = normalizeCoord(space, 0, coords[0])
-	coords[1] = normalizeCoord(space, 1, coords[1])
-	coords[2] = normalizeCoord(space, 2, coords[2])
-	return coords
 }
 
 export function normalizeCoord(

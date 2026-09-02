@@ -4,10 +4,8 @@ import { ColorPlusInputPlugin } from './plugin.js'
 // The identifier of the plugin bundle
 export const id = 'color-plus'
 
-// Replaced by Rollup with compiled SASS
+// Replaced at build time with the compiled stylesheet (see tsdown.config.ts)
 export const css = '__css__'
-
-// Re-export the parameter types
 
 // Export plugins array with explicit typing
 export const plugins: TpPlugin[] = [ColorPlusInputPlugin]

@@ -62,11 +62,6 @@ export function stringToColor(
 		// granting the binding alpha keeps its one transparent state reachable
 		(stringFormat.formatId === 'keyword' && colorJs.alpha === 0)
 
-	// If (!validateColorJsObject(colorJs)) {
-	// 	console.warn("Can't handle null coords");
-	// 	return undefined;
-	// }
-
 	const color = getColorPlusObjectFromColorJsObject(colorJs)
 
 	return {
