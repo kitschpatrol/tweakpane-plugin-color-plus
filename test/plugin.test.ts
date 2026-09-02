@@ -183,6 +183,32 @@ it('writes a tuple binding with the alpha flag back at its own length', () => {
 	expect(external[2]).toBeCloseTo(255, 6)
 })
 
+it('writes into a bound object or array in place', () => {
+	const object = { r: 255, g: 0, b: 102 }
+	const objectHolder: Record<string, unknown> = { color: object }
+	const objectTarget = new BindingTarget(objectHolder, 'color')
+	const objectParams = accept(object).params
+	ColorPlusInputPlugin.binding.writer({
+		initialValue: objectParams.lastExternalValue,
+		params: objectParams,
+		target: objectTarget,
+	})(objectTarget, ColorPlus.create('#0080ff')!)
+	expect(objectHolder.color).toBe(object)
+	expect(object).toEqual({ r: 0, g: 128, b: 255 })
+
+	const tuple = [255, 0, 102]
+	const tupleHolder: Record<string, unknown> = { color: tuple }
+	const tupleTarget = new BindingTarget(tupleHolder, 'color')
+	const tupleParams = accept(tuple).params
+	ColorPlusInputPlugin.binding.writer({
+		initialValue: tupleParams.lastExternalValue,
+		params: tupleParams,
+		target: tupleTarget,
+	})(tupleTarget, ColorPlus.create('#0080ff')!)
+	expect(tupleHolder.color).toBe(tuple)
+	expect(tuple).toEqual([0, 128, 255])
+})
+
 it('ignores float mode on values without channels to scale', () => {
 	const warn = spyOnWarnings()
 	expect(accept('#ff0066', { color: { type: 'float' } }).params.color?.type).toBe('int')
@@ -335,6 +361,44 @@ it('constrains typed colors into the configured gamuts unless disabled', () => {
 
 	const unconstrained = createControllerConfig('oklch(60% 0.1 30)', { constrain: false })
 	expect(unconstrained.config.parser('oklch(65% 0.4 13)')!.getAll('oklch')[1]).toBeCloseTo(0.4, 10)
+})
+
+it('keeps the format when an unlocked switch would change the bound value shape', () => {
+	const warn = spyOnWarnings()
+	const unlocked = { color: { formatLocked: false } }
+	const shapeWarning =
+		"ColorPlusInputPlugin typed format would change the bound value's shape... keeping format"
+
+	// A string binding moves between string formats, but stays a string
+	const string = createControllerConfig('#ff0066', unlocked)
+	string.config.parser('rgb(0 128 255)')
+	expect(string.config.formatter(ColorPlus.create('#0080ff')!)).toBe('rgb(0 128 255)')
+	// The typed color still applies, in the current format
+	expect(string.config.parser('[0, 128, 255]')!.serialize(hex)).toBe('#0080ff')
+	expect(string.config.formatter(ColorPlus.create('#0080ff')!)).toBe('rgb(0 128 255)')
+
+	// A tuple keeps its length
+	const tuple = createControllerConfig([255, 0, 102], unlocked)
+	tuple.config.parser('[0, 128, 255, 0.5]')
+	expect(tuple.params.format).toMatchObject({ alpha: false, type: 'tuple' })
+
+	// An object keeps its keys
+	const object = createControllerConfig({ r: 255, g: 0, b: 102 }, unlocked)
+	object.config.parser('{h: 210, s: 100, l: 50}')
+	object.config.parser('{red: 0, green: 128, blue: 255}')
+	object.config.parser('#0080ff')
+	expect(object.params.format).toMatchObject({
+		format: { coordKeys: ['r', 'g', 'b'] },
+		type: 'object',
+	})
+	// The same keys are the same shape
+	object.config.parser('{r: 0, g: 128, b: 255}')
+	expect(object.params.format).toMatchObject({
+		format: { coordKeys: ['r', 'g', 'b'] },
+		type: 'object',
+	})
+
+	expect(warn.mock.calls.filter(([message]) => message === shapeWarning)).toHaveLength(5)
 })
 
 it('switches the binding format to the typed format only when unlocked', () => {

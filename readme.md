@@ -167,6 +167,8 @@ These options are added by the plugin.
 
 By default (`true`), any valid color entered in the widget's text field is converted back to the bound value's original format. Set to `false` to let a typed value switch the binding's format to match what was typed. _(Experimental!)_
 
+A typed value can only move between formats that share the bound value's shape: a string binding can switch between hex, `rgb()`, `oklch()`, and so on, but a switch that would change the value's type or shape (a string to an object or array, a tuple gaining an alpha slot, an object's keys changing) keeps the current format and logs a console warning, so the control always shows a value in the shape your code bound. The picker's alpha slider is decided when the binding is created, so after a switch to an alpha-bearing string format the alpha can only be changed by typing it.
+
 ##### `constrain`
 
 Keep the color inside the widest configured gamut (see [`gamuts`](#gamuts)): picks on the palette plane snap to the in-gamut frontier, while slider moves, typed text, and externally bound values shed chroma (at constant lightness and hue) to fit. Set to `false` to allow out-of-gamut colors. Default `true`.

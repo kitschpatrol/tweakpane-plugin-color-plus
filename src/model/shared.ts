@@ -385,6 +385,26 @@ export function formatIsSerializable(format: ColorFormat): boolean {
 }
 
 /**
+ * Whether two formats write values of the same shape: the same value type, and
+ * for tuples the same length (alpha slot), for objects the same keys. All
+ * string formats write a string, so any two of them share a shape.
+ */
+export function formatsShareShape(a: ColorFormat, b: ColorFormat): boolean {
+	if (a.type === 'tuple' && b.type === 'tuple') {
+		return a.alpha === b.alpha
+	}
+
+	if (a.type === 'object' && b.type === 'object') {
+		return (
+			a.format.alphaKey === b.format.alphaKey &&
+			a.format.coordKeys.every((key, index) => key === b.format.coordKeys[index])
+		)
+	}
+
+	return a.type === b.type
+}
+
+/**
  * Currently unused
  *
  * @public

@@ -7,7 +7,7 @@ import type { ColorTextsMode } from './view/color-texts.js'
 import type { GamutLines } from './view/plane-palette.js'
 import { ColorController } from './controller/color.js'
 import { ColorPlus } from './model/color-plus.js'
-import { formatIsSerializable, isStringFormat } from './model/shared.js'
+import { formatIsSerializable, formatsShareShape, isStringFormat } from './model/shared.js'
 import {
 	clampColorToGamut,
 	defaultsForFormat,
@@ -266,7 +266,17 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 					}
 
 					if (formatIsSerializable(newFormat)) {
-						args.params.format = newFormat
+						if (formatsShareShape(args.params.format, newFormat)) {
+							args.params.format = newFormat
+						} else {
+							// A string binding may move between string formats, but the bound
+							// value keeps its type and shape: the control then always shows a
+							// value in the shape the app bound, and the in-place object and
+							// array writes always find their keys
+							console.warn(
+								"ColorPlusInputPlugin typed format would change the bound value's shape... keeping format",
+							)
+						}
 					} else {
 						// Keep the previous format rather than switching to one the next
 						// write would choke on
