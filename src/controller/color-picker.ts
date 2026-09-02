@@ -13,6 +13,7 @@ import type { ColorPlus } from '../model/color-plus.js'
 import type { ColorType } from '../model/shared.js'
 import type { ColorTextsMode } from '../view/color-texts.js'
 import type { GamutLines } from '../view/plane-palette.js'
+import { createKeywordDisplayValue } from '../utilities.js'
 import { ColorPickerView } from '../view/color-picker.js'
 import { APaletteController } from './a-palette.js'
 import { ChannelSliderController } from './channel-slider.js'
@@ -105,12 +106,22 @@ export class ColorPickerController implements ValueController<ColorPlus, ColorPi
 			})
 		}
 
+		// Quantized named-color bindings snap the text fields to the keyword the
+		// bound value will receive, in real time; typed values still pass
+		// through to the underlying value unsnapped.
+		let textsValue = this.value
+		if (config.textFields && config.quantizePalette) {
+			const { disconnect, value } = createKeywordDisplayValue(this.value)
+			textsValue = value
+			this.viewProps.handleDispose(disconnect)
+		}
+
 		this.textsC = config.textFields
 			? new ColorTextsController(doc, {
 					colorType: config.colorType,
 					supportsAlpha: config.supportsAlpha,
 					textsMode: config.textsMode,
-					value: this.value,
+					value: textsValue,
 					viewProps: this.viewProps,
 				})
 			: undefined

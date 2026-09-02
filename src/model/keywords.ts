@@ -17,6 +17,7 @@ type KeywordEntry = {
 	lab: [number, number, number]
 	name: string
 	oklch: [number, number, number]
+	srgb: [number, number, number]
 }
 
 let lut: KeywordEntry[] | undefined
@@ -36,6 +37,7 @@ function keywordLut(): KeywordEntry[] {
 				name,
 				// Achromatic keywords have no oklch hue; coerce to 0 for the raster path
 				oklch: [finite(lch[0]), finite(lch[1]), finite(lch[2])],
+				srgb: [finite(coords[0]), finite(coords[1]), finite(coords[2])],
 			})
 		}
 	}
@@ -76,6 +78,18 @@ export function nearestKeywordOklch(l: number, c: number, h: number): [number, n
 	const hueRadians = (finite(h) * Math.PI) / 180
 	return nearestEntry(finite(l), finite(c) * Math.cos(hueRadians), finite(c) * Math.sin(hueRadians))
 		.oklch
+}
+
+/**
+ * The exact sRGB coordinates (0–1) of the CSS named color nearest to the given
+ * OKLCH color. Drives the snapped display color for named-color bindings, so
+ * the swatch and text fields show the keyword's own values. Returns a shared
+ * tuple — read, don't mutate.
+ */
+export function nearestKeywordSrgb(l: number, c: number, h: number): [number, number, number] {
+	const hueRadians = (finite(h) * Math.PI) / 180
+	return nearestEntry(finite(l), finite(c) * Math.cos(hueRadians), finite(c) * Math.sin(hueRadians))
+		.srgb
 }
 
 type KeywordSerializeOptions = {

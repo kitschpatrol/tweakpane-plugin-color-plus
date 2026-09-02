@@ -22,7 +22,7 @@ import type { ColorPlus } from '../model/color-plus.js'
 import type { ColorType, GamutMethod } from '../model/shared.js'
 import type { ColorTextsMode } from '../view/color-texts.js'
 import type { GamutLines } from '../view/plane-palette.js'
-import { clampColorToGamut } from '../utilities.js'
+import { clampColorToGamut, createKeywordDisplayValue } from '../utilities.js'
 import { ColorView } from '../view/color.js'
 import { ColorPickerController } from './color-picker.js'
 import { ColorSwatchController } from './color-swatch.js'
@@ -84,9 +84,19 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 
 		this.foldable = Foldable.create(config.expanded)
 
+		// Quantized named-color bindings snap the swatch to the keyword the
+		// bound value will receive, in real time; the underlying value (and the
+		// picker plane's reticle) stays continuous.
+		let swatchValue = this.value
+		if (config.quantizePalette) {
+			const { disconnect, value } = createKeywordDisplayValue(this.value)
+			swatchValue = value
+			this.viewProps.handleDispose(disconnect)
+		}
+
 		this.swatchC = new ColorSwatchController(doc, {
 			swatchFallback: config.swatchFallback,
-			value: this.value,
+			value: swatchValue,
 			viewProps: this.viewProps,
 		})
 		const { buttonElement } = this.swatchC.view

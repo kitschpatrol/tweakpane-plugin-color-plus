@@ -88,7 +88,8 @@ type ColorPlusInputParamsInternal = ColorPlusInputParams & {
 }
 
 // Internal switch: locked keyword (named-color) bindings render the picker
-// plane posterized to the nearest named colors
+// plane posterized to the nearest named colors, and snap the swatch and text
+// fields to the nearest name in real time (the plane reticle stays continuous)
 const QUANTIZE_KEYWORD_PALETTE = true
 
 // eslint-disable-next-line ts/naming-convention
@@ -285,9 +286,9 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				return parsedColor
 			},
 			pickerLayout: args.params.picker ?? 'popup',
-			// Locked named-color bindings posterize the picker plane to match the
-			// nearest-name write-back; unlocked ones can drift to other formats, so
-			// they keep the continuous plane
+			// Locked named-color bindings posterize the picker plane and snap the
+			// swatch and text fields to match the nearest-name write-back; unlocked
+			// ones can drift to other formats, so they keep the continuous displays
 			quantizePalette:
 				// eslint-disable-next-line ts/no-unnecessary-condition -- Compile-time switch; the guard is what lets the const be flipped off
 				QUANTIZE_KEYWORD_PALETTE &&

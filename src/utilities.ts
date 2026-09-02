@@ -1,4 +1,5 @@
-import { isObject, parsePickerLayout, parseRecord } from '@tweakpane/core'
+import type { Value } from '@tweakpane/core'
+import { createValue, isObject, parsePickerLayout, parseRecord } from '@tweakpane/core'
 import type { PaletteProjection, PlaneLayout } from './model/channel'
 import type { ColorPlus } from './model/color-plus'
 import type { ColorFormat, ColorSpaceId, ColorType, GamutMethod } from './model/shared'
@@ -7,7 +8,9 @@ import type { ColorTextsMode } from './view/color-texts'
 import type { GamutLines } from './view/plane-palette'
 import { PLANE_LAYOUTS } from './model/channel.js'
 import { clampToGamut, normalizeGamutId, widestGamut } from './model/gamut.js'
+import { nearestKeywordSrgb } from './model/keywords.js'
 import { isStringFormat } from './model/shared.js'
+import { connectValues } from './model/value-sync.js'
 
 /**
  * Option defaults that adapt to the gamut reach of the initially bound color's
@@ -96,6 +99,40 @@ export function clampColorToGamut(color: ColorPlus, gamuts: string[]): boolean {
 
 	color.setAll([clampedL, clampedC, clampedH], 'oklch')
 	return true
+}
+
+/**
+ * A copy of the color snapped to the perceptually-nearest CSS named color
+ * (exact keyword sRGB coordinates, alpha untouched).
+ */
+export function snapToNearestKeyword(color: ColorPlus): ColorPlus {
+	const snapped = color.clone()
+	const [l, c, h] = snapped.getAll('oklch')
+	snapped.setAll([...nearestKeywordSrgb(finite(l), finite(c), finite(h))], 'srgb')
+	return snapped
+}
+
+/**
+ * A display-side mirror of a color value for quantized named-color bindings:
+ * reads snap to the nearest CSS named color in real time (so the swatch and
+ * text fields always show the keyword the bound value will receive), while
+ * writes pass through to the primary unsnapped, preserving the continuous
+ * internal color that the plane reticle and sliders track.
+ */
+export function createKeywordDisplayValue(primary: Value<ColorPlus>): {
+	disconnect: () => void
+	value: Value<ColorPlus>
+} {
+	const value = createValue(snapToNearestKeyword(primary.rawValue), {
+		equals: (a, b) => a.equals(b),
+	})
+	const disconnect = connectValues({
+		backward: (_, secondary) => secondary,
+		forward: (p) => snapToNearestKeyword(p),
+		primary,
+		secondary: value,
+	})
+	return { disconnect, value }
 }
 
 /**

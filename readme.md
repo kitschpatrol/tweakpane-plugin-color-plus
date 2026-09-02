@@ -288,7 +288,7 @@ const namedColors = {
 }
 ```
 
-A named-color binding always writes a name back: when the current color doesn't exactly match one of the 148 named colors, the perceptually-nearest name (by distance in OKLab) is written instead, while the widget keeps full precision internally. Exact ties resolve to the first name in the CSS named-color table (`aqua` over `cyan`, `fuchsia` over `magenta`, `gray` over `grey`). To make the snapping visible, the picker plane for a named-color binding is posterized into patches of the named colors — clicking anywhere inside a patch writes that patch's name.
+A named-color binding always writes a name back: when the current color doesn't exactly match one of the 148 named colors, the perceptually-nearest name (by distance in OKLab) is written instead, while the widget keeps full precision internally. Exact ties resolve to the first name in the CSS named-color table (`aqua` over `cyan`, `fuchsia` over `magenta`, `gray` over `grey`). To make the snapping visible, the picker plane for a named-color binding is posterized into patches of the named colors — clicking anywhere inside a patch writes that patch's name, and the swatch and text fields snap live to that name's exact color while you drag. Only the plane's reticle stays continuous, tracking the pointer freely within a patch, so the picked position (and the widget's internal precision) is never lost to the snap.
 
 `transparent` is supported too: a binding initialized with `transparent` gains an alpha slider, and writes `transparent` back only when alpha is exactly 0 (a translucent color writes the nearest opaque name, since names can't carry alpha).
 
