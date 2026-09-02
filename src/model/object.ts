@@ -330,7 +330,13 @@ export function colorToObject(
 	// float channels keep the model's precision
 	for (const [index, value] of convertedColor.coords.entries()) {
 		const coordKey = objectFormat.coordKeys[index]
-		if (value === null || coordKey === undefined) {
+		if (coordKey === undefined) {
+			continue
+		}
+
+		if (value === null) {
+			// A missing channel stays missing, as in the tuple format
+			result[coordKey] = null
 			continue
 		}
 

@@ -1,10 +1,11 @@
 import { afterEach, expect, it, vi } from 'vitest'
+import type { ColorPlusInputParams } from '../src/plugin.js'
 import type { ColorTextsMode } from '../src/view/color-texts.js'
 import { ColorPlus } from '../src/model/color-plus.js'
 import {
 	defaultsForFormat,
-	normalizeGamuts,
 	parseColorInputParams,
+	resolveGamuts,
 	textsModeForFormat,
 	validateColorInputParams,
 } from '../src/utilities.js'
@@ -36,7 +37,7 @@ it('parses the supported binding params', () => {
 		expanded: true,
 		gamutLabel: false,
 		gamutLines: 'outer',
-		gamuts: ['srgb', 'display-p3'],
+		gamuts: ['srgb', 'p3'],
 		paletteChannels: 'LC_H',
 		paletteProjection: 'perceptual',
 		picker: 'inline',
@@ -51,44 +52,42 @@ it('leaves omitted params undefined for the plugin to default', () => {
 	expect(Object.values(parsed!).every((value) => value === undefined)).toBe(true)
 })
 
-it('falls back with a warning for unknown palette and gamut-line options', () => {
-	const warn = spyOnWarnings()
-	const parsed = parseColorInputParams({
-		gamutLines: 'dotted',
-		paletteChannels: 'XY_Z',
-		paletteProjection: 'fisheye',
-		view: 'color-plus',
-	})
-	expect(parsed).toMatchObject({
-		gamutLines: 'inner',
-		paletteChannels: 'CL_H',
-		paletteProjection: 'okhsv',
-	})
-	expect(warn).toHaveBeenCalledTimes(3)
+it('rejects unrecognized option values, like the built-in inputs', () => {
+	const cases: Array<Record<string, unknown>> = [
+		{ color: { type: 'double' } },
+		{ gamutLines: 'dotted' },
+		{ gamuts: ['srgb', 'banana'] },
+		{ paletteChannels: 'XY_Z' },
+		{ paletteChannels: 42 },
+		{ paletteProjection: 'fisheye' },
+		{ picker: 'modal' },
+		{ swatchFallback: 'nearest' },
+	]
+	for (const params of cases) {
+		expect(parseColorInputParams({ ...params, view: 'color-plus' })).toBeUndefined()
+	}
 })
 
 it('rejects params of the wrong shape', () => {
-	// Unknown enum values, wrong primitive types, and readonly bindings all
-	// fail the record parse, so the plugin declines the binding
-	expect(parseColorInputParams({ color: { type: 'double' }, view: 'color-plus' })).toBeUndefined()
-	expect(parseColorInputParams({ swatchFallback: 'nearest', view: 'color-plus' })).toBeUndefined()
-	expect(parseColorInputParams({ picker: 'modal', view: 'color-plus' })).toBeUndefined()
+	// Wrong primitive types and readonly bindings fail the record parse too
 	expect(parseColorInputParams({ constrain: 'yes', view: 'color-plus' })).toBeUndefined()
 	expect(parseColorInputParams({ gamuts: 'srgb', view: 'color-plus' })).toBeUndefined()
 	expect(parseColorInputParams({ readonly: true, view: 'color-plus' })).toBeUndefined()
 })
 
-it('normalizes gamut ids, dropping unknowns and duplicates', () => {
-	const warn = spyOnWarnings()
-	expect(normalizeGamuts(['Display-P3', 'srgb', 'p3', 'banana'], ['srgb'])).toEqual(['p3', 'srgb'])
-	expect(warn).toHaveBeenCalledWith('ColorPlus: unknown gamut "banana"... ignoring')
+it('normalizes gamut aliases while parsing', () => {
+	expect(
+		parseColorInputParams({ gamuts: ['Display-P3', 'srgb', 'A98-RGB', 'p3'], view: 'color-plus' })
+			?.gamuts,
+	).toEqual(['p3', 'srgb', 'a98rgb', 'p3'])
 })
 
-it('falls back to a copy of the defaults when no gamut is usable', () => {
-	spyOnWarnings()
+it('deduplicates configured gamuts and falls back to a copy of the defaults', () => {
+	expect(resolveGamuts(['p3', 'srgb', 'p3'], ['srgb'])).toEqual(['p3', 'srgb'])
+
 	const fallback = ['srgb', 'p3']
-	for (const gamuts of [undefined, [], ['banana']]) {
-		const result = normalizeGamuts(gamuts, fallback)
+	for (const gamuts of [undefined, []]) {
+		const result = resolveGamuts(gamuts, fallback)
 		expect(result).toEqual(fallback)
 		expect(result).not.toBe(fallback)
 	}
@@ -159,27 +158,23 @@ it('drops option combinations that do not apply to the bound value type', () => 
 	const warn = spyOnWarnings()
 
 	// Alpha mode is number-only
-	expect(
-		validateColorInputParams({ color: { alpha: true } }, '#ff0066').color?.alpha,
-	).toBeUndefined()
-	expect(validateColorInputParams({ color: { alpha: true } }, 0xff_00_66).color?.alpha).toBe(true)
+	const alphaOnString: ColorPlusInputParams = { color: { alpha: true } }
+	validateColorInputParams(alphaOnString, '#ff0066')
+	expect(alphaOnString.color?.alpha).toBeUndefined()
+	const alphaOnNumber: ColorPlusInputParams = { color: { alpha: true } }
+	validateColorInputParams(alphaOnNumber, 0xff_00_66)
+	expect(alphaOnNumber.color?.alpha).toBe(true)
 
 	// Float mode is object- and array-only
-	expect(validateColorInputParams({ color: { type: 'float' } }, '#ff0066').color?.type).toBe('int')
-	expect(
-		validateColorInputParams({ color: { type: 'float' } }, { r: 1, g: 0, b: 0.4 }).color?.type,
-	).toBe('float')
-	expect(validateColorInputParams({ color: { type: 'float' } }, [1, 0, 0.4]).color?.type).toBe(
-		'float',
-	)
+	const floatOnString: ColorPlusInputParams = { color: { type: 'float' } }
+	validateColorInputParams(floatOnString, '#ff0066')
+	expect(floatOnString.color?.type).toBe('int')
+	const floatOnObject: ColorPlusInputParams = { color: { type: 'float' } }
+	validateColorInputParams(floatOnObject, { r: 1, g: 0, b: 0.4 })
+	expect(floatOnObject.color?.type).toBe('float')
+	const floatOnTuple: ColorPlusInputParams = { color: { type: 'float' } }
+	validateColorInputParams(floatOnTuple, [1, 0, 0.4])
+	expect(floatOnTuple.color?.type).toBe('float')
 
 	expect(warn).toHaveBeenCalledTimes(2)
-})
-
-it('falls back with a warning for a palette layout that is not a string', () => {
-	const warn = spyOnWarnings()
-	expect(parseColorInputParams({ paletteChannels: 42, view: 'color-plus' })).toMatchObject({
-		paletteChannels: 'CL_H',
-	})
-	expect(warn).toHaveBeenCalledWith('ColorPlus: unknown paletteChannels "42"... using CL_H')
 })

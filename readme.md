@@ -129,7 +129,7 @@ pane.on('change', () => {
 
 ### Options
 
-In addition to Tweakpane's standard binding options, Color Plus accepts the options below.
+In addition to Tweakpane's standard binding options, Color Plus accepts the options below. As with Tweakpane's built-in inputs, an unrecognized option value makes the plugin decline the binding, which surfaces as Tweakpane's `No matching controller` error.
 
 #### Built-in color options
 
@@ -502,8 +502,8 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 220.2 kB | 59.9 kB | 50.8 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 111.9 kB | 37.9 kB | 33 kB   |
+| tweakpane-plugin-color-plus.min.js      | 219.7 kB | 59.9 kB | 50.8 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 111.4 kB | 37.9 kB | 33 kB   |
 
 <!-- /size-table -->
 

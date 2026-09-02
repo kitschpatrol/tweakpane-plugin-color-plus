@@ -70,9 +70,16 @@ it('declines values it cannot parse and params it cannot validate', () => {
 	expect(ColorPlusInputPlugin.accept('bogus', { view: 'color-plus' })).toBeNull()
 	expect(ColorPlusInputPlugin.accept(() => 1, { view: 'color-plus' })).toBeNull()
 	expect(warn).toHaveBeenCalledWith('ColorPlusInputPlugin could not parse and get format')
-	expect(
-		ColorPlusInputPlugin.accept('#ff0066', { color: { type: 'double' }, view: 'color-plus' }),
-	).toBeNull()
+	const rejected: Array<Record<string, unknown>> = [
+		{ color: { type: 'double' } },
+		{ constrain: 'yes' },
+		{ gamuts: ['banana'] },
+		{ picker: 'modal' },
+		{ swatchFallback: 'nearest' },
+	]
+	for (const params of rejected) {
+		expect(ColorPlusInputPlugin.accept('#ff0066', { ...params, view: 'color-plus' })).toBeNull()
+	}
 })
 
 it('fills in defaults adapted to an sRGB-bound value', () => {
@@ -98,15 +105,13 @@ it('fills in defaults adapted to an sRGB-bound value', () => {
 })
 
 it('fills in wide-gamut defaults for a perceptual value and normalizes gamuts', () => {
-	const warn = spyOnWarnings()
-	const result = accept('oklch(60% 0.2 30)', { gamuts: ['Display-P3', 'srgb', 'banana'] })
+	const result = accept('oklch(60% 0.2 30)', { gamuts: ['Display-P3', 'srgb', 'p3'] })
 	expect(result.initialValue).toBe('oklch(60% 0.2 30)')
 	expect(result.params).toMatchObject({
 		gamutLabel: true,
 		gamuts: ['p3', 'srgb'],
 		textsMode: 'oklch',
 	})
-	expect(warn).toHaveBeenCalledWith('ColorPlus: unknown gamut "banana"... ignoring')
 })
 
 it('honors explicit options over the defaults', () => {
@@ -141,13 +146,51 @@ it('honors explicit options over the defaults', () => {
 	})
 })
 
-it('warns about the alpha flag on non-number values and keeps the format alpha-free', () => {
+it('ignores the alpha flag on non-number values', () => {
 	const warn = spyOnWarnings()
 	const result = accept('#ff0066', { color: { alpha: true } })
-	expect(result.initialValue).toBe('#ff0066')
+	expect(result.params.color?.alpha).toBeUndefined()
 	expect(result.params.format.alpha).toBe(false)
 	expect(warn).toHaveBeenCalledWith(
 		'ColorPlus: alpha mode is only supported for number values... ignoring',
+	)
+
+	// Neither the controller nor the writer sees alpha
+	const { config } = createControllerConfig('#ff0066', { color: { alpha: true } })
+	expect(config.supportsAlpha).toBe(false)
+	expect(config.parser('rgb(0 128 255 / 0.5)')!.alpha).toBe(1)
+	expect(config.formatter(ColorPlus.create('rgb(0 128 255 / 0.5)')!)).toBe('#0080ff')
+})
+
+it('writes a tuple binding with the alpha flag back at its own length', () => {
+	spyOnWarnings()
+	const external = [255, 0, 102]
+	const holder: Record<string, unknown> = { color: external }
+	const acceptance = accept(external, { color: { alpha: true } })
+	const target = new BindingTarget(holder, 'color')
+	const writer = ColorPlusInputPlugin.binding.writer({
+		initialValue: acceptance.initialValue,
+		params: acceptance.params,
+		target,
+	})
+
+	const internal = ColorPlus.create('rgb(0 128 255 / 0.5)')!
+	internal.convert('oklch')
+	writer(target, internal)
+	expect(external).toHaveLength(3)
+	expect(external[0]).toBeCloseTo(0, 6)
+	expect(external[1]).toBeCloseTo(128, 6)
+	expect(external[2]).toBeCloseTo(255, 6)
+})
+
+it('ignores float mode on values without channels to scale', () => {
+	const warn = spyOnWarnings()
+	expect(accept('#ff0066', { color: { type: 'float' } }).params.color?.type).toBe('int')
+	expect(createControllerConfig(0xff_00_66, { color: { type: 'float' } }).config.colorType).toBe(
+		'int',
+	)
+	expect(warn).toHaveBeenCalledWith(
+		'ColorPlus: float mode is only supported for object or array values... ignoring',
 	)
 })
 

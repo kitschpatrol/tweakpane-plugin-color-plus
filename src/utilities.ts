@@ -135,9 +135,45 @@ export function createKeywordDisplayValue(primary: Value<ColorPlus>): {
 	return { disconnect, value }
 }
 
+// Option value parsers, in the style of Tweakpane's built-in inputs: an
+// unrecognized value is undefined, which fails the record parse so the plugin
+// declines the binding
+
+function parseColorType(value: unknown): ColorType | undefined {
+	return value === 'float' || value === 'int' ? value : undefined
+}
+
+function parseGamutId(value: unknown): string | undefined {
+	return typeof value === 'string' ? normalizeGamutId(value) : undefined
+}
+
+const GAMUT_LINES_VALUES: GamutLines[] = ['all', 'inner', 'none', 'outer']
+
+function parseGamutLines(value: unknown): GamutLines | undefined {
+	return GAMUT_LINES_VALUES.find((id) => id === value)
+}
+
+function parseGamutMethod(value: unknown): GamutMethod | undefined {
+	return value === 'clip' || value === 'css' ? value : undefined
+}
+
+function parsePaletteChannels(value: unknown): PlaneLayout | undefined {
+	return typeof value === 'string'
+		? PLANE_LAYOUTS.find((id) => id === value.toUpperCase())
+		: undefined
+}
+
+const PALETTE_PROJECTION_VALUES: PaletteProjection[] = ['okhsv', 'perceptual', 'stretch']
+
+function parsePaletteProjection(value: unknown): PaletteProjection | undefined {
+	return PALETTE_PROJECTION_VALUES.find((id) => id === value)
+}
+
 /**
- * Parse the user-provided binding params into typed plugin options, returning
- * undefined when the record doesn't match the expected shape.
+ * Parse the user-provided binding params into typed plugin options. Returns
+ * undefined when the record doesn't match the expected shape or an option has
+ * an unrecognized value, in which case the plugin declines the binding like
+ * Tweakpane's built-in inputs do.
  */
 export function parseColorInputParams(
 	params: Record<string, unknown>,
@@ -154,7 +190,7 @@ export function parseColorInputParams(
 		expanded: p.optional.boolean,
 		gamutLabel: p.optional.boolean,
 		gamutLines: p.optional.custom(parseGamutLines),
-		gamuts: p.optional.array(p.required.string),
+		gamuts: p.optional.array(p.required.custom(parseGamutId)),
 		paletteChannels: p.optional.custom(parsePaletteChannels),
 		paletteProjection: p.optional.custom(parsePaletteProjection),
 		picker: p.optional.custom(parsePickerLayout),
@@ -165,83 +201,12 @@ export function parseColorInputParams(
 }
 
 /**
- * Normalize user-provided gamut strings to colorjs registry ids, dropping
- * unknown ids with a warning and falling back to `fallback` when empty.
+ * Deduplicate the configured gamut ids (already normalized to colorjs ids by
+ * the params parser), falling back to `fallback` when none were configured.
  */
-export function normalizeGamuts(gamuts: string[] | undefined, fallback: string[]): string[] {
-	if (gamuts === undefined || gamuts.length === 0) {
-		return [...fallback]
-	}
-
-	const result: string[] = []
-	for (const id of gamuts) {
-		const normalized = normalizeGamutId(id)
-		if (normalized === undefined) {
-			console.warn(`ColorPlus: unknown gamut "${id}"... ignoring`)
-		} else if (!result.includes(normalized)) {
-			result.push(normalized)
-		}
-	}
-
-	return result.length > 0 ? result : [...fallback]
-}
-
-function parseColorType(value: unknown): ColorType | undefined {
-	return value === 'int' ? 'int' : value === 'float' ? 'float' : undefined
-}
-
-function parseGamutMethod(value: unknown): GamutMethod | undefined {
-	return value === 'clip' ? 'clip' : value === 'css' ? 'css' : undefined
-}
-
-/**
- * Resolve a paletteChannels string to a known `PlaneLayout`, warning and
- * falling back to the default when it isn't one of the six permutations.
- */
-function parsePaletteChannels(value: unknown): PlaneLayout {
-	if (typeof value === 'string') {
-		const upper = value.toUpperCase()
-		for (const id of PLANE_LAYOUTS) {
-			if (id === upper) {
-				return id
-			}
-		}
-	}
-
-	console.warn(`ColorPlus: unknown paletteChannels "${String(value)}"... using CL_H`)
-	return 'CL_H'
-}
-
-const GAMUT_LINES_VALUES = ['all', 'inner', 'none', 'outer'] as const
-
-/**
- * Resolve a gamutLines string, warning and falling back to the default when it
- * isn't a known value.
- */
-function parseGamutLines(value: unknown): GamutLines {
-	const match = GAMUT_LINES_VALUES.find((id) => id === value)
-	if (match !== undefined) {
-		return match
-	}
-
-	console.warn(`ColorPlus: unknown gamutLines "${String(value)}"... using inner`)
-	return 'inner'
-}
-
-const PALETTE_PROJECTION_VALUES = ['okhsv', 'perceptual', 'stretch'] as const
-
-/**
- * Resolve a paletteProjection string, warning and falling back to the default
- * when it isn't a known value.
- */
-function parsePaletteProjection(value: unknown): PaletteProjection {
-	const match = PALETTE_PROJECTION_VALUES.find((id) => id === value)
-	if (match !== undefined) {
-		return match
-	}
-
-	console.warn(`ColorPlus: unknown paletteProjection "${String(value)}"... using okhsv`)
-	return 'okhsv'
+export function resolveGamuts(gamuts: string[] | undefined, fallback: string[]): string[] {
+	const unique = [...new Set(gamuts)]
+	return unique.length > 0 ? unique : [...fallback]
 }
 
 /**
@@ -249,10 +214,7 @@ function parsePaletteProjection(value: unknown): PaletteProjection {
  * mode is number-only, float mode is object/array-only), warning when an option
  * is ignored.
  */
-export function validateColorInputParams(
-	params: ColorPlusInputParams,
-	colorValue: unknown,
-): ColorPlusInputParams {
+export function validateColorInputParams(params: ColorPlusInputParams, colorValue: unknown): void {
 	if (typeof colorValue !== 'number' && params.color?.alpha !== undefined) {
 		console.warn('ColorPlus: alpha mode is only supported for number values... ignoring')
 		params.color.alpha = undefined
@@ -262,6 +224,4 @@ export function validateColorInputParams(
 		console.warn('ColorPlus: float mode is only supported for object or array values... ignoring')
 		params.color.type = 'int'
 	}
-
-	return params
 }

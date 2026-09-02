@@ -1,11 +1,14 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import type { ColorPlusObject, ColorSpaceId } from '../src/model/shared.js'
+import type { ColorPlusObject, ColorSpaceId, Coords } from '../src/model/shared.js'
 import {
+	applyDecimalPrecision,
 	convert,
 	denormalizeCoord,
+	denormalizeCoords,
 	formatNumber,
 	getRangeForChannel,
 	normalizeCoord,
+	normalizeCoords,
 	serialize,
 	toDecimalPrecision,
 } from '../src/model/shared.js'
@@ -131,4 +134,25 @@ it('maps channel values to unit ranges and back', () => {
 	expect(denormalizeCoord('hsl', 0, normalizeCoord('hsl', 0, 123))).toBeCloseTo(123, 10)
 	expect(normalizeCoord('hsl', 0, null)).toBeNull()
 	expect(denormalizeCoord('hsl', 0, null)).toBeNull()
+})
+
+it('rounds every coordinate and the alpha of a color in place', () => {
+	const color: ColorPlusObject = {
+		alpha: 0.123456,
+		coords: [0.123456, null, 0.987654],
+		spaceId: 'srgb',
+	}
+	applyDecimalPrecision(color, 2)
+	expect(color).toEqual({ alpha: 0.12, coords: [0.12, null, 0.99], spaceId: 'srgb' })
+
+	applyDecimalPrecision(color, 0, false)
+	expect(color).toEqual({ alpha: 0.12, coords: [0, null, 1], spaceId: 'srgb' })
+})
+
+it('maps whole coordinate sets to unit ranges and back in place', () => {
+	const coords: Coords = [180, 25, null]
+	expect(normalizeCoords('hsl', coords)).toBe(coords)
+	expect(coords).toEqual([0.5, 0.25, null])
+	expect(denormalizeCoords('hsl', coords)).toBe(coords)
+	expect(coords).toEqual([180, 25, null])
 })

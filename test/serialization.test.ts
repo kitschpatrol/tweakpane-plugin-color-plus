@@ -45,6 +45,7 @@ const roundTrips: string[] = [
 	// Percentages and missing channels keep their notation
 	'rgb(100% 0% 40%)',
 	'rgb(none 0 102)',
+	'hsl(none 50% 50%)',
 ]
 
 it.each(roundTrips)('round-trips %s through parse and serialize', (value) => {
@@ -225,12 +226,17 @@ it('writes native-unit float object channels in 0-1', () => {
 	expect(value.l).toBeCloseTo(0.5, 10)
 })
 
-it('writes null channels as null in tuples and as zero bytes in numbers', () => {
-	const color = ColorPlus.create([null, 0, 102])!
-	expect(color.toValue(ColorPlus.getFormat([0, 0, 0])!)).toEqual([null, 0, 102])
-	expect(color.serialize(ColorPlus.getFormat([0, 0, 0])!)).toBe('[null, 0, 102]')
-	expect(color.toValue(ColorPlus.getFormat(0)!)).toBe(0x00_00_66)
-	expect(color.serialize(ColorPlus.getFormat(0)!)).toBe('0x000066')
+it('writes null channels as null in objects and tuples, and as zero bytes in numbers', () => {
+	const tuple = ColorPlus.create([null, 0, 102])!
+	expect(tuple.toValue(ColorPlus.getFormat([0, 0, 0])!)).toEqual([null, 0, 102])
+	expect(tuple.serialize(ColorPlus.getFormat([0, 0, 0])!)).toBe('[null, 0, 102]')
+	expect(tuple.toValue(ColorPlus.getFormat(0)!)).toBe(0x00_00_66)
+	expect(tuple.serialize(ColorPlus.getFormat(0)!)).toBe('0x000066')
+
+	const object = ColorPlus.create({ r: null, g: 0, b: 102 })!
+	const objectFormat = ColorPlus.getFormat({ r: 0, g: 0, b: 0 })!
+	expect(object.toValue(objectFormat)).toEqual({ r: null, g: 0, b: 102 })
+	expect(object.serialize(objectFormat)).toBe('{r: null, g: 0, b: 102}')
 })
 
 it('refuses object conversion for spaces without an object shape', () => {
@@ -265,4 +271,22 @@ it('serializes keywords through bare format ids, with alpha only when asked', ()
 	expect(
 		transparent.serialize({ alpha: false, format: 'keyword', space: 'srgb', type: 'string' }),
 	).toBe('black')
+})
+
+it('keeps the notation of a channel parsed as none once it holds a number', () => {
+	// The untyped slot would otherwise serialize as a percentage, unlike its
+	// siblings
+	const format = ColorPlus.getFormat('rgb(none 0 102)')!
+	expect(ColorPlus.create('rgb(254.76 0.4 101.82)')!.serialize(format)).toBe('rgb(255 0 102)')
+
+	// A channel that is still missing stays none, and the others still round
+	expect(
+		ColorPlus.create('rgb(none 127.46 300.2)')!.serialize(ColorPlus.getFormat('rgb(0 0 0)')!),
+	).toBe('rgb(none 127 300)')
+
+	// A slot whose grammar shares no type with its siblings keeps the colorjs
+	// default
+	expect(
+		ColorPlus.create('hsl(180 50% 50%)')!.serialize(ColorPlus.getFormat('hsl(none 50% 50%)')!),
+	).toBe('hsl(180 50% 50%)')
 })

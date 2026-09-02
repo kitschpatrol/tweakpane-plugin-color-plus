@@ -11,8 +11,8 @@ import { formatIsSerializable, isStringFormat } from './model/shared.js'
 import {
 	clampColorToGamut,
 	defaultsForFormat,
-	normalizeGamuts,
 	parseColorInputParams,
+	resolveGamuts,
 	textsModeForFormat,
 	validateColorInputParams,
 } from './utilities.js'
@@ -109,9 +109,11 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			return null
 		}
 
-		const validParams = validateColorInputParams(params, value)
+		// Drops options the bound value's type doesn't support, in the copy the
+		// plugin params below are built from
+		validateColorInputParams(parsedParams, value)
 
-		const format = ColorPlus.getFormat(value, validParams.color?.alpha, parsedParams.color?.type)
+		const format = ColorPlus.getFormat(value, parsedParams.color?.alpha, parsedParams.color?.type)
 
 		if (format === undefined) {
 			console.warn('ColorPlusInputPlugin could not parse and get format')
@@ -123,7 +125,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 			return null
 		}
 
-		const color = ColorPlus.create(value, validParams.color?.alpha, parsedParams.color?.type)
+		const color = ColorPlus.create(value, parsedParams.color?.alpha, parsedParams.color?.type)
 		if (color === undefined) {
 			console.warn('ColorPlusInputPlugin could not parse')
 			return null
@@ -132,7 +134,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 		// OKLCH is the internal working representation for the perceptual picker
 		color.convert('oklch')
 
-		const initialValue = color.toValue(format, validParams.color?.alpha)
+		const initialValue = color.toValue(format, parsedParams.color?.alpha)
 
 		// Defaults that follow the gamut reach of the bound color's model
 		const defaults = defaultsForFormat(format)
@@ -151,7 +153,7 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				format,
 				gamutLabel: parsedParams.gamutLabel ?? defaults.gamutLabel,
 				gamutLines: parsedParams.gamutLines ?? 'inner',
-				gamuts: normalizeGamuts(parsedParams.gamuts, defaults.gamuts),
+				gamuts: resolveGamuts(parsedParams.gamuts, defaults.gamuts),
 				// Internal
 				lastExternalValue: initialValue,
 				lastInternalValue: color,

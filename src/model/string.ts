@@ -51,7 +51,7 @@ export function stringToColor(
 		format: parsedFormat,
 		formatId,
 		// Custom formats like hex don't report coordinate types
-		types: parseMeta.types ?? [],
+		types: fillMissingCoordinateTypes(parsedFormat, parseMeta.types ?? []),
 	}
 
 	const hasAlpha =
@@ -78,6 +78,30 @@ export function stringToColor(
 			type: 'string',
 		},
 	}
+}
+
+/**
+ * A `none` channel parses with no coordinate type, and colorjs serializes an
+ * untyped slot in the format's first grammar alternative (a percentage for
+ * rgb()), so an edit that gives the channel a number would flip its notation
+ * away from its siblings'. Borrow a sibling's type where this slot's grammar
+ * allows it; a slot with no usable sibling keeps the colorjs default.
+ */
+function fillMissingCoordinateTypes(
+	format: StringFormat['format'],
+	types: Array<string | undefined>,
+): Array<string | undefined> {
+	return types.map((type, index) => {
+		if (type !== undefined) {
+			return type
+		}
+
+		const alternatives = new Set(format.coords[index]?.map((coordFormat) => coordFormat.type))
+		return types.find((sibling) => {
+			const baseType = sibling?.split('[', 1)[0]
+			return baseType !== undefined && alternatives.has(baseType)
+		})
+	})
 }
 
 /**
