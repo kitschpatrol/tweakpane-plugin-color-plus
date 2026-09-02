@@ -1,6 +1,14 @@
-import { expect, it } from 'vitest'
+import { afterEach, expect, it, vi } from 'vitest'
+import type { ObjectColorFormat } from '../src/model/shared'
 import { ColorPlus } from '../src/model/color-plus'
+import { colorToObject, colorToObjectString } from '../src/model/object'
 import { formatIsSerializable } from '../src/model/shared'
+import { colorToString } from '../src/model/string'
+import { spyOnWarnings } from './helpers.js'
+
+afterEach(() => {
+	vi.restoreAllMocks()
+})
 
 // Round-trip: parse a string, serialize it back unchanged
 const roundTrips: string[] = [
@@ -34,6 +42,9 @@ const roundTrips: string[] = [
 	'rgb(0 128 300)',
 	'hsl(230 180% 37%)',
 	'color(display-p3 1.2 0 0)',
+	// Percentages and missing channels keep their notation
+	'rgb(100% 0% 40%)',
+	'rgb(none 0 102)',
 ]
 
 it.each(roundTrips)('round-trips %s through parse and serialize', (value) => {
@@ -179,4 +190,79 @@ it('serializes hex without collapsing', () => {
 	const color = ColorPlus.create('#fff')
 	const format = ColorPlus.getFormat('#fff')
 	expect(color!.serialize(format!)).toBe('#ffffff')
+})
+
+it('serializes object and tuple formats as display strings', () => {
+	const color = ColorPlus.create('#ff006680')!
+	expect(color.serialize(ColorPlus.getFormat({ r: 0, g: 0, b: 0 })!)).toBe('{r: 255, g: 0, b: 102}')
+	expect(color.serialize(ColorPlus.getFormat({ r: 0, g: 0, b: 0, a: 1 })!)).toBe(
+		'{r: 255, g: 0, b: 102, a: 0.502}',
+	)
+	expect(color.serialize(ColorPlus.getFormat({ r: 0, g: 0, b: 0 }, undefined, 'float')!)).toBe(
+		'{r: 1.000, g: 0.000, b: 0.400}',
+	)
+	expect(color.serialize(ColorPlus.getFormat([0, 0, 0])!)).toBe('[255, 0, 102]')
+	expect(color.serialize(ColorPlus.getFormat([0, 0, 0, 1])!)).toBe('[255, 0, 102, 0.502]')
+	expect(color.serialize(ColorPlus.getFormat([0, 0, 0], undefined, 'float')!)).toBe(
+		'[1.000, 0.000, 0.400]',
+	)
+
+	// The override adds or drops alpha regardless of the format
+	expect(color.serialize(ColorPlus.getFormat([0, 0, 0])!, true)).toBe('[255, 0, 102, 0.502]')
+	expect(color.serialize(ColorPlus.getFormat({ r: 0, g: 0, b: 0, a: 1 })!, false)).toBe(
+		'{r: 255, g: 0, b: 102}',
+	)
+})
+
+it('writes native-unit float object channels in 0-1', () => {
+	const hslFormat = ColorPlus.getFormat({ h: 0, s: 0, l: 0 }, undefined, 'float')!
+	const color = ColorPlus.create('#ff0066')!
+	expect(color.serialize(hslFormat)).toBe('{h: 0.933, s: 1.000, l: 0.500}')
+
+	const value = color.toValue(hslFormat) as Record<string, number>
+	expect(value.h).toBeCloseTo(336 / 360, 10)
+	expect(value.s).toBeCloseTo(1, 10)
+	expect(value.l).toBeCloseTo(0.5, 10)
+})
+
+it('writes null channels as null in tuples and as zero bytes in numbers', () => {
+	const color = ColorPlus.create([null, 0, 102])!
+	expect(color.toValue(ColorPlus.getFormat([0, 0, 0])!)).toEqual([null, 0, 102])
+	expect(color.serialize(ColorPlus.getFormat([0, 0, 0])!)).toBe('[null, 0, 102]')
+	expect(color.toValue(ColorPlus.getFormat(0)!)).toBe(0x00_00_66)
+	expect(color.serialize(ColorPlus.getFormat(0)!)).toBe('0x000066')
+})
+
+it('refuses object conversion for spaces without an object shape', () => {
+	const warn = spyOnWarnings()
+	const format: ObjectColorFormat = {
+		alpha: false,
+		format: { alphaKey: undefined, colorType: 'int', coordKeys: ['l', 'c', 'h'] },
+		space: 'oklch',
+		type: 'object',
+	}
+	const color = ColorPlus.create('#ff0066')!.toJSON()
+	expect(colorToObject(color, format)).toBeUndefined()
+	expect(colorToObjectString(color, format)).toBeUndefined()
+	expect(warn).toHaveBeenCalledWith('Invalid color space for object conversion: oklch')
+})
+
+it('requires parse metadata to serialize CSS strings', () => {
+	const warn = spyOnWarnings()
+	const bareFormat = { alpha: false, format: 'hex', space: 'srgb', type: 'string' } as const
+	expect(colorToString(ColorPlus.create('#ff0066')!.toJSON(), bareFormat)).toBeUndefined()
+	expect(warn).toHaveBeenCalledWith('Invalid format type')
+
+	// The generic serializer handles bare format ids instead
+	expect(ColorPlus.create('#ff0066')!.serialize(bareFormat)).toBe('#ff0066')
+})
+
+it('serializes keywords through bare format ids, with alpha only when asked', () => {
+	const transparent = ColorPlus.create('rgb(0 0 0 / 0)')!
+	expect(
+		transparent.serialize({ alpha: true, format: 'keyword', space: 'srgb', type: 'string' }),
+	).toBe('transparent')
+	expect(
+		transparent.serialize({ alpha: false, format: 'keyword', space: 'srgb', type: 'string' }),
+	).toBe('black')
 })

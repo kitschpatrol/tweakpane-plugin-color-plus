@@ -9,6 +9,12 @@ export default defineConfig({
 		open: '/index.html',
 	},
 	test: {
+		coverage: {
+			exclude: ['src/scratch.ts'],
+			include: ['src/**/*.ts'],
+			provider: 'v8',
+			reporter: ['text', 'html'],
+		},
 		root: './',
 	},
 })

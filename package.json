@@ -53,6 +53,7 @@
 		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm build && pnpm publish --otp $(op item get npm --otp)",
 		"start": "run-p watch dev",
 		"test": "vitest run",
+		"test:coverage": "vitest run --coverage",
 		"watch": "run-p watch:*",
 		"watch:dts": "onchange --initial --kill \"src/**/*.ts\" -- pnpm build:dts",
 		"watch:sass": "onchange --initial --kill \"src/sass/**/*.scss\" -- pnpm build:dev",
@@ -64,6 +65,7 @@
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^8.7.0",
 		"@types/node": "^20.19.43",
+		"@vitest/coverage-v8": "^4.1.11",
 		"autoprefixer": "^10.5.4",
 		"bumpp": "^12.2.2",
 		"colorjs.io": "^0.7.1",

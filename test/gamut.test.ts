@@ -5,7 +5,9 @@ import {
 	clampToGamut,
 	computeGlobalMaxChroma,
 	gamutsByExtent,
+	lightnessRange,
 	maxChroma,
+	minimumGamut,
 	normalizeGamutId,
 	oklchToRgb,
 	widestGamut,
@@ -82,4 +84,61 @@ it('clamps OKLCH coordinates into a gamut by shedding chroma at constant lightne
 	// rejects the phantom epsilon sliver — see the pole guard in gamut.ts).
 	expect(clampToGamut(1.5, 0.2, 30, 'srgb')).toEqual([1, 0, 30])
 	expect(clampToGamut(-0.5, 0.2, 30, 'srgb')).toEqual([0, 0, 30])
+})
+
+it('finds the in-gamut lightness band at a fixed chroma and hue', () => {
+	const range = lightnessRange(0.1, 30, 'srgb')
+	expect(range).toBeDefined()
+	const [lo, hi] = range!
+	expect(lo).toBeGreaterThan(0)
+	expect(hi).toBeLessThan(1)
+	expect(lo).toBeLessThan(hi)
+
+	// Inside the band the gamut holds at least this chroma; just outside it doesn't
+	expect(maxChroma((lo + hi) / 2, 30, 'srgb')).toBeGreaterThan(0.1)
+	expect(maxChroma(lo + 2e-3, 30, 'srgb')).toBeGreaterThan(0.1)
+	expect(maxChroma(hi - 2e-3, 30, 'srgb')).toBeGreaterThan(0.1)
+	expect(maxChroma(lo - 2e-3, 30, 'srgb')).toBeLessThan(0.1)
+	expect(maxChroma(hi + 2e-3, 30, 'srgb')).toBeLessThan(0.1)
+
+	// A wider gamut holds the chroma over a wider band
+	const [p3Lo, p3Hi] = lightnessRange(0.1, 30, 'p3')!
+	expect(p3Lo).toBeLessThan(lo)
+	expect(p3Hi).toBeGreaterThan(hi)
+})
+
+it('reports no lightness band when the chroma exceeds the gamut everywhere', () => {
+	expect(lightnessRange(0.45, 30, 'srgb')).toBeUndefined()
+})
+
+it('spans the full lightness range at zero chroma', () => {
+	expect(lightnessRange(0, 30, 'srgb')).toEqual([0, 1])
+	expect(lightnessRange(-0.1, 30, 'srgb')).toEqual([0, 1])
+
+	// The epsilon probe admits a sliver of chroma at the black pole, so the band
+	// starts at exactly 0 rather than a bisected edge
+	const [lo, hi] = lightnessRange(1e-6, 30, 'srgb')!
+	expect(lo).toBe(0)
+	expect(hi).toBeGreaterThan(0.999)
+	expect(hi).toBeLessThan(1)
+})
+
+it('picks the narrowest configured gamut holding a color', () => {
+	// Well inside sRGB
+	expect(minimumGamut(0.6, 0.1, 30, ['p3', 'srgb'])).toBe('srgb')
+	// A green sRGB can't reach but P3 can, whatever the configured order
+	expect(minimumGamut(0.6, 0.2, 145, ['p3', 'srgb'])).toBe('p3')
+	expect(minimumGamut(0.6, 0.2, 145, ['srgb', 'p3'])).toBe('p3')
+	// Without P3 configured the color is out of every gamut
+	expect(minimumGamut(0.6, 0.2, 145, ['srgb'])).toBeUndefined()
+	expect(minimumGamut(0.6, 0.1, 30, [])).toBeUndefined()
+})
+
+it('falls back to the first id, or sRGB, when no configured gamut is known', () => {
+	expect(widestGamut(['banana'])).toBe('banana')
+	expect(widestGamut([])).toBe('srgb')
+})
+
+it('returns a stable global max chroma across calls', () => {
+	expect(computeGlobalMaxChroma('p3')).toBe(computeGlobalMaxChroma('p3'))
 })

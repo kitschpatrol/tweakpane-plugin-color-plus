@@ -1,3 +1,4 @@
+import { inGamut as colorJsInGamut } from 'colorjs.io/fn'
 import { expect, it } from 'vitest'
 import { ColorPlus } from '../src/model/color-plus.js'
 import { clampColorToGamut } from '../src/utilities.js'
@@ -107,4 +108,71 @@ it('clamps a color into the widest configured gamut by shedding chroma', () => {
 	expect(inGamut).toBeDefined()
 	expect(clampColorToGamut(inGamut!, ['srgb'])).toBe(false)
 	expect(inGamut!.getAll('oklch')[1]).toBeCloseTo(0.1, 10)
+})
+
+it('reports its color space', () => {
+	const c = ColorPlus.create('#f00')!
+	expect(c.space).toBe('srgb')
+	c.convert('oklch')
+	expect(c.space).toBe('oklch')
+})
+
+it('sets alpha through set(), constrained to [0, 1]', () => {
+	const c = ColorPlus.create('#f00')!
+	c.set('alpha', 0.25)
+	expect(c.alpha).toBe(0.25)
+	c.set('alpha', (alpha) => alpha * 2)
+	expect(c.alpha).toBe(0.5)
+	c.set('alpha', 3)
+	expect(c.alpha).toBe(1)
+	c.alpha = -1
+	expect(c.alpha).toBe(0)
+})
+
+it('maps into another gamut and returns to its own space', () => {
+	const c = ColorPlus.create('oklch(65% 0.4 13)')!
+	expect(colorJsInGamut(c.toJSON(), 'srgb')).toBe(false)
+
+	c.toGamut('srgb')
+	expect(c.space).toBe('oklch')
+	expect(colorJsInGamut(c.toJSON(), 'srgb')).toBe(true)
+	const [, chroma] = c.getAll()
+	expect(chroma).toBeLessThan(0.4)
+	expect(chroma).toBeGreaterThan(0)
+})
+
+it('maps into its own gamut with the css or clip method', () => {
+	const css = ColorPlus.create('rgb(300 -20 102)')!
+	css.toGamut()
+	expect(css.space).toBe('srgb')
+	for (const channel of css.getAll()) {
+		expect(channel).toBeGreaterThanOrEqual(-1e-9)
+		expect(channel).toBeLessThanOrEqual(1 + 1e-9)
+	}
+
+	const clip = ColorPlus.create('rgb(300 -20 102)')!
+	clip.toGamut(undefined, 'clip')
+	const [r, g, b] = clip.getAll()
+	expect(r).toBe(1)
+	expect(g).toBe(0)
+	expect(b).toBeCloseTo(0.4, 10)
+
+	// The css method sheds chroma instead of clipping channels
+	expect(css.getAll()[1]).toBeGreaterThan(0.1)
+})
+
+it('gets and sets channels in its own space by default', () => {
+	const c = ColorPlus.create('#f00')!
+	expect(c.get('r')).toBe(1)
+	expect(c.get('g')).toBe(0)
+
+	c.set('g', 0.5)
+	expect(c.getAll()).toEqual([1, 0.5, 0])
+
+	c.set('b', (b) => b + 0.25)
+	expect(c.getAll()).toEqual([1, 0.5, 0.25])
+
+	c.setAll([0, 0.5, 1])
+	expect(c.getAll()).toEqual([0, 0.5, 1])
+	expect(c.space).toBe('srgb')
 })

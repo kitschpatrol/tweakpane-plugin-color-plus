@@ -1,5 +1,10 @@
-import { expect, it } from 'vitest'
+import { afterEach, expect, it, vi } from 'vitest'
 import { ColorPlus } from '../src/model/color-plus.js'
+import { spyOnWarnings } from './helpers.js'
+
+afterEach(() => {
+	vi.restoreAllMocks()
+})
 
 it('parses hex colors correctly', () => {
 	const tests = [
@@ -304,5 +309,90 @@ it('parses legacy hsl values correctly', () => {
 
 	for (const [input, expected] of tests) {
 		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
+
+it('parses object-like strings graciously', () => {
+	const tests = [
+		['{r: 255, g: 0, b: 102}', 'ColorPlus(srgb, [1,0,0.4], 1)'],
+		['{"r": 255, "g": 0, "b": 102}', 'ColorPlus(srgb, [1,0,0.4], 1)'],
+		["{ 'red': 255, 'green': 0, 'blue': 102, 'alpha': 0.5 }", 'ColorPlus(srgb, [1,0,0.4], 0.5)'],
+		// Units and percent signs are tolerated
+		['{ h: 270deg, s: 100%, l: 50% }', 'ColorPlus(hsl, [270,100,50], 1)'],
+		['{r: 255, g: 0, b: null}', 'ColorPlus(srgb, [1,0,none], 1)'],
+	]
+
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
+
+it('rejects malformed object-like strings', () => {
+	spyOnWarnings()
+	// Missing channel, unparsable value, odd token count
+	expect(ColorPlus.create('{r: 255, g: 0}')).toBeUndefined()
+	expect(ColorPlus.create('{r: 255, g: 0, b: foo}')).toBeUndefined()
+	expect(ColorPlus.create('{r: 255, g: 0, b: 102, a}')).toBeUndefined()
+})
+
+it('matches object keys case-insensitively and by alias', () => {
+	const tests = [
+		// eslint-disable-next-line ts/naming-convention -- Upper-case keys are the point
+		[{ R: 255, G: 0, B: 102 }, 'ColorPlus(srgb, [1,0,0.4], 1)'],
+		[
+			{ hue: 336, lightness: 50, opacity: 0.5, saturation: 100 },
+			'ColorPlus(hsl, [336,100,50], 0.5)',
+		],
+		[{ brightness: 100, hue: 336, sat: 100 }, 'ColorPlus(hsv, [336,100,100], 1)'],
+		[{ blackness: 0, hue: 336, whiteness: 0 }, 'ColorPlus(hwb, [336,0,0], 1)'],
+		[{ alpha: 0.5, by: 21, gr: 83, l: 55 }, 'ColorPlus(lab, [55,83,21], 0.5)'],
+		// Lab's `a` channel shadows the alpha alias, so alpha must be spelled out
+		[{ a: 83, alpha: 0.5, b: 21, l: 55 }, 'ColorPlus(lab, [55,83,21], 0.5)'],
+		[{ chroma: 85, hue: 14, lightness: 55 }, 'ColorPlus(lch, [55,85,14], 1)'],
+	]
+
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
+
+it('rejects objects with unknown, missing, or non-numeric channels', () => {
+	spyOnWarnings()
+	expect(ColorPlus.create({ b: 102, g: 0, r: 255, x: 1 })).toBeUndefined()
+	expect(ColorPlus.create({ r: 255, g: 0 })).toBeUndefined()
+	expect(ColorPlus.create({ r: '255', g: 0, b: 102 })).toBeUndefined()
+	expect(ColorPlus.create({})).toBeUndefined()
+})
+
+it('keeps null object channels as none', () => {
+	expect(ColorPlus.create({ r: null, g: 0, b: 102 })?.toString()).toBe(
+		'ColorPlus(srgb, [none,0,0.4], 1)',
+	)
+})
+
+it('parses tuple-like strings', () => {
+	expect(ColorPlus.create('[255, 0, 102]')?.toString()).toBe('ColorPlus(srgb, [1,0,0.4], 1)')
+	expect(ColorPlus.create('[1, 0, 0.4, 0.5]', undefined, 'float')?.toString()).toBe(
+		'ColorPlus(srgb, [1,0,0.4], 0.5)',
+	)
+	expect(ColorPlus.create('[255, null, 102]')?.toString()).toBe('ColorPlus(srgb, [1,none,0.4], 1)')
+	expect(ColorPlus.create('[255, 0, null]')?.toString()).toBe('ColorPlus(srgb, [1,0,none], 1)')
+})
+
+it('rejects tuples of the wrong length or element type', () => {
+	spyOnWarnings()
+	expect(ColorPlus.create([255, 0])).toBeUndefined()
+	expect(ColorPlus.create([255, 0, 102, 1, 1])).toBeUndefined()
+	expect(ColorPlus.create(['255', 0, 102])).toBeUndefined()
+	// Alpha may not be null
+	expect(ColorPlus.create([255, 0, 102, null])).toBeUndefined()
+	expect(ColorPlus.create('[255, 0')).toBeUndefined()
+})
+
+it('rejects values that are not colors at all', () => {
+	spyOnWarnings()
+	for (const value of [null, undefined, true, () => 1, '']) {
+		expect(ColorPlus.create(value)).toBeUndefined()
+		expect(ColorPlus.getFormat(value)).toBeUndefined()
 	}
 })
