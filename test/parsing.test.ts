@@ -40,11 +40,50 @@ it('rejects invalid named colors', () => {
 it('parses number colors correctly', () => {
 	const tests = [
 		[0xff_00_66, 'ColorPlus(srgb, [1,0,0.4], 1)'],
-		[0xff_00_66_7f, 'ColorPlus(srgb, [1,0,0.4], 0.4980392156862745)'],
+		// Leading zero bytes must survive the hex conversion
+		[0x00_00_ff, 'ColorPlus(srgb, [0,0,1], 1)'],
+		[0x00_ff_ff, 'ColorPlus(srgb, [0,1,1], 1)'],
+		[0x00_ff_00, 'ColorPlus(srgb, [0,1,0], 1)'],
+		[0x00_00_00, 'ColorPlus(srgb, [0,0,0], 1)'],
+		// Without the alpha flag the high byte is discarded, like the built-in input
+		[0xff_00_66_7f, 'ColorPlus(srgb, [0,0.4,0.498], 1)'],
 	]
 
 	for (const [input, expected] of tests) {
 		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
+
+it('wraps out-of-range number colors like the built-in input', () => {
+	// Bitwise semantics: negatives wrap, fractions truncate, bits past 32 are
+	// dropped, and NaN reads as black
+	const tests = [
+		[-1, 'ColorPlus(srgb, [1,1,1], 1)'],
+		[0xff_00_66 + 0.5, 'ColorPlus(srgb, [1,0,0.4], 1)'],
+		[0x1_00_00_00_00 + 0xff_00_66, 'ColorPlus(srgb, [1,0,0.4], 1)'],
+		[NaN, 'ColorPlus(srgb, [0,0,0], 1)'],
+		[Infinity, 'ColorPlus(srgb, [0,0,0], 1)'],
+	]
+
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+
+	expect(ColorPlus.create(-1, true)?.toString()).toEqual('ColorPlus(srgb, [1,1,1], 1)')
+	expect(ColorPlus.create(NaN, true)?.toString()).toEqual('ColorPlus(srgb, [0,0,0], 0)')
+})
+
+it('parses number colors with the alpha flag correctly', () => {
+	const tests = [
+		[0xff_00_66_7f, 'ColorPlus(srgb, [1,0,0.4], 0.4980392156862745)'],
+		[0x00_ff_00_ff, 'ColorPlus(srgb, [0,1,0], 1)'],
+		[0x00_00_ff_80, 'ColorPlus(srgb, [0,0,1], 0.5019607843137255)'],
+		// With the flag set, the lowest byte is alpha even for small values
+		[0xff_00_66, 'ColorPlus(srgb, [0,1,0], 0.4)'],
+	]
+
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input, true)?.toString()).toEqual(expected)
 	}
 })
 

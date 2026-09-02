@@ -83,6 +83,22 @@ it('serializes zero alpha as transparent when the format has alpha', () => {
 	expect(ColorPlus.create('rgb(255 0 0)')!.serialize(format)).toBe('red')
 })
 
+it('round-trips number colors with leading zero bytes', () => {
+	for (const value of [0x00_00_ff, 0x00_ff_ff, 0x00_ff_00, 0xff_00_66]) {
+		const color = ColorPlus.create(value)!
+		const format = ColorPlus.getFormat(value)!
+		expect(color.toValue(format)).toBe(value)
+		expect(color.serialize(format)).toBe(`0x${value.toString(16).padStart(6, '0')}`)
+	}
+
+	for (const value of [0x00_ff_00_ff, 0x00_00_ff_80, 0xff_00_66_7f]) {
+		const color = ColorPlus.create(value, true)!
+		const format = ColorPlus.getFormat(value, true)!
+		expect(color.toValue(format)).toBe(value)
+		expect(color.serialize(format)).toBe(`0x${value.toString(16).padStart(8, '0')}`)
+	}
+})
+
 it('serializes hex without collapsing', () => {
 	const color = ColorPlus.create('#fff')
 	const format = ColorPlus.getFormat('#fff')

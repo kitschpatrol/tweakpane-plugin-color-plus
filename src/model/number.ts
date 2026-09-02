@@ -1,34 +1,45 @@
 /* eslint-disable no-bitwise */
 import type { ColorFormat, ColorPlusObject } from './shared'
 import { convert } from './shared'
-import { stringToColor } from './string'
 
+/**
+ * Reads a number as a packed sRGB color, mirroring Tweakpane's built-in number
+ * color input bit for bit. With the alpha flag the lowest byte is alpha,
+ * otherwise the low three bytes are RGB and anything above them is discarded.
+ * Like the built-in, any number is accepted: fractions truncate, negatives
+ * wrap, and NaN reads as black. A value that doesn't fit is warned about.
+ */
 export function numberToColor(
 	value: unknown,
 	hasAlpha?: boolean,
 ): undefined | { color: ColorPlusObject; format: ColorFormat } {
-	if (typeof value !== 'number' || !Number.isFinite(value)) {
+	if (typeof value !== 'number') {
 		// No need to parse strings here because stringToColor will catch them
 		return undefined
 	}
 
-	if (value < 0 || value > 0xff_ff_ff_ff) {
-		console.warn(`Invalid number value: ${value}`)
-		return undefined
+	const packed = hasAlpha === true ? value >>> 0 : value & 0xff_ff_ff
+	if (packed !== value) {
+		console.warn(
+			hasAlpha === true
+				? `Number color ${value} is not an integer from 0 to 0xffffffff; reading it as 0x${packed.toString(16)}`
+				: `Number color ${value} is not an integer from 0 to 0xffffff; reading it as 0x${packed.toString(16)}. Set color.alpha to true if the lowest byte is alpha.`,
+		)
 	}
 
-	const colorString = '#' + value.toString(16)
-	const result = stringToColor(colorString)
-	if (result === undefined) {
-		return undefined
-	}
-
-	const { color, format: stringFormat } = result
+	const [r, g, b, alpha]: [number, number, number, number] =
+		hasAlpha === true
+			? [packed >>> 24, (packed >>> 16) & 0xff, (packed >>> 8) & 0xff, (packed & 0xff) / 255]
+			: [packed >>> 16, (packed >>> 8) & 0xff, packed & 0xff, 1]
 
 	return {
-		color,
+		color: {
+			alpha,
+			coords: [r / 255, g / 255, b / 255],
+			spaceId: 'srgb',
+		},
 		format: {
-			alpha: hasAlpha === true || stringFormat.alpha,
+			alpha: hasAlpha === true,
 			format: {},
 			space: 'srgb',
 			type: 'number',
@@ -77,6 +88,5 @@ export function colorToNumberString(
 	}
 
 	const includeAlpha = alphaOverride ?? format.alpha
-	// TODO alpha should be ff?
 	return '0x' + value.toString(16).padStart(includeAlpha ? 8 : 6, '0')
 }
