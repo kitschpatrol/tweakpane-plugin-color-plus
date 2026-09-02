@@ -278,6 +278,10 @@ export function serialize(
 		// Never collapse hex to #f06-style shorthand
 		collapse: false,
 		format: format.format,
+		// Same policy as colorToString: gamut handling is the plugin's job, so
+		// don't let colorjs map out-of-range coords on the way out (hex still
+		// maps itself). A no-op for the current oklch and hex callers
+		inGamut: false,
 	})
 }
 

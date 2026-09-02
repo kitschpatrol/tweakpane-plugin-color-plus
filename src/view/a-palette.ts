@@ -1,6 +1,13 @@
 import type { Value, View, ViewProps } from '@tweakpane/core'
 import { ClassName, mapRange } from '@tweakpane/core'
 import type { ColorPlus } from '../model/color-plus.js'
+import type { ColorFormat } from '../model/shared.js'
+
+/**
+ * Serialized as oklch like the swatch, so the browser paints wide colors itself
+ * instead of colorjs mapping them into sRGB first
+ */
+const cssFormat: ColorFormat = { alpha: true, format: 'oklch', space: 'oklch', type: 'string' }
 
 const cn = ClassName('apl')
 
@@ -57,38 +64,15 @@ export class APaletteView implements View {
 	}
 
 	private update(): void {
-		const activeColor = this.value.rawValue.clone()
-		activeColor.convert('srgb')
+		const activeColor = this.value.rawValue
 		const leftColor = activeColor.clone()
 		leftColor.alpha = 0
 
-		const rightColor = leftColor.clone()
+		const rightColor = activeColor.clone()
 		rightColor.alpha = 1
 
-		const gradientComps = [
-			'to right',
-			leftColor.serialize({
-				alpha: true,
-				format: 'rgba',
-				space: 'srgb',
-				type: 'string',
-			}),
-			rightColor.serialize({
-				alpha: true,
-				format: 'rgba',
-				space: 'srgb',
-				type: 'string',
-			}),
-		]
-		this.colorElement.style.background = `linear-gradient(${gradientComps.join(',')})`
-
-		this.previewElement.style.backgroundColor = activeColor.serialize({
-			alpha: true,
-			format: 'rgba',
-			space: 'srgb',
-			type: 'string',
-		})
-		const left = mapRange(activeColor.alpha, 0, 1, 0, 100)
-		this.markerElement.style.left = `${left}%`
+		this.colorElement.style.background = `linear-gradient(to right, ${leftColor.serialize(cssFormat)}, ${rightColor.serialize(cssFormat)})`
+		this.previewElement.style.backgroundColor = activeColor.serialize(cssFormat)
+		this.markerElement.style.left = `${mapRange(activeColor.alpha, 0, 1, 0, 100)}%`
 	}
 }

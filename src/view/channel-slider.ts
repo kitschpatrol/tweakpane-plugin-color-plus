@@ -133,7 +133,7 @@ export class ChannelSliderView implements View {
 
 		const unit = valueToUnit(this.channel, coords[this.channel], this.globalMaxChroma)
 		this.markerElement.style.left = `${unit * 100}%`
-		const [r, g, b] = oklchToRgb(base.l, base.c, base.h, 'srgb')
-		this.markerElement.style.backgroundColor = `rgb(${clampByte(r)} ${clampByte(g)} ${clampByte(b)})`
+		// Written as oklch like the swatch, so the browser paints wide colors itself
+		this.markerElement.style.backgroundColor = `oklch(${base.l} ${base.c} ${base.h})`
 	}
 }
