@@ -17,22 +17,35 @@
 				box-sizing: border-box;
 				min-height: 100dvh;
 				margin: 0;
-				padding: 24px 0;
+				padding: 24px 16px;
 				font-family: sans-serif;
 			}
 
-			.box {
-				width: 320px;
+			/* Tracks break on the same 320px basis as before but stretch to fill
+			   the row; the max width keeps the column count capped at four */
+			#pickers {
+				display: grid;
+				/* stylelint-disable-next-line defensive-css/require-grid-minmax --
+				   The 1fr is already a minmax() max bound; the rule's autofix nests
+				   minmax(), which is invalid and drops the declaration */
+				grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+				gap: 16px;
+				align-items: start;
+				width: 100%;
+				max-width: 1600px;
+			}
+
+			.cell {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+				padding: 20px;
+				border-radius: 12px;
 			}
 		</style>
 		<script src="./index.ts" type="module"></script>
 	</head>
 	<body>
-		<div class="box">
-			<div id="picker"></div>
-		</div>
-		<div class="box">
-			<div id="controls"></div>
-		</div>
+		<div id="pickers"></div>
 	</body>
 </html>

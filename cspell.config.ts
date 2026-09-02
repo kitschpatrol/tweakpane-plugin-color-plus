@@ -14,6 +14,7 @@ export default cspellConfig({
 		'plpv',
 		'posterize',
 		'posterized',
+		'posterizes',
 		'prophoto',
 		'rrggbbaa',
 	],

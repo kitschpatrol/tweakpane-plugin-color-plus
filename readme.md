@@ -20,19 +20,15 @@
 
 <!-- /short-description -->
 
-> [!WARNING]
->
-> This Tweakpane plugin is a work in progress and is provided as a zero-versioned pre-release preview. Expect bugs and possible API / UI changes until the first 1.0.0 release.
-
 ## Overview
 
 The Color Plus plugin adds support for handling wide color and many additional color formats to the [Tweakpane](https://tweakpane.github.io/docs/) UI library.
 
-The plugin supports all [CSS Color Module Level 4](https://drafts.csswg.org/css-color-4/) formats and color spaces, and adds support for controlling colors stored as tuples / arrays, as well as additional color object formats. It also subtly revises the color picker UI to handle wide gamut colors.
+The plugin supports all [CSS Color Module Level 4](https://drafts.csswg.org/css-color-4/) formats and color spaces, along with color values stored as tuples or arrays, [named-color](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/named-color) strings, and several additional object formats. It also subtly extends the color-picker interface to accommodate wide-gamut colors.
 
-The plugin is a clean superset of the functionality, options, and control presentation of Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color), in the hope that it can work as a minimally-invasive drop-in replacement in existing projects that need support for modern color.
+Its API surface is a clean superset of Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color), so it can work as a minimally-invasive drop-in replacement in existing projects that need support for modern color.
 
-The plugin was developed for the benefit of [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui) and [Tweakpane CSS](https://github.com/kitschpatrol/tweakpane-css), but there's no reason it can't be used in vanilla Tweakpane projects as well.
+I originally developed this for the benefit of [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui) and [Tweakpane CSS](https://github.com/kitschpatrol/tweakpane-css), but I've found myself reaching for it in vanilla Tweakpane projects as well.
 
 ## Getting started
 
@@ -42,7 +38,7 @@ The plugin requires [Tweakpane 4](https://www.npmjs.com/package/tweakpane).
 
 If you're using the ["lite" build](#the-lite-plugin-build) of the plugin without a bundler, you'll need to provide the [@tweakpane/core](https://www.npmjs.com/package/@tweakpane/core) library as well.
 
-If you're using Svelte 4 or 5 as a front-end library, you might want to take a look at [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui), which wraps Tweakpane in a set of Svelte-friendly components, and integrates the Color Plus plugin as part of a preview release.
+If you're using Svelte 4 or 5 as a front-end library, take a look at [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui), which wraps Tweakpane in a set of Svelte-friendly components, including a [`<ColorPlus>`](https://kitschpatrol.com/svelte-tweakpane-ui/docs/components/color-plus) component.
 
 ### Installation
 
@@ -60,9 +56,11 @@ npm install tweakpane-plugin-color-plus
 
 ### Usage
 
-Import and register the plugin. For now, you must explicitly add `view: 'color-plus'` to the `addBinding` options object. (Tweakpane's built-in color input handling will take precedence in the absence of the `view` option.)
+Import and register the plugin, then pass `view: 'color-plus'` in the params of each `addBinding` call that should use it.
 
-#### NPM
+Note that the plugin does not automatically take over color values, you must pass `view` explicitly on the bindings you'd like to control with Color Plus.
+
+#### From NPM
 
 <!-- code({ file: "./demo/npm/index.js" }) -->
 
@@ -87,7 +85,7 @@ pane.on('change', () => {
 
 <!-- /code -->
 
-#### CDN
+#### From CDN
 
 <!-- code({ file: "./demo/cdn/index.html" }) -->
 
@@ -133,8 +131,6 @@ pane.on('change', () => {
 
 In addition to Tweakpane's standard binding options, Color Plus accepts the options below.
 
-_Note that some defaults adapt to the gamut reach of the bound color's model: a color in an sRGB-bound model (hex, `rgb()`, `hsl()`, ...) gets a simple sRGB picker, while a color in a wide or perceptual model (`oklch()`, `lab()`, `display-p3`, ...) gets the full wide-gamut treatment. You're free to override these default assumptions via the `gamuts` array option. The affected options are noted below\._
-
 #### Built-in color options
 
 These options mirror Tweakpane's [built-in color input](https://tweakpane.github.io/docs/input-bindings/#color), and behave the same way here.
@@ -177,7 +173,7 @@ Keep the color inside the widest configured gamut (see [`gamuts`](#gamuts)): pic
 
 ##### `gamuts`
 
-The RGB gamuts whose boundaries the OKLCH picker draws, as an array of ids. Both colorjs ids and their CSS aliases are accepted: `'srgb'`, `'p3'` / `'display-p3'`, `'a98rgb'` / `'a98-rgb'`, `'rec2020'`, and `'prophoto'` / `'prophoto-rgb'`.
+The RGB gamuts whose boundaries the OKLCH picker draws on the palette plane, as an array of ids. Both colorjs ids and their CSS aliases are accepted: `'srgb'`, `'p3'` / `'display-p3'`, `'a98rgb'` / `'a98-rgb'`, `'rec2020'`, and `'prophoto'` / `'prophoto-rgb'`.
 
 _Adaptive default:_ `['srgb', 'p3']` when the bound color uses a wide or perceptual model, `['srgb']` when it uses an sRGB-bound model.
 
@@ -239,6 +235,31 @@ Show the color model drop-down and per-channel text inputs below the picker pale
 pane.addBinding(params, 'color', { view: 'color-plus', textFields: false })
 ```
 
+### Adaptive defaults
+
+Rather than shipping one global set of default option values, Color Plus resolves several defaults from the format of the initially bound value. The goal is to do the right thing with as little configuration as possible: binding `'#ff0066'` gets a simple sRGB picker with no wide-gamut chrome it can't use, while binding `'oklch(65% 0.26 357deg)'` gets Display P3 boundaries and a gamut label without any setup.
+
+The bound value drives three defaults: The [`gamuts`](#gamuts) array, the [`gamutLabel`](#gamutlabel) state, and which mode the picker's text fields open in. It also determines which `color.*` options apply at all:
+
+| Initial value                                                              | Gamut reach | `gamuts`         | `gamutLabel` | Text fields open in  | Applicable `color.*` options |
+| -------------------------------------------------------------------------- | ----------- | ---------------- | ------------ | -------------------- | ---------------------------- |
+| Hex string `'#ff0066'`                                                     | sRGB-bound  | `['srgb']`       | `false`      | `hex`                | `formatLocked`               |
+| Named color `'rebeccapurple'`                                              | sRGB-bound  | `['srgb']`       | `false`      | `hex`                | `formatLocked`               |
+| sRGB-model string `'rgb(…)'`, `'hsl(…)'`, `'hwb(…)'`                       | sRGB-bound  | `['srgb']`       | `false`      | `srgb`, `hsl`, `hsv` | `formatLocked`               |
+| Wide / perceptual string `'oklch(…)'`, `'lab(…)'`, `'color(display-p3 …)'` | wide        | `['srgb', 'p3']` | `true`       | `oklch`              | `formatLocked`               |
+| Number `0xff0066`                                                          | sRGB-bound  | `['srgb']`       | `false`      | `hex`                | `alpha`, `formatLocked`      |
+| sRGB-model object `{r, g, b}`, `{h, s, l}`, …                              | sRGB-bound  | `['srgb']`       | `false`      | `srgb`, `hsl`, `hsv` | `type`, `formatLocked`       |
+| Wide / perceptual object `{l, a, b}`, `{l, c, h}`                          | wide        | `['srgb', 'p3']` | `true`       | `oklch`              | `type`, `formatLocked`       |
+| Tuple / array `[255, 0, 102]`                                              | sRGB-bound  | `['srgb']`       | `false`      | `srgb`               | `type`, `formatLocked`       |
+
+The "gamut reach" grouping follows the bound color's model, not its value type: models that can't leave the sRGB gamut (hex, named colors, `rgb()`, `hsl()`, `hwb()`, HSV, sRGB Linear, and the matching objects and tuples) get the simple sRGB picker, while wide and perceptual models (Oklch, Oklab, Lab, LCH, Display P3, Rec. 2020, and friends) get the full wide-gamut treatment.
+
+The text fields open in the mode matching the bound model when the drop-down offers one (`srgb`, `hsl`, `hsv`, `okhsv`, `oklch`); other models fall back to `hsv` (sRGB-bound) or `oklch` (wide), and hex, named-color, and number values always open in `hex`.
+
+A couple of behaviors follow the value rather than an option: an alpha slider appears whenever the value itself carries alpha (`'#ff00667f'`, `{r, g, b, a}`, a 4-tuple, `'transparent'`, … — numbers use `color.alpha` instead), and a named-color binding posterizes the picker plane into named-color patches (see [String formats](#string-formats)).
+
+These are only defaults: `gamuts` and `gamutLabel` accept explicit overrides, and the text-fields mode is just the drop-down's starting selection. Options passed for a value type that doesn't support them (`color.alpha` on a string, `color.type` on a number) are ignored with a console warning.
+
 ### Color spaces
 
 As a trade-off between bundle size and flexibility, Color Plus only supports "predefined" color spaces included in the CSS 4 color specification, with the sole addition of `HSV` for parity with the built-in Tweakpane color input implementation.
@@ -264,7 +285,7 @@ Supported spaces / color functions include:
 
 ### Color formats
 
-The Color Plus plugin supports a wide range of parameter values formats beyond those of the built-in Tweakpane color input. The plugin "remembers" the original format of the input value, and will always transform any valid color input value entered in the text field of the Tweakpane UI widget into that format.
+The Color Plus plugin supports a wide range of parameter values formats beyond those of the built-in Tweakpane color input. The plugin remembers the original format of the input value, and will always transform any valid color input value entered in the text field of the Tweakpane UI widget into that format.
 
 #### String formats
 
@@ -481,8 +502,8 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 219.5 kB | 59.8 kB | 50.7 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 111.3 kB | 37.8 kB | 32.8 kB |
+| tweakpane-plugin-color-plus.min.js      | 220.2 kB | 59.9 kB | 50.8 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 111.9 kB | 37.9 kB | 33 kB   |
 
 <!-- /size-table -->
 
