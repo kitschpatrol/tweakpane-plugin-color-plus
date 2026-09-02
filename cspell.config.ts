@@ -10,12 +10,9 @@ export default cspellConfig({
 		'gmax',
 		'hplv',
 		'huelucinations',
-		'Kiley',
-		'OKHSL',
 		'Ottosson',
 		'plpv',
 		'prophoto',
-		'rebeccapurple',
 		'rrggbbaa',
 	],
 })
