@@ -142,7 +142,7 @@ export type ObjectFormat = {
 	coordKeys: [string, string, string]
 }
 
-export type TupleFormat = {
+type TupleFormat = {
 	// Space is always SRGB
 	colorType: ColorType
 }
@@ -154,15 +154,23 @@ export type TupleFormat = {
  */
 type NumberFormat = Record<string, never>
 
-/**
- * Original format and alpha state inferred from the user-provided value
- */
-export type ColorFormat = {
+type ColorFormatBase = {
 	alpha: boolean
-	format: NumberFormat | ObjectFormat | string | StringFormat | TupleFormat
 	space: ColorSpaceId
-	type: 'number' | 'object' | 'string' | 'tuple'
 }
+
+export type NumberColorFormat = ColorFormatBase & { format: NumberFormat; type: 'number' }
+export type ObjectColorFormat = ColorFormatBase & { format: ObjectFormat; type: 'object' }
+/** A bare string is a colorjs format id, used for internal one-off serialization */
+export type StringColorFormat = ColorFormatBase & { format: string | StringFormat; type: 'string' }
+export type TupleColorFormat = ColorFormatBase & { format: TupleFormat; type: 'tuple' }
+
+/**
+ * Original format and alpha state inferred from the user-provided value.
+ * Discriminated on `type`, so narrowing it also narrows `format`
+ */
+export type ColorFormat =
+	NumberColorFormat | ObjectColorFormat | StringColorFormat | TupleColorFormat
 
 /**
  * Returns a new color object only if conversion is needed, otherwise returns

@@ -102,7 +102,7 @@ export class ColorPlus {
 
 		switch (format.type) {
 			case 'number': {
-				return colorToNumberString(this.color, format, alphaOverride)!
+				return colorToNumberString(this.color, format, alphaOverride)
 			}
 
 			case 'object': {
@@ -114,7 +114,7 @@ export class ColorPlus {
 			}
 
 			case 'tuple': {
-				return colorToTupleString(this.color, format, alphaOverride)!
+				return colorToTupleString(this.color, format, alphaOverride)
 			}
 		}
 	}
@@ -167,7 +167,7 @@ export class ColorPlus {
 	public toValue(format: ColorFormat, alphaOverride?: boolean): ColorPlusValue {
 		switch (format.type) {
 			case 'number': {
-				return colorToNumber(this.color, format, alphaOverride)!
+				return colorToNumber(this.color, format, alphaOverride)
 			}
 
 			case 'object': {
@@ -179,7 +179,7 @@ export class ColorPlus {
 			}
 
 			case 'tuple': {
-				return colorToTuple(this.color, format, alphaOverride)!
+				return colorToTuple(this.color, format, alphaOverride)
 			}
 		}
 	}

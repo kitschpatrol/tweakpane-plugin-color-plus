@@ -6,6 +6,7 @@ import type {
 	ColorJsParseMeta,
 	ColorPlusObject,
 	CoordFormat,
+	StringColorFormat,
 	StringFormat,
 } from './shared'
 import {
@@ -85,7 +86,7 @@ export function stringToColor(
  */
 export function colorToString(
 	color: ColorPlusObject,
-	format: ColorFormat,
+	format: StringColorFormat,
 	alphaOverride?: boolean,
 ): string | undefined {
 	if (!isStringFormat(format.format)) {

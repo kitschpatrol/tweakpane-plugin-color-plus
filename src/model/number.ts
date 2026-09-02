@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import type { ColorFormat, ColorPlusObject } from './shared'
+import type { ColorFormat, ColorPlusObject, NumberColorFormat } from './shared'
 import { convert } from './shared'
 
 /**
@@ -49,14 +49,9 @@ export function numberToColor(
 
 export function colorToNumber(
 	color: ColorPlusObject,
-	format: ColorFormat,
+	format: NumberColorFormat,
 	alphaOverride?: boolean,
-): number | undefined {
-	if (format.type !== 'number') {
-		console.warn(`Invalid format type: ${format.type}`)
-		return undefined
-	}
-
+): number {
 	// Always SRGB
 	const converted = convert(color, 'srgb') ?? color
 
@@ -78,15 +73,10 @@ export function colorToNumber(
 
 export function colorToNumberString(
 	color: ColorPlusObject,
-	format: ColorFormat,
+	format: NumberColorFormat,
 	alphaOverride?: boolean,
-): string | undefined {
+): string {
 	const value = colorToNumber(color, format, alphaOverride)
-
-	if (value === undefined) {
-		return undefined
-	}
-
 	const includeAlpha = alphaOverride ?? format.alpha
 	return '0x' + value.toString(16).padStart(includeAlpha ? 8 : 6, '0')
 }

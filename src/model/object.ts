@@ -1,5 +1,12 @@
 import { mapRange } from '@tweakpane/core'
-import type { ColorFormat, ColorPlusObject, ColorSpaceId, ColorType, ObjectFormat } from './shared'
+import type {
+	ColorFormat,
+	ColorPlusObject,
+	ColorSpaceId,
+	ColorType,
+	ObjectColorFormat,
+	ObjectFormat,
+} from './shared'
 import { convert, formatNumber, getRangeForChannel } from './shared'
 
 /**
@@ -249,15 +256,10 @@ export function objectToColor(
 		)
 
 		if (hasAllRequiredChannels && allInputKeysValid) {
-			const colorFormat: ColorFormat = {
-				alpha: false, // May be overwritten
-				format: {
-					alphaKey: undefined, // May be overwritten
-					colorType,
-					coordKeys: ['', '', ''], // Will be overwritten
-				},
-				space: spaceId,
-				type: 'object',
+			const objectFormat: ObjectFormat = {
+				alphaKey: undefined, // May be overwritten
+				colorType,
+				coordKeys: ['', '', ''], // Will be overwritten
 			}
 
 			const result: ColorPlusObject = {
@@ -273,7 +275,7 @@ export function objectToColor(
 				if (matchingKey !== undefined) {
 					const channelValue = lowerCaseValue[matchingKey.toLowerCase()]!
 
-					;(colorFormat.format as ObjectFormat).coordKeys[index] = matchingKey
+					objectFormat.coordKeys[index] = matchingKey
 					result.coords[index] = channelValue
 				}
 			}
@@ -284,19 +286,22 @@ export function objectToColor(
 
 				if (alphaKey !== undefined) {
 					// Alpha value provided
-
-					;(colorFormat.format as ObjectFormat).alphaKey = alphaKey
-					colorFormat.alpha = true
+					objectFormat.alphaKey = alphaKey
 					result.alpha = lowerCaseValue[alphaKey.toLowerCase()]!
 				}
 			}
 
 			// Map between float and int if needed
-			mapCoordsToColorJsRanges(result, (colorFormat.format as ObjectFormat).colorType)
+			mapCoordsToColorJsRanges(result, colorType)
 
 			return {
 				color: result,
-				format: colorFormat,
+				format: {
+					alpha: objectFormat.alphaKey !== undefined,
+					format: objectFormat,
+					space: spaceId,
+					type: 'object',
+				},
 			}
 		}
 	}
@@ -306,21 +311,15 @@ export function objectToColor(
 
 export function colorToObject(
 	color: ColorPlusObject,
-	format: ColorFormat,
+	format: ObjectColorFormat,
 	alphaOverride?: boolean,
 ): Record<string, null | number> | undefined {
-	if (format.type !== 'object') {
-		console.warn(`Invalid format type: ${format.type}`)
-		return undefined
-	}
-
 	if (colorObjectKeys.every((keys) => keys.spaceId !== format.space)) {
 		console.warn(`Invalid color space for object conversion: ${format.space}`)
 		return undefined
 	}
 
-	// TODO proper type guard
-	const objectFormat = format.format as ObjectFormat
+	const objectFormat = format.format
 
 	const result: Record<string, null | number> = {}
 
@@ -354,7 +353,7 @@ export function colorToObject(
 
 export function colorToObjectString(
 	color: ColorPlusObject,
-	format: ColorFormat,
+	format: ObjectColorFormat,
 	alphaOverride?: boolean,
 ): string | undefined {
 	const object = colorToObject(color, format, alphaOverride)
@@ -363,7 +362,7 @@ export function colorToObjectString(
 		return undefined
 	}
 
-	const precision = (format.format as ObjectFormat).colorType === 'int' ? 0 : 3
+	const precision = format.format.colorType === 'int' ? 0 : 3
 	const precisionAlpha = 3
 	return stringifyObject(object, precision, precisionAlpha)
 }

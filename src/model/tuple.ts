@@ -1,4 +1,4 @@
-import type { ColorFormat, ColorPlusObject, ColorType, TupleFormat } from './shared'
+import type { ColorFormat, ColorPlusObject, ColorType, TupleColorFormat } from './shared'
 import { convert, formatNumber } from './shared'
 
 export type ColorTupleRgb = [null | number, null | number, null | number]
@@ -84,15 +84,10 @@ export function tupleToColor(
  */
 export function colorToTuple(
 	color: ColorPlusObject,
-	format: ColorFormat,
+	format: TupleColorFormat,
 	alphaOverride?: boolean,
-): ColorTupleRgb | ColorTupleRgba | undefined {
-	if (format.type !== 'tuple') {
-		console.warn(`Invalid format type: ${format.type}`)
-		return undefined
-	}
-
-	const { colorType } = format.format as TupleFormat
+): ColorTupleRgb | ColorTupleRgba {
+	const { colorType } = format.format
 	const convertedColor = convert(color, format.space) ?? color
 
 	const result = [
@@ -119,16 +114,11 @@ export function colorToTuple(
  */
 export function colorToTupleString(
 	color: ColorPlusObject,
-	format: ColorFormat,
+	format: TupleColorFormat,
 	alphaOverride?: boolean,
-): string | undefined {
+): string {
 	const tuple = colorToTuple(color, format, alphaOverride)
-
-	if (tuple === undefined) {
-		return undefined
-	}
-
-	const precision = (format.format as TupleFormat).colorType === 'int' ? 0 : 3
+	const precision = format.format.colorType === 'int' ? 0 : 3
 	const precisionAlpha = 3
 
 	return stringifyTuple(tuple, precision, precisionAlpha)
