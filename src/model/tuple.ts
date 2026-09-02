@@ -90,16 +90,15 @@ export function colorToTuple(
 	const { colorType } = format.format
 	const convertedColor = convert(color, format.space) ?? color
 
+	// Int channels are written as whole numbers, as the readme promises and the
+	// text field already displays; float channels keep the model's precision
+	const toChannel = (coord: null | number): null | number =>
+		coord === null ? null : colorType === 'int' ? Math.round(coord * 255) : coord
+
 	const result = [
-		convertedColor.coords[0] === null
-			? null
-			: convertedColor.coords[0] * (colorType === 'int' ? 255 : 1),
-		convertedColor.coords[1] === null
-			? null
-			: convertedColor.coords[1] * (colorType === 'int' ? 255 : 1),
-		convertedColor.coords[2] === null
-			? null
-			: convertedColor.coords[2] * (colorType === 'int' ? 255 : 1),
+		toChannel(convertedColor.coords[0]),
+		toChannel(convertedColor.coords[1]),
+		toChannel(convertedColor.coords[2]),
 	]
 
 	if (alphaOverride ?? format.alpha) {

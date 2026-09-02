@@ -325,7 +325,9 @@ export function colorToObject(
 
 	const convertedColor = convert(color, format.space) ?? color
 
-	// Map between float and int if needed
+	// Map between float and int if needed. Int channels are written as whole
+	// numbers, as the readme promises and the text field already displays;
+	// float channels keep the model's precision
 	for (const [index, value] of convertedColor.coords.entries()) {
 		const coordKey = objectFormat.coordKeys[index]
 		if (value === null || coordKey === undefined) {
@@ -336,11 +338,13 @@ export function colorToObject(
 
 		if (format.space === 'srgb') {
 			result[coordKey] =
-				objectFormat.colorType === 'int' ? mapRange(value, colorJsLow, colorJsHigh, 0, 255) : value
+				objectFormat.colorType === 'int'
+					? Math.round(mapRange(value, colorJsLow, colorJsHigh, 0, 255))
+					: value
 		} else if (objectFormat.colorType === 'float') {
 			result[coordKey] = mapRange(value, colorJsLow, colorJsHigh, 0, 1)
 		} else {
-			result[coordKey] = value
+			result[coordKey] = Math.round(value)
 		}
 	}
 

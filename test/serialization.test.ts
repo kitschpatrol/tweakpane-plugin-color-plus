@@ -125,6 +125,49 @@ it('round-trips every channel and alpha byte through numbers', () => {
 	}
 })
 
+it('writes int object and tuple channels as whole numbers', () => {
+	// A picker edit leaves the model on fractional channels; alpha is untouched
+	const edited = ColorPlus.create('rgb(254.76 0.4 101.82 / 0.4980392)')!
+
+	const objectFormat = ColorPlus.getFormat({ r: 255, g: 0, b: 102, a: 0.5 })!
+	expect(edited.toValue(objectFormat)).toEqual({ r: 255, g: 0, b: 102, a: 0.4980392 })
+
+	const tupleFormat = ColorPlus.getFormat([255, 0, 102, 0.5])!
+	expect(edited.toValue(tupleFormat)).toEqual([255, 0, 102, 0.4980392])
+
+	// Native-unit spaces round too, matching the text-field display
+	const hslFormat = ColorPlus.getFormat({ h: 336, s: 100, l: 50 })!
+	expect(ColorPlus.create('hsl(335.6 99.7% 50.2%)')!.toValue(hslFormat)).toEqual({
+		h: 336,
+		s: 100,
+		l: 50,
+	})
+
+	// Out-of-range channels round but aren't clamped, like the string formats
+	expect(ColorPlus.create('rgb(300 -1.4 102)')!.toValue(objectFormat)).toEqual({
+		r: 300,
+		g: -1,
+		b: 102,
+		a: 1,
+	})
+})
+
+it('keeps float object and tuple channels exact', () => {
+	const edited = ColorPlus.create('rgb(254.76 0.4 101.82)')!
+
+	const objectFormat = ColorPlus.getFormat({ r: 1, g: 0, b: 0.4 }, undefined, 'float')!
+	const object = edited.toValue(objectFormat) as Record<string, number>
+	expect(object.r).toBeCloseTo(254.76 / 255, 12)
+	expect(object.g).toBeCloseTo(0.4 / 255, 12)
+	expect(object.b).toBeCloseTo(101.82 / 255, 12)
+
+	const tupleFormat = ColorPlus.getFormat([1, 0, 0.4], undefined, 'float')!
+	const tuple = edited.toValue(tupleFormat) as number[]
+	expect(tuple[0]).toBeCloseTo(254.76 / 255, 12)
+	expect(tuple[1]).toBeCloseTo(0.4 / 255, 12)
+	expect(tuple[2]).toBeCloseTo(101.82 / 255, 12)
+})
+
 it('gamut-maps out-of-gamut colors when serializing to hex', () => {
 	// Hex can't express out-of-range channels, so colorjs's hex format maps
 	// regardless of the serializer's inGamut option
