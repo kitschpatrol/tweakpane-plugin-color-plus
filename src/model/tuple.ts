@@ -1,5 +1,5 @@
 import type { ColorFormat, ColorPlusObject, ColorType, TupleColorFormat } from './shared'
-import { convert, formatNumber } from './shared'
+import { convert, formatNumber, roundToWhole } from './shared'
 
 export type ColorTupleRgb = [null | number, null | number, null | number]
 export type ColorTupleRgba = [null | number, null | number, null | number, number]
@@ -93,7 +93,7 @@ export function colorToTuple(
 	// Int channels are written as whole numbers, as the readme promises and the
 	// text field already displays; float channels keep the model's precision
 	const toChannel = (coord: null | number): null | number =>
-		coord === null ? null : colorType === 'int' ? Math.round(coord * 255) : coord
+		coord === null ? null : colorType === 'int' ? roundToWhole(coord * 255) : coord
 
 	const result = [
 		toChannel(convertedColor.coords[0]),

@@ -111,3 +111,21 @@ it('writes number colors back to the bound property', () => {
 
 	expect(holder.color).toBe(0x00_80_ff)
 })
+
+/* eslint-disable ts/naming-convention, perfectionist/sort-objects -- The keys' spelling is the point */
+it('writes object colors back to the bound object own key spelling', () => {
+	const externalValue = { R: 255, G: 0, B: 102, A: 0.5 }
+	const holder: Record<string, unknown> = { color: externalValue }
+	const { target, writer } = createWriter(holder)
+
+	writer(target, createInternalColor('rgb(0 128 255 / 0.25)'))
+
+	expect(holder.color).toBe(externalValue)
+	expect(externalValue).toEqual({ R: 0, G: 128, B: 255, A: 0.25 })
+
+	const mixed: Record<string, unknown> = { color: { Red: 255, green: 0, BLUE: 102 } }
+	const mixedWriter = createWriter(mixed)
+	mixedWriter.writer(mixedWriter.target, createInternalColor('#0080ff'))
+	expect(mixed.color).toEqual({ Red: 0, green: 128, BLUE: 255 })
+})
+/* eslint-enable ts/naming-convention, perfectionist/sort-objects */

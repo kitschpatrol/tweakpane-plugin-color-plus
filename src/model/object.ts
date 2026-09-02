@@ -7,7 +7,7 @@ import type {
 	ObjectColorFormat,
 	ObjectFormat,
 } from './shared'
-import { convert, formatNumber, getRangeForChannel } from './shared'
+import { convert, formatNumber, getRangeForChannel, roundToWhole } from './shared'
 
 /**
  * Interpret object keys graciously... allow for mixes of long and short
@@ -230,11 +230,14 @@ export function objectToColor(
 		return undefined
 	}
 
+	// Keys match case-insensitively, but the format keeps the object's own
+	// spelling so writes land on the keys that are actually there
+	const ownKeys = new Map(Object.keys(objectValue).map((key) => [key.toLowerCase(), key]))
 	const lowerCaseValue = Object.fromEntries(
 		Object.entries(objectValue).map(([k, v]) => [k.toLowerCase(), v]),
 	)
 
-	const inputKeys = new Set(Object.keys(lowerCaseValue).map((k) => k.toLowerCase()))
+	const inputKeys = new Set(ownKeys.keys())
 
 	for (const objectKeys of colorObjectKeys) {
 		const { channels, spaceId } = objectKeys
@@ -275,7 +278,7 @@ export function objectToColor(
 				if (matchingKey !== undefined) {
 					const channelValue = lowerCaseValue[matchingKey.toLowerCase()]!
 
-					objectFormat.coordKeys[index] = matchingKey
+					objectFormat.coordKeys[index] = ownKeys.get(matchingKey.toLowerCase())!
 					result.coords[index] = channelValue
 				}
 			}
@@ -286,7 +289,7 @@ export function objectToColor(
 
 				if (alphaKey !== undefined) {
 					// Alpha value provided
-					objectFormat.alphaKey = alphaKey
+					objectFormat.alphaKey = ownKeys.get(alphaKey.toLowerCase())!
 					result.alpha = lowerCaseValue[alphaKey.toLowerCase()]!
 				}
 			}
@@ -345,12 +348,12 @@ export function colorToObject(
 		if (format.space === 'srgb') {
 			result[coordKey] =
 				objectFormat.colorType === 'int'
-					? Math.round(mapRange(value, colorJsLow, colorJsHigh, 0, 255))
+					? roundToWhole(mapRange(value, colorJsLow, colorJsHigh, 0, 255))
 					: value
 		} else if (objectFormat.colorType === 'float') {
 			result[coordKey] = mapRange(value, colorJsLow, colorJsHigh, 0, 1)
 		} else {
-			result[coordKey] = Math.round(value)
+			result[coordKey] = roundToWhole(value)
 		}
 	}
 

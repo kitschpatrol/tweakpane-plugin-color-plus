@@ -350,6 +350,15 @@ export function toDecimalPrecision(n: number, decimalPrecision: number | undefin
 	return Math.round(n * multiplier) / multiplier
 }
 
+/**
+ * Round to a whole number for the int object and tuple formats. Adding zero
+ * turns the -0 that a channel which round-trips slightly negative would
+ * otherwise produce into a plain 0, so the user's value never holds -0.
+ */
+export function roundToWhole(value: number): number {
+	return Math.round(value) + 0
+}
+
 export function formatNumber(value: number, digits: number | undefined): string {
 	if (digits === undefined) {
 		return value.toString()
