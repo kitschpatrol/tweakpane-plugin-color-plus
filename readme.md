@@ -4,7 +4,7 @@
 
 <!-- /title -->
 
-<img alt="Svelte Tweakpane UI Banner" src="./assets/banner.webp">
+<img alt="Tweakpane Plugin Color Plus Banner" src="./assets/banner.webp">
 
 <!-- badges -->
 
@@ -50,8 +50,12 @@ npm install tweakpane-plugin-color-plus
 
 #### CDN
 
+The package is published as an ES module, so import it from a module script (see the [complete example](#from-cdn) below):
+
 ```html
-<script src="https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus"></script>
+<script type="module">
+  import * as TweakpanePluginColorPlus from 'https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus'
+</script>
 ```
 
 ### Usage
@@ -291,7 +295,7 @@ The Color Plus plugin supports a wide range of parameter values formats beyond t
 
 #### String formats
 
-Hexadecimal strings values with or without alpha components are supported:
+Hexadecimal string values with or without alpha components are supported:
 
 ```ts
 const hexStrings = {
@@ -334,7 +338,7 @@ The Color Plus plugin should "just work" with a range of color object keys, incl
 
 The plugin will infer the desired representation from the keys.
 
-Float values are supported via the `type: 'float'` binding parameter:
+Float values are supported via the `color: { type: 'float' }` binding option (see [`color.type`](#colortype)):
 
 ```ts
 const objects = {
@@ -357,9 +361,9 @@ const objects = {
 
 Tuple color representations can be useful for interoperability with libraries like [three.js](https://threejs.org/).
 
-Numeric tuple / array values with or without alpha components are supported. Alpha values must be between 0.0 and 1.0:
+Numeric tuple / array values with or without alpha components are supported. Alpha values must be between 0.0 and 1.0.
 
-Float values are supported via the `type: 'float'` binding parameter:
+Float values are supported via the `color: { type: 'float' }` binding option (see [`color.type`](#colortype)):
 
 ```ts
 const tuples = {
