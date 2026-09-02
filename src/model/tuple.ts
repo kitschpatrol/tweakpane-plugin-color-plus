@@ -12,7 +12,6 @@ function isColorTuple(value: unknown): value is ColorTupleRgb | ColorTupleRgba {
 
 	// Check length is either 3 (RGB) or 4 (RGBA)
 	if (value.length !== 3 && value.length !== 4) {
-		console.warn(`Invalid tuple length: ${value.length}`)
 		return false
 	}
 
@@ -54,7 +53,6 @@ export function tupleToColor(
 
 	// Ensure all values are numbers or null...
 	if (!isColorTuple(tupleValue)) {
-		console.warn('Invalid tuple values')
 		return undefined
 	}
 

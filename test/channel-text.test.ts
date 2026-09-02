@@ -1,13 +1,8 @@
-import { afterEach, expect, it, vi } from 'vitest'
+import { expect, it } from 'vitest'
 import type { ChannelTextConfig, ColorTextConfig } from '../src/controller/color-texts.js'
 import { channelValue, parseColorText, withChannelValue } from '../src/controller/color-texts.js'
 import { ColorPlus } from '../src/model/color-plus.js'
 import { maxChroma } from '../src/model/gamut.js'
-import { spyOnWarnings } from './helpers.js'
-
-afterEach(() => {
-	vi.restoreAllMocks()
-})
 
 const hex = { alpha: false, format: 'hex', space: 'srgb', type: 'string' } as const
 
@@ -125,7 +120,6 @@ it('parses hex field text into OKLCH', () => {
 })
 
 it('rejects hex field text that is not a color', () => {
-	spyOnWarnings()
 	expect(parseColorText('bogus', textConfig, 1)).toBeNull()
 })
 

@@ -57,7 +57,6 @@ export class ColorPlus {
 		const parsed = parseColorAndFormat(value, hasAlpha, colorType)
 
 		if (parsed === undefined) {
-			console.warn('Could not parse color')
 			return undefined
 		}
 

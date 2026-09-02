@@ -328,7 +328,6 @@ it('parses object-like strings graciously', () => {
 })
 
 it('rejects malformed object-like strings', () => {
-	spyOnWarnings()
 	// Missing channel, unparsable value, odd token count
 	expect(ColorPlus.create('{r: 255, g: 0}')).toBeUndefined()
 	expect(ColorPlus.create('{r: 255, g: 0, b: foo}')).toBeUndefined()
@@ -357,7 +356,6 @@ it('matches object keys case-insensitively and by alias', () => {
 })
 
 it('rejects objects with unknown, missing, or non-numeric channels', () => {
-	spyOnWarnings()
 	expect(ColorPlus.create({ b: 102, g: 0, r: 255, x: 1 })).toBeUndefined()
 	expect(ColorPlus.create({ r: 255, g: 0 })).toBeUndefined()
 	expect(ColorPlus.create({ r: '255', g: 0, b: 102 })).toBeUndefined()
@@ -380,7 +378,6 @@ it('parses tuple-like strings', () => {
 })
 
 it('rejects tuples of the wrong length or element type', () => {
-	spyOnWarnings()
 	expect(ColorPlus.create([255, 0])).toBeUndefined()
 	expect(ColorPlus.create([255, 0, 102, 1, 1])).toBeUndefined()
 	expect(ColorPlus.create(['255', 0, 102])).toBeUndefined()
@@ -389,10 +386,13 @@ it('rejects tuples of the wrong length or element type', () => {
 	expect(ColorPlus.create('[255, 0')).toBeUndefined()
 })
 
-it('rejects values that are not colors at all', () => {
-	spyOnWarnings()
-	for (const value of [null, undefined, true, () => 1, '']) {
+it('rejects values that are not colors at all, quietly', () => {
+	// A typo in a text field is routine, so the model doesn't warn about it
+	const warn = spyOnWarnings()
+	for (const value of [null, undefined, true, () => 1, '', 'bogus', [255, 0], { r: 255 }]) {
 		expect(ColorPlus.create(value)).toBeUndefined()
 		expect(ColorPlus.getFormat(value)).toBeUndefined()
 	}
+
+	expect(warn).not.toHaveBeenCalled()
 })

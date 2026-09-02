@@ -347,9 +347,10 @@ it('parses typed text into OKLCH, dropping alpha the format cannot carry', () =>
 	).toBe(0.5)
 })
 
-it('rejects typed text it cannot parse', () => {
-	spyOnWarnings()
+it('rejects typed text it cannot parse, quietly', () => {
+	const warn = spyOnWarnings()
 	expect(createControllerConfig('#ff0066').config.parser('bogus')).toBeNull()
+	expect(warn).not.toHaveBeenCalled()
 })
 
 it('constrains typed colors into the configured gamuts unless disabled', () => {
