@@ -147,10 +147,12 @@ export type TupleFormat = {
 	colorType: ColorType
 }
 
-// TODO export?
-// Nothing for now, but important to distinguish from non-object format strings
-// eslint-disable-next-line ts/no-empty-object-type
-type NumberFormat = {}
+/**
+ * Number formats carry no metadata of their own, but a distinct empty type
+ * keeps them apart from the string formats used for internal one-offs. Not
+ * exported: nothing outside this module names it.
+ */
+type NumberFormat = Record<string, never>
 
 /**
  * Original format and alpha state inferred from the user-provided value

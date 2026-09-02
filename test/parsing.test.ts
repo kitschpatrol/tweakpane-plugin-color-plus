@@ -289,13 +289,17 @@ it('parses named function colors correctly', () => {
 })
 
 it('parses legacy hsl values correctly', () => {
-	// TODO tests for 0x-prefixed strings
 	const tests = [
-		// TODO tests for legacy hsl values
 		['hsl(180 24 25)', 'ColorPlus(hsl, [180,24,25], 1)'],
 		['hsl(180, 24, 25)', 'ColorPlus(hsl, [180,24,25], 1)'],
 		['hsla(180, 24, 25, 0.5)', 'ColorPlus(hsl, [180,24,25], 0.5)'],
 		['hsla(180 24 25 / 0.5)', 'ColorPlus(hsl, [180,24,25], 0.5)'],
+		// Mixed units: only unitless saturation and lightness gain a percent sign
+		['hsl(180deg 24 25)', 'ColorPlus(hsl, [180,24,25], 1)'],
+		['hsl(0.5turn 24 25)', 'ColorPlus(hsl, [180,24,25], 1)'],
+		['hsl(180 24% 25)', 'ColorPlus(hsl, [180,24,25], 1)'],
+		['hsl(180 24 25 / 50%)', 'ColorPlus(hsl, [180,24,25], 0.5)'],
+		['hsl(-180, 24.5, 25.5)', 'ColorPlus(hsl, [-180,24.5,25.5], 1)'],
 	]
 
 	for (const [input, expected] of tests) {

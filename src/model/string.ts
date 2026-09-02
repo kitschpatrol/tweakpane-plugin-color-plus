@@ -176,13 +176,6 @@ function toDecimalPrecisionForFormat(
 		)
 	}
 
-	// TODO
-	// Alpha always needs to be rounded
-	// console.log(stringFormat.alphaType);
-	// if (stringFormat.alphaType == undefined) {
-	// newColor.alpha = toDecimalPrecision(newColor.alpha, 2);
-	// // }
-
 	return newColor
 }
 
