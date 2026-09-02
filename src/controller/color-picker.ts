@@ -13,7 +13,7 @@ import type { ColorPlus } from '../model/color-plus.js'
 import type { ColorType } from '../model/shared.js'
 import type { ColorTextsMode } from '../view/color-texts.js'
 import type { GamutLines } from '../view/plane-palette.js'
-import { createKeywordDisplayValue } from '../utilities.js'
+import { createKeywordDisplayValue, withAlpha } from '../utilities.js'
 import { ColorPickerView } from '../view/color-picker.js'
 import { APaletteController } from './a-palette.js'
 import { ChannelSliderController } from './channel-slider.js'
@@ -96,10 +96,7 @@ export class ColorPickerController implements ValueController<ColorPlus, ColorPi
 			: undefined
 		if (this.alphaIcs) {
 			connectValues({
-				backward(p, s) {
-					p.alpha = s
-					return p.clone()
-				},
+				backward: (p, s) => withAlpha(p, s),
 				forward: (p) => p.alpha,
 				primary: this.value,
 				secondary: this.alphaIcs.text.value,

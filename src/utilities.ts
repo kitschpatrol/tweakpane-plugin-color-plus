@@ -113,6 +113,19 @@ export function snapToNearestKeyword(color: ColorPlus): ColorPlus {
 }
 
 /**
+ * A copy of the color with its alpha replaced. The picker's alpha text field
+ * hands this back as the primary value's next value, and it has to be a fresh
+ * instance: Tweakpane compares the previous and next values before emitting a
+ * change, so setting alpha on the held value in place would make the two
+ * compare equal and silence the event (no write-back, no swatch update).
+ */
+export function withAlpha(color: ColorPlus, alpha: number): ColorPlus {
+	const copy = color.clone()
+	copy.alpha = alpha
+	return copy
+}
+
+/**
  * A display-side mirror of a color value for quantized named-color bindings:
  * reads snap to the nearest CSS named color in real time (so the swatch and
  * text fields always show the keyword the bound value will receive), while
