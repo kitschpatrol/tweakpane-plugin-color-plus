@@ -116,6 +116,8 @@ export class ColorPickerController implements ValueController<ColorPlus, ColorPi
 		this.textsC = config.textFields
 			? new ColorTextsController(doc, {
 					colorType: config.colorType,
+					constrain: config.constrain,
+					gamuts: config.gamuts,
 					supportsAlpha: config.supportsAlpha,
 					textsMode: config.textsMode,
 					value: textsValue,

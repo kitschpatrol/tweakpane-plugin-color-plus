@@ -22,17 +22,38 @@ import { ColorPlus } from '../model/color-plus.js'
 import { CHROMA_CEILING } from '../model/gamut.js'
 import { denormalizeCoord, getRangeForChannel, normalizeCoord } from '../model/shared.js'
 import { connectValues } from '../model/value-sync.js'
+import { clampColorToGamut } from '../utilities.js'
 import { ColorTextsView } from '../view/color-texts.js'
 
 type Config = {
 	colorType: ColorType
+	constrain: boolean
+	gamuts: string[]
 	supportsAlpha: boolean
 	textsMode: ColorTextsMode
 	value: Value<ColorPlus>
 	viewProps: ViewProps
 }
 
+/** A texts drop-down mode with per-channel number fields (everything but hex). */
 type ColorMode = 'hsl' | 'hsv' | 'okhsv' | 'oklch' | 'srgb'
+
+/** How the per-channel number fields read and write the color. */
+export type ChannelTextConfig = {
+	colorMode: ColorMode
+	colorType: ColorType
+	// Pull typed values into the widest configured gamut, like the main text
+	// field does (see the plugin's constrain option)
+	constrain: boolean
+	gamuts: string[]
+}
+
+/** What the hex field needs to turn typed text into a color. */
+export type ColorTextConfig = {
+	constrain: boolean
+	gamuts: string[]
+	supportsAlpha: boolean
+}
 
 /**
  * The OK modes show raw colorjs coordinates: the int/float `colorType` only
@@ -44,6 +65,101 @@ function isOkMode(mode: ColorMode): boolean {
 
 function isHueChannel(mode: ColorMode, index: number): boolean {
 	return (mode === 'oklch' && index === 2) || (mode === 'okhsv' && index === 0)
+}
+
+/**
+ * The number shown in channel `index`'s text field for the color: a raw colorjs
+ * coordinate in the OK modes, otherwise scaled to the int (0–255 for sRGB) or
+ * float (0–1) convention.
+ */
+export function channelValue(color: ColorPlus, config: ChannelTextConfig, index: number): number {
+	const { colorMode, colorType } = config
+	let rawValue = color.getAll(colorMode)[index] ?? 0
+
+	// Edge case to prevent wrapping 360 to 0 in HSL
+	// eslint-disable-next-line ts/no-unnecessary-condition
+	if (index === 0 && colorMode === 'hsl' && (color.get('h', 'hsv') ?? 0) === 360) {
+		rawValue = 360
+	}
+
+	if (isOkMode(colorMode)) {
+		return rawValue
+	}
+
+	return colorType === 'float'
+		? (normalizeCoord(colorMode, index, rawValue) ?? 0)
+		: rawValue * (colorMode === 'srgb' ? 255 : 1)
+}
+
+/**
+ * A copy of the color with channel `index` set from its text field's number,
+ * the inverse of `channelValue`. With constraining on, the result is pulled
+ * into the widest configured gamut, so a typed channel can't push the color out
+ * of gamut any more than the main text field can.
+ */
+export function withChannelValue(
+	color: ColorPlus,
+	config: ChannelTextConfig,
+	index: number,
+	value: number,
+): ColorPlus {
+	const { colorMode, colorType } = config
+	const next = color.clone()
+	const comps = next.getAll(colorMode)
+	comps[index] = isOkMode(colorMode)
+		? value
+		: colorType === 'float'
+			? denormalizeCoord(colorMode, index, value)
+			: value / (colorMode === 'srgb' ? 255 : 1)
+	next.setAll(comps, colorMode)
+
+	// Edge case to prevent wrapping 360 to 0 in HSL
+	if (
+		index === 0 &&
+		colorMode === 'hsl' &&
+		((value === 360 && colorType === 'int') || (value === 1 && colorType === 'float'))
+	) {
+		next.set('h', 360)
+	}
+
+	if (config.constrain) {
+		clampColorToGamut(next, config.gamuts)
+	}
+
+	return next
+}
+
+/**
+ * Parse the hex field's text (any color string the plugin understands) into the
+ * working OKLCH representation, constrained into the widest configured gamut
+ * when asked. Typed text only carries alpha when it spells one out
+ * (`#rrggbbaa`, `rgb(… / 0.5)`) and the binding supports alpha; otherwise the
+ * color's current alpha is kept rather than reset to opaque.
+ *
+ * @returns Null when the text isn't a color.
+ */
+export function parseColorText(
+	text: string,
+	config: ColorTextConfig,
+	currentAlpha: number,
+): ColorPlus | null {
+	const parsedColor = ColorPlus.create(text)
+	if (parsedColor === undefined) {
+		return null
+	}
+
+	parsedColor.convert('oklch')
+
+	if (config.constrain) {
+		clampColorToGamut(parsedColor, config.gamuts)
+	}
+
+	const isAlphaInText = ColorPlus.getFormat(text)?.alpha ?? false
+	if (!isAlphaInText || !config.supportsAlpha) {
+		parsedColor.alpha = currentAlpha
+	}
+
+	return parsedColor
 }
 
 function createFormatter(mode: ColorMode, type: ColorType, index: number): Formatter<number> {
@@ -118,15 +234,14 @@ function createComponentController(
 function createComponentControllers(
 	doc: Document,
 	config: {
-		colorMode: ColorMode
-		colorType: ColorType
+		channel: ChannelTextConfig
 		value: Value<ColorPlus>
 		viewProps: ViewProps
 	},
 ): ComponentControllerSet {
 	const cc = {
-		colorMode: config.colorMode,
-		colorType: config.colorType,
+		colorMode: config.channel.colorMode,
+		colorType: config.channel.colorType,
 		parser: parseNumber,
 		viewProps: config.viewProps,
 	}
@@ -135,48 +250,9 @@ function createComponentControllers(
 		const c = createComponentController(doc, cc, i)
 		const disconnect = connectValues({
 			// Number in text field to ColorPlus model
-			backward(p, s) {
-				const newColor = p.clone()
-				const comps = newColor.getAll(config.colorMode)
-
-				// eslint-disable-next-line ts/no-unnecessary-condition
-				const typed = s ?? 0
-				comps[i] = isOkMode(config.colorMode)
-					? typed
-					: config.colorType === 'float'
-						? denormalizeCoord(config.colorMode, i, typed)
-						: typed / (config.colorMode === 'srgb' ? 255 : 1)
-				newColor.setAll(comps, config.colorMode)
-
-				// Edge case to prevent wrapping 360 to 0 in HSL
-				if (
-					i === 0 &&
-					config.colorMode === 'hsl' &&
-					((s === 360 && config.colorType === 'int') || (s === 1 && config.colorType === 'float'))
-				) {
-					newColor.set('h', 360)
-				}
-
-				return newColor
-			},
+			backward: (p, s) => withChannelValue(p, config.channel, i, s),
 			// ColorPlus model to number in text field
-			forward(p) {
-				let rawValue = p.getAll(config.colorMode)[i] ?? 0
-
-				// Edge case to prevent wrapping 360 to 0 in HSL
-				// eslint-disable-next-line ts/no-unnecessary-condition
-				if (i === 0 && config.colorMode === 'hsl' && (p.get('h', 'hsv') ?? 0) === 360) {
-					rawValue = 360
-				}
-
-				if (isOkMode(config.colorMode)) {
-					return rawValue
-				}
-
-				return config.colorType === 'float'
-					? (normalizeCoord(config.colorMode, i, rawValue) ?? 0)
-					: rawValue * (config.colorMode === 'srgb' ? 255 : 1)
-			},
+			forward: (p) => channelValue(p, config.channel, i),
 			primary: config.value,
 			// Like the 'view'
 			secondary: c.value,
@@ -197,35 +273,18 @@ function createComponentControllers(
 function createHexController(
 	doc: Document,
 	config: {
-		supportsAlpha: boolean
+		text: ColorTextConfig
 		value: Value<ColorPlus>
 		viewProps: ViewProps
 	},
 ) {
 	const c = new TextController<ColorPlus>(doc, {
 		// Text to color
-		parser(text: string) {
-			const parsedColor = ColorPlus.create(text)
-			if (parsedColor === undefined) {
-				return null
-			}
-
-			parsedColor.convert('oklch')
-
-			// A typed hex only carries alpha when it has alpha digits (#rgba or
-			// #rrggbbaa) and the binding supports alpha; otherwise keep the
-			// color's current alpha rather than resetting it to opaque.
-			const isAlphaInText = ColorPlus.getFormat(text)?.alpha ?? false
-			if (!isAlphaInText || !config.supportsAlpha) {
-				parsedColor.alpha = config.value.rawValue.alpha
-			}
-
-			return parsedColor
-		},
+		parser: (text: string) => parseColorText(text, config.text, config.value.rawValue.alpha),
 		props: ValueMap.fromObject({
 			formatter(value: ColorPlus): string {
 				const serialized = value.serialize({
-					alpha: config.supportsAlpha,
+					alpha: config.text.supportsAlpha,
 					format: 'hex',
 					space: 'srgb',
 					type: 'string',
@@ -272,13 +331,17 @@ export class ColorTextsController implements ValueController<ColorPlus, ColorTex
 	public readonly viewProps: ViewProps
 	private ccs: ComponentValueController[]
 	private readonly colorType: ColorType
+	private readonly constrain: boolean
 	private disconnectCcs: () => void
+	private readonly gamuts: string[]
 	private readonly supportsAlpha: boolean
 
 	constructor(doc: Document, config: Config) {
 		this.onModeSelectChange = this.onModeSelectChange.bind(this)
 
 		this.colorType = config.colorType
+		this.constrain = config.constrain
+		this.gamuts = config.gamuts
 		this.supportsAlpha = config.supportsAlpha
 		this.value = config.value
 		this.viewProps = config.viewProps
@@ -305,15 +368,23 @@ export class ColorTextsController implements ValueController<ColorPlus, ColorTex
 		const mode = this.colorMode.rawValue
 		if (isColorMode(mode)) {
 			return createComponentControllers(doc, {
-				colorMode: mode,
-				colorType: this.colorType,
+				channel: {
+					colorMode: mode,
+					colorType: this.colorType,
+					constrain: this.constrain,
+					gamuts: this.gamuts,
+				},
 				value: this.value,
 				viewProps: this.viewProps,
 			})
 		}
 
 		return createHexController(doc, {
-			supportsAlpha: this.supportsAlpha,
+			text: {
+				constrain: this.constrain,
+				gamuts: this.gamuts,
+				supportsAlpha: this.supportsAlpha,
+			},
 			value: this.value,
 			viewProps: this.viewProps,
 		})
