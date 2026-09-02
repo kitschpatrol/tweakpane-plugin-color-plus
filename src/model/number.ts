@@ -1,4 +1,5 @@
 /* eslint-disable no-bitwise */
+import { constrainRange } from '@tweakpane/core'
 import type { ColorFormat, ColorPlusObject, NumberColorFormat } from './shared'
 import { convert } from './shared'
 
@@ -47,6 +48,20 @@ export function numberToColor(
 	}
 }
 
+/**
+ * Maps a 0-1 channel to a byte. Clamped first, since an out-of-gamut channel
+ * would otherwise bleed into its neighbors through the bit shifts in
+ * colorToNumber. Rounded rather than floored as in Tweakpane's built-in number
+ * input, so a sub-step edit writes back the original byte instead of dropping
+ * to the one below.
+ */
+function toByte(unit: null | number): number {
+	return Math.round(constrainRange(unit ?? 0, 0, 1) * 255)
+}
+
+/**
+ * Packs a color into a number, the inverse of numberToColor
+ */
 export function colorToNumber(
 	color: ColorPlusObject,
 	format: NumberColorFormat,
@@ -55,20 +70,16 @@ export function colorToNumber(
 	// Always SRGB
 	const converted = convert(color, 'srgb') ?? color
 
-	const [r, g, b] = converted.coords
-
-	// Convert from 0-1 range to 0-255 range and round to integers
-	const ri = Math.round((r ?? 0) * 255)
-	const gi = Math.round((g ?? 0) * 255)
-	const bi = Math.round((b ?? 0) * 255)
+	const r = toByte(converted.coords[0])
+	const g = toByte(converted.coords[1])
+	const b = toByte(converted.coords[2])
 
 	const includeAlpha = alphaOverride ?? format.alpha
 	if (includeAlpha) {
-		const a = Math.round(converted.alpha * 255)
-		return ((ri << 24) | (gi << 16) | (bi << 8) | a) >>> 0
+		return ((r << 24) | (g << 16) | (b << 8) | toByte(converted.alpha)) >>> 0
 	}
 
-	return ((ri << 16) | (gi << 8) | bi) >>> 0
+	return ((r << 16) | (g << 8) | b) >>> 0
 }
 
 export function colorToNumberString(

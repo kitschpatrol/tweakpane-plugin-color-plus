@@ -104,6 +104,27 @@ it('round-trips number colors with leading zero bytes', () => {
 	}
 })
 
+it('clamps out-of-range channels when packing numbers', () => {
+	// Slightly outside sRGB, as after an edit with constrain off. Without
+	// clamping, the negative green bleeds into the other bytes
+	const format = ColorPlus.getFormat(0xff_00_66)!
+	expect(ColorPlus.create('rgb(254.76 -0.96 101.82)')!.toValue(format)).toBe(0xff_00_66)
+	expect(ColorPlus.create('rgb(300 0 0)')!.toValue(format)).toBe(0xff_00_00)
+	expect(ColorPlus.create('rgb(0 -50 0)')!.toValue(format)).toBe(0x00_00_00)
+
+	const alphaFormat = ColorPlus.getFormat(0xff_00_66_7f, true)!
+	expect(ColorPlus.create('rgb(300 -1 102 / 0.5)')!.toValue(alphaFormat)).toBe(0xff_00_66_80)
+})
+
+it('round-trips every channel and alpha byte through numbers', () => {
+	const format = ColorPlus.getFormat(0, true)!
+	for (let byte = 0; byte < 256; byte++) {
+		// The byte in every position: 0x01010101 * byte
+		const value = byte * 0x01_01_01_01
+		expect(ColorPlus.create(value, true)!.toValue(format)).toBe(value)
+	}
+})
+
 it('gamut-maps out-of-gamut colors when serializing to hex', () => {
 	// Hex can't express out-of-range channels, so colorjs's hex format maps
 	// regardless of the serializer's inGamut option
