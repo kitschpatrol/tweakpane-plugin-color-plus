@@ -27,6 +27,7 @@ type Config = {
 	gamuts: string[]
 	paletteChannels: PlaneLayout
 	paletteProjection: PaletteProjection
+	quantizePalette: boolean
 	supportsAlpha: boolean
 	textFields: boolean
 	textsMode: ColorTextsMode
@@ -59,6 +60,7 @@ export class ColorPickerController implements ValueController<ColorPlus, ColorPi
 			gamuts: config.gamuts,
 			paletteChannels: config.paletteChannels,
 			paletteProjection: config.paletteProjection,
+			quantizePalette: config.quantizePalette,
 			value: this.value,
 			viewProps: this.viewProps,
 		})

@@ -26,12 +26,22 @@ import {
 	XYZ_D50,
 	XYZ_D65,
 } from 'colorjs.io/fn'
+import { serializeKeyword } from './keywords.js'
 
 // Loading color spaces that are either:
 // - In the CSS 4 spec
 // - Available in CSS function() style colors
 // - Used by Tweakpane's original implementation
 /* eslint-disable unicorn/no-top-level-side-effects -- Registration must happen at import time, and it must live in this module (whose exports are in use): the package declares `sideEffects: false`, so a dedicated side-effect-only module gets tree-shaken out of the bundle */
+
+// Colorjs ships the keyword (CSS named-color) format parse-only; attaching a
+// serializer before registration makes canSerialize() truthy, so named colors
+// work as binding formats. Colorjs is bundled, so the patch can't leak into a
+// host app's own copy.
+if (sRGB.formats.keyword) {
+	sRGB.formats.keyword.serialize = serializeKeyword
+}
+
 ColorJsColorSpace.register(A98RGB) // A98-rgb
 ColorJsColorSpace.register(HSL) // Hsl(), hsla(), hsl,
 ColorJsColorSpace.register(HSV) // --hsv (Tweakpane legacy)
@@ -343,9 +353,9 @@ export function isStringFormat(format: ColorFormat['format']): format is StringF
 }
 
 /**
- * Some formats are parsable by Color.js but not serializable, e.g. keyword
- * formats like `'blue'`. We can accept these after the format is initialized,
- * but not as an initial color value.
+ * Some formats are parsable by Color.js but not serializable. (Keyword formats
+ * like `'blue'` used to be the example, but they gained a serializer above;
+ * this remains as insurance against future parse-only formats.)
  *
  * @returns True if the format is serializable
  */

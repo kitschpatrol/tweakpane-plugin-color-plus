@@ -9,6 +9,10 @@ const params: Record<string, unknown> = {
 	hexString: '#a73663',
 	hexStringAlpha: '#ff00667f',
 
+	// Named colors
+	namedColor: 'rebeccapurple',
+	namedColorTransparent: 'transparent',
+
 	// Picker config demos (color-plus only)
 	pickerStretch: '#3366ff',
 	pickerGamutsSrgbOnly: '#3366ff',
@@ -187,6 +191,8 @@ const ignoredParams = new Set([
 	'funcRgb',
 	'funcRgba',
 	'funcRgbAlpha',
+	'namedColor',
+	'namedColorTransparent',
 	'objectHsl',
 	'objectHsv',
 	'objectHwb',

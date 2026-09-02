@@ -279,7 +279,18 @@ const hexStrings = {
 
 `0x`-prefixed hex strings like `'0xff0066'` are also supported, but will be normalized to `#`-prefixed representation.
 
-You can input any CSS [`<named-color>`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/named-color) string like `rebeccapurple` in the widget's text field, but these may not currently be used as initial parameter values, and will be converted to the widget's initial representation format. (Future versions might add additional support for named colors.)
+Any CSS [`<named-color>`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/named-color) string like `rebeccapurple` works both in the widget's text field and as an initial parameter value:
+
+```ts
+const namedColors = {
+  namedColor: 'rebeccapurple',
+  namedColorTransparent: 'transparent',
+}
+```
+
+A named-color binding always writes a name back: when the current color doesn't exactly match one of the 148 named colors, the perceptually-nearest name (by distance in OKLab) is written instead, while the widget keeps full precision internally. Exact ties resolve to the first name in the CSS named-color table (`aqua` over `cyan`, `fuchsia` over `magenta`, `gray` over `grey`). To make the snapping visible, the picker plane for a named-color binding is posterized into patches of the named colors — clicking anywhere inside a patch writes that patch's name.
+
+`transparent` is supported too: a binding initialized with `transparent` gains an alpha slider, and writes `transparent` back only when alpha is exactly 0 (a translucent color writes the nearest opaque name, since names can't carry alpha).
 
 #### Number formats
 
@@ -470,8 +481,8 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 218.2 kB | 59.4 kB | 50.3 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 110 kB   | 37.4 kB | 32.5 kB |
+| tweakpane-plugin-color-plus.min.js      | 219.5 kB | 59.8 kB | 50.7 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 111.3 kB | 37.8 kB | 32.8 kB |
 
 <!-- /size-table -->
 

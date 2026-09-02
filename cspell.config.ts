@@ -12,6 +12,8 @@ export default cspellConfig({
 		'huelucinations',
 		'Ottosson',
 		'plpv',
+		'posterize',
+		'posterized',
 		'prophoto',
 		'rrggbbaa',
 	],

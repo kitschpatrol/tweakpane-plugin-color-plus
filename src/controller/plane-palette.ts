@@ -39,6 +39,7 @@ type Config = {
 	gamuts: string[]
 	paletteChannels: PlaneLayout
 	paletteProjection: PaletteProjection
+	quantizePalette: boolean
 	value: Value<ColorPlus>
 	viewProps: ViewProps
 }
@@ -71,6 +72,7 @@ export class PlanePaletteController implements ValueController<ColorPlus, PlaneP
 			gamuts: config.gamuts,
 			paletteChannels: config.paletteChannels,
 			paletteProjection: config.paletteProjection,
+			quantizePalette: config.quantizePalette,
 			value: this.value,
 			viewProps: this.viewProps,
 		})

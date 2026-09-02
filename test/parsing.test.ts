@@ -18,6 +18,25 @@ it('parses hex colors correctly', () => {
 	}
 })
 
+it('parses named colors correctly', () => {
+	const tests = [
+		['red', 'ColorPlus(srgb, [1,0,0], 1)'],
+		['RebeccaPurple', 'ColorPlus(srgb, [0.4,0.2,0.6], 1)'],
+		[' red ', 'ColorPlus(srgb, [1,0,0], 1)'],
+		['transparent', 'ColorPlus(srgb, [0,0,0], 0)'],
+	]
+
+	for (const [input, expected] of tests) {
+		expect(ColorPlus.create(input)?.toString()).toEqual(expected)
+	}
+})
+
+it('rejects invalid named colors', () => {
+	// Internal spaces and unknown names are invalid CSS, matching the browser
+	expect(ColorPlus.create('rebecca purple')).toBeUndefined()
+	expect(ColorPlus.create('bogus')).toBeUndefined()
+})
+
 it('parses number colors correctly', () => {
 	const tests = [
 		[0xff_00_66, 'ColorPlus(srgb, [1,0,0.4], 1)'],

@@ -26,6 +26,9 @@ const roundTrips: string[] = [
 	'color(srgb-linear 1 0 0.13)',
 	'color(xyz-d65 0.44 0.22 0.15)', // Plain xyz normalizes to xyz-d65
 	'color(--hsv 336 100% 100)',
+	'red',
+	'rebeccapurple',
+	'transparent',
 ]
 
 it.each(roundTrips)('round-trips %s through parse and serialize', (value) => {
@@ -39,10 +42,45 @@ it.each(roundTrips)('round-trips %s through parse and serialize', (value) => {
 	expect(serialized).toBe(value.startsWith('#f06') ? '#ff0066' : value)
 })
 
-it('reports keyword formats as unserializable', () => {
+it('reports keyword formats as serializable', () => {
 	const format = ColorPlus.getFormat('rebeccapurple')
 	expect(format).toBeDefined()
-	expect(formatIsSerializable(format!)).toBe(false)
+	expect(formatIsSerializable(format!)).toBe(true)
+})
+
+it('serializes keyword colors as lowercase names', () => {
+	const color = ColorPlus.create('RebeccaPurple')
+	const format = ColorPlus.getFormat('RebeccaPurple')
+	expect(color!.serialize(format!)).toBe('rebeccapurple')
+})
+
+it('snaps to the nearest keyword when serializing', () => {
+	const format = ColorPlus.getFormat('red')
+	// One off rebeccapurple's #663399
+	const color = ColorPlus.create('#663398')
+	expect(color!.serialize(format!)).toBe('rebeccapurple')
+})
+
+it('breaks exact keyword ties by CSS table order', () => {
+	const format = ColorPlus.getFormat('red')!
+	expect(ColorPlus.create('#00ffff')!.serialize(format)).toBe('aqua')
+	expect(ColorPlus.create('#ff00ff')!.serialize(format)).toBe('fuchsia')
+	expect(ColorPlus.create('#808080')!.serialize(format)).toBe('gray')
+})
+
+it('ignores alpha when serializing keyword formats without alpha', () => {
+	// Plain names carry no alpha, so translucency isn't representable
+	const format = ColorPlus.getFormat('red')!
+	const color = ColorPlus.create('rgb(255 0 0 / 0.5)')!
+	expect(color.serialize(format)).toBe('red')
+})
+
+it('serializes zero alpha as transparent when the format has alpha', () => {
+	const format = ColorPlus.getFormat('transparent')!
+	expect(ColorPlus.create('rgb(255 0 0 / 0)')!.serialize(format)).toBe('transparent')
+	// Only exactly zero alpha reads as transparent
+	expect(ColorPlus.create('rgb(255 0 0 / 0.3)')!.serialize(format)).toBe('red')
+	expect(ColorPlus.create('rgb(255 0 0)')!.serialize(format)).toBe('red')
 })
 
 it('serializes hex without collapsing', () => {

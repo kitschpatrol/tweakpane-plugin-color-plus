@@ -80,6 +80,29 @@ it('writes string colors back to the bound property', () => {
 	expect(holder.color).toBe('#0080ff')
 })
 
+it('writes named colors back to the bound property', () => {
+	const holder: Record<string, unknown> = { color: 'red' }
+	const { target, writer } = createWriter(holder)
+
+	writer(target, createInternalColor('#663399'))
+	expect(holder.color).toBe('rebeccapurple')
+
+	// Colors between names snap to the perceptually nearest one
+	writer(target, createInternalColor('#663398'))
+	expect(holder.color).toBe('rebeccapurple')
+})
+
+it('writes transparent named colors back to the bound property', () => {
+	const holder: Record<string, unknown> = { color: 'transparent' }
+	const { target, writer } = createWriter(holder)
+
+	writer(target, createInternalColor('rgb(255 0 0 / 0)'))
+	expect(holder.color).toBe('transparent')
+
+	writer(target, createInternalColor('rgb(255 0 0)'))
+	expect(holder.color).toBe('red')
+})
+
 it('writes number colors back to the bound property', () => {
 	const holder: Record<string, unknown> = { color: 0xff_00_66 }
 	const { target, writer } = createWriter(holder)

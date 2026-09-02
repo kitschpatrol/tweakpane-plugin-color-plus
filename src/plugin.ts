@@ -7,7 +7,7 @@ import type { ColorTextsMode } from './view/color-texts.js'
 import type { GamutLines } from './view/plane-palette.js'
 import { ColorController } from './controller/color.js'
 import { ColorPlus } from './model/color-plus.js'
-import { formatIsSerializable } from './model/shared.js'
+import { formatIsSerializable, isStringFormat } from './model/shared.js'
 import {
 	clampColorToGamut,
 	defaultsForFormat,
@@ -86,6 +86,10 @@ type ColorPlusInputParamsInternal = ColorPlusInputParams & {
 	textFields: boolean
 	textsMode: ColorTextsMode
 }
+
+// Internal switch: locked keyword (named-color) bindings render the picker
+// plane posterized to the nearest named colors
+const QUANTIZE_KEYWORD_PALETTE = true
 
 // eslint-disable-next-line ts/naming-convention
 export const ColorPlusInputPlugin: InputBindingPlugin<
@@ -258,7 +262,13 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 						return null
 					}
 
-					args.params.format = newFormat
+					if (formatIsSerializable(newFormat)) {
+						args.params.format = newFormat
+					} else {
+						// Keep the previous format rather than switching to one the next
+						// write would choke on
+						console.warn('ColorPlusInputPlugin typed format not serializable... keeping format')
+					}
 				}
 
 				parsedColor.convert('oklch')
@@ -275,6 +285,15 @@ export const ColorPlusInputPlugin: InputBindingPlugin<
 				return parsedColor
 			},
 			pickerLayout: args.params.picker ?? 'popup',
+			// Locked named-color bindings posterize the picker plane to match the
+			// nearest-name write-back; unlocked ones can drift to other formats, so
+			// they keep the continuous plane
+			quantizePalette:
+				// eslint-disable-next-line ts/no-unnecessary-condition -- Compile-time switch; the guard is what lets the const be flipped off
+				QUANTIZE_KEYWORD_PALETTE &&
+				isStringFormat(args.params.format.format) &&
+				args.params.format.format.formatId === 'keyword' &&
+				args.params.color?.formatLocked !== false,
 			supportsAlpha: args.params.format.alpha || args.params.color?.alpha === true,
 			swatchFallback: args.params.swatchFallback,
 			textFields: args.params.textFields,

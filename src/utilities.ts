@@ -61,7 +61,10 @@ const TEXTS_MODE_SPACES = ['hsl', 'hsv', 'okhsv', 'oklch', 'srgb'] as const
 export function textsModeForFormat(format: ColorFormat): ColorTextsMode {
 	if (
 		format.type === 'number' ||
-		(isStringFormat(format.format) && format.format.formatId === 'hex')
+		(isStringFormat(format.format) &&
+			// Keywords have no numeric text representation of their own; hex is the
+			// canonical compact sRGB form
+			(format.format.formatId === 'hex' || format.format.formatId === 'keyword'))
 	) {
 		return 'hex'
 	}

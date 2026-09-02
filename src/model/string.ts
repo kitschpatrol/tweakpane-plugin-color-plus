@@ -56,7 +56,10 @@ export function stringToColor(
 	const hasAlpha =
 		stringFormat.format.alpha === true ||
 		stringFormat.alphaType !== undefined ||
-		(stringFormat.formatId === 'hex' && hexHasAlpha(normalizedValue))
+		(stringFormat.formatId === 'hex' && hexHasAlpha(normalizedValue)) ||
+		// `transparent` is the only alpha-bearing keyword (parsed as black at 0);
+		// granting the binding alpha keeps its one transparent state reachable
+		(stringFormat.formatId === 'keyword' && colorJs.alpha === 0)
 
 	// If (!validateColorJsObject(colorJs)) {
 	// 	console.warn("Can't handle null coords");
@@ -102,11 +105,6 @@ export function colorToString(
 			unit: 2,
 		},
 	)
-
-	// TODO Special case for keyword formats
-	// if (format.format.formatId === 'keyword') {
-	// 	// Round internal color to nearest keyword
-	// }
 
 	// Fancy format objects
 	// See color.js/src/serialize.js

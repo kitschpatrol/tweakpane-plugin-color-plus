@@ -46,6 +46,7 @@ import {
 	oklchToRgb,
 	widestGamut,
 } from '../model/gamut.js'
+import { nearestKeywordOklch } from '../model/keywords.js'
 import {
 	buildOkhsvProfile,
 	lightnessChromaToOkhsv,
@@ -59,6 +60,12 @@ const svp = ClassName('svp')
 
 /** Gradient is rasterized at 1/4 of the backing resolution, then scaled up. */
 const SUBSAMPLE = 4
+/**
+ * Quantized planes rasterize at 1/2 resolution (with smoothing off) instead:
+ * cell edges stay crisp, and the nearest-keyword scan stays fast enough for
+ * slider-drag repaints.
+ */
+const SUBSAMPLE_QUANTIZED = 2
 /** Iteration-axis samples for band curves, the clip path, and boundary strokes. */
 const BAND_STEPS = 64
 
@@ -117,6 +124,7 @@ type Config = {
 	gamuts: string[]
 	paletteChannels: PlaneLayout
 	paletteProjection: PaletteProjection
+	quantizePalette: boolean
 	value: Value<ColorPlus>
 	viewProps: ViewProps
 }
@@ -149,6 +157,7 @@ export class PlanePaletteView implements View {
 	private offscreenHeight = 0
 	private offscreenWidth = 0
 	private readonly outerBoundary: boolean
+	private readonly quantize: boolean
 	private rafHandle: number | undefined
 	private readonly resizeObserver: ResizeObserver | undefined
 	private readonly roles: LayoutRoles
@@ -161,6 +170,7 @@ export class PlanePaletteView implements View {
 
 		this.value = config.value
 		this.stretch = config.paletteProjection !== 'perceptual'
+		this.quantize = config.quantizePalette
 		this.constrain = config.constrain
 		this.outerBoundary = config.gamutLines === 'outer' || config.gamutLines === 'all'
 		this.innerBoundary = config.gamutLines === 'inner' || config.gamutLines === 'all'
@@ -631,8 +641,9 @@ export class PlanePaletteView implements View {
 		const cssHeight = canvas.clientHeight > 0 ? canvas.clientHeight : 150
 		const backingWidth = Math.round(cssWidth * dpr)
 		const backingHeight = Math.round(cssHeight * dpr)
-		const width = Math.max(1, Math.round(backingWidth / SUBSAMPLE))
-		const height = Math.max(1, Math.round(backingHeight / SUBSAMPLE))
+		const subsample = this.quantize ? SUBSAMPLE_QUANTIZED : SUBSAMPLE
+		const width = Math.max(1, Math.round(backingWidth / subsample))
+		const height = Math.max(1, Math.round(backingHeight / subsample))
 		const target = supportsWideCanvas ? 'p3' : 'srgb'
 		const colorSpace: PredefinedColorSpace = supportsWideCanvas ? 'display-p3' : 'srgb'
 
@@ -656,7 +667,8 @@ export class PlanePaletteView implements View {
 			return
 		}
 
-		context.imageSmoothingEnabled = true
+		// Quantized planes upscale without smoothing so patch edges stay crisp
+		context.imageSmoothingEnabled = !this.quantize
 		if (this.stretch) {
 			context.drawImage(this.offscreenCanvas, 0, 0, backingWidth, backingHeight)
 		} else {
@@ -701,15 +713,22 @@ export class PlanePaletteView implements View {
 		sliderValue: number,
 		band: [number, number] | undefined,
 	): [number, number, number] | undefined {
+		let coords: [number, number, number] | undefined
 		if (this.useOkhsv) {
-			return this.okhsvPixel(xFraction, yFraction, sliderValue)
+			coords = this.okhsvPixel(xFraction, yFraction, sliderValue)
+		} else if (this.stretch) {
+			coords = this.stretchPixel(xFraction, yFraction, band, sliderValue)
+		} else {
+			coords = positionToOklch(this.roles, xFraction, yFraction, sliderValue, this.globalMaxChroma)
 		}
 
-		if (this.stretch) {
-			return this.stretchPixel(xFraction, yFraction, band, sliderValue)
+		if (coords === undefined || !this.quantize) {
+			return coords
 		}
 
-		return positionToOklch(this.roles, xFraction, yFraction, sliderValue, this.globalMaxChroma)
+		// Posterize to the nearest CSS named color's own color, so the plane shows
+		// the exact patches a named-color binding will write back
+		return nearestKeywordOklch(coords[0], coords[1], coords[2])
 	}
 
 	private positionFor(iterValue: number, bandValue: number, widestBand?: [number, number]): Point {

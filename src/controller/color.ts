@@ -39,6 +39,7 @@ type Config = {
 	paletteProjection: PaletteProjection
 	parser: Parser<ColorPlus>
 	pickerLayout: PickerLayout
+	quantizePalette: boolean
 	supportsAlpha: boolean
 	swatchFallback: GamutMethod
 	textFields: boolean
@@ -123,6 +124,7 @@ export class ColorController implements ValueController<ColorPlus, ColorView> {
 			gamuts: config.gamuts,
 			paletteChannels: config.paletteChannels,
 			paletteProjection: config.paletteProjection,
+			quantizePalette: config.quantizePalette,
 			supportsAlpha: config.supportsAlpha,
 			textFields: config.textFields,
 			textsMode: config.textsMode,
