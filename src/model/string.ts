@@ -124,12 +124,18 @@ export function colorToString(
 						},
 		// Never collapse hex to #f06-style shorthand
 		collapse: false,
-		// InGamut: true, // TODO expose? Overrides inGamut in the format object
 		commas: stringFormat.commas,
 		coords: stringFormat.types,
 		// The id resolves to the same Format object captured at parse time
 		// (SerializeOptions doesn't accept Format class instances directly)
 		format: stringFormat.formatId,
+		// Colorjs gamut-maps out-of-range coords into bounded spaces by default,
+		// which would silently rewrite a color the `constrain` option allowed.
+		// Gamut handling is the plugin's job, so serialize the model faithfully:
+		// rgb(0 128 300) stays as written, valid CSS the browser clips itself.
+		// Hex still maps, since its colorjs format sets toGamut and the
+		// serializer ORs that in regardless of this option
+		inGamut: false,
 		// Precision is total significant digits, not decimal places, so stick with default?
 		precision: 3,
 	})

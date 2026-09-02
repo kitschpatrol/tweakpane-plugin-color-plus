@@ -29,6 +29,11 @@ const roundTrips: string[] = [
 	'red',
 	'rebeccapurple',
 	'transparent',
+	// Out of gamut: colorjs would map these by default, but gamut handling is
+	// the plugin's job, so the string reflects the model
+	'rgb(0 128 300)',
+	'hsl(230 180% 37%)',
+	'color(display-p3 1.2 0 0)',
 ]
 
 it.each(roundTrips)('round-trips %s through parse and serialize', (value) => {
@@ -97,6 +102,13 @@ it('round-trips number colors with leading zero bytes', () => {
 		expect(color.toValue(format)).toBe(value)
 		expect(color.serialize(format)).toBe(`0x${value.toString(16).padStart(8, '0')}`)
 	}
+})
+
+it('gamut-maps out-of-gamut colors when serializing to hex', () => {
+	// Hex can't express out-of-range channels, so colorjs's hex format maps
+	// regardless of the serializer's inGamut option
+	const format = ColorPlus.getFormat('#000000')!
+	expect(ColorPlus.create('rgb(0 128 300)')!.serialize(format)).toBe('#3888ff')
 })
 
 it('serializes hex without collapsing', () => {
