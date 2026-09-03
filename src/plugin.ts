@@ -1,8 +1,8 @@
 import type { BaseInputParams, InputBindingPlugin, PickerLayout } from '@tweakpane/core'
 import { createPlugin, writePrimitive } from '@tweakpane/core'
 import type { PaletteProjection, PlaneLayout } from './model/channel.js'
-import type { ColorFormat, GamutMethod } from './model/shared.js'
-import type { ColorTupleRgb, ColorTupleRgba } from './model/tuple.js'
+import type { ColorFormat, ColorType, GamutMethod } from './model/shared.js'
+import type { ColorPlusValueRgbaTuple, ColorPlusValueRgbTuple } from './model/tuple.js'
 import type { ColorTextsMode } from './view/color-texts.js'
 import type { GamutLines } from './view/plane-palette.js'
 import { ColorController } from './controller/color.js'
@@ -17,8 +17,18 @@ import {
 	validateColorInputParams,
 } from './utilities.js'
 
+export type ColorPlusGamutLines = GamutLines
+export type ColorPlusPaletteChannels = PlaneLayout
+export type ColorPlusPaletteProjection = PaletteProjection
+export type ColorPlusSwatchFallback = GamutMethod
+export type ColorPlusType = ColorType
+export type ColorPlusValueNumber = number
+export type ColorPlusValueObject = Record<string, null | number>
+export type { ColorPlusValueRgbaTuple, ColorPlusValueRgbTuple } from './model/tuple.js'
+export type ColorPlusValueString = string
+export type ColorPlusValueTuple = ColorPlusValueRgbaTuple | ColorPlusValueRgbTuple
 export type ColorPlusValue =
-	ColorTupleRgb | ColorTupleRgba | number | Record<string, null | number> | string
+	ColorPlusValueNumber | ColorPlusValueObject | ColorPlusValueString | ColorPlusValueTuple
 export type ColorPlusInputParams = BaseInputParams & {
 	color?: {
 		// In the original tweakpane installation, this is only applied to number values
@@ -27,7 +37,7 @@ export type ColorPlusInputParams = BaseInputParams & {
 		// (experimental)
 		formatLocked?: boolean
 		// In the original tweakpane implementation, this only applied to object values
-		type?: 'float' | 'int'
+		type?: ColorPlusType
 	}
 	// Keep the color inside the widest configured gamut: plane picks snap to the
 	// in-gamut frontier in the perceptual (un-stretched) plane, while slider
@@ -44,28 +54,28 @@ export type ColorPlusInputParams = BaseInputParams & {
 	// 'inner' (default) draws the narrower gamuts' lines, 'outer' draws the
 	// widest gamut's (otherwise redundant with the drawn plane's own edge),
 	// 'all' draws both, 'none' hides every line
-	gamutLines?: GamutLines
+	gamutLines?: ColorPlusGamutLines
 	// RGB gamut ids whose boundaries the OKLCH picker draws (default srgb and
 	// p3 when the bound color uses a wide or perceptual model, just srgb when
 	// it uses an sRGB-bound model like hex, rgb, or hsl)
 	gamuts?: string[]
 	// Channel-to-axis assignment for the picker plane and slider as
 	// [X][Y]_[slider], e.g. 'CL_H' (default)
-	paletteChannels?: PlaneLayout
+	paletteChannels?: ColorPlusPaletteChannels
 	// How the picker plane projects the gamut volume onto its rectangle:
 	// 'perceptual' keeps absolute OKLCH spacing (the gamut sits as an irregular
 	// region), 'stretch' fills the plane with the widest gamut row by row, and
 	// 'okhsv' (default) uses an OKHSV saturation/value projection on
 	// lightness×chroma layouts (the vivid cusp lands in the corner), falling
 	// back to 'stretch' behavior on the other layouts
-	paletteProjection?: PaletteProjection
+	paletteProjection?: ColorPlusPaletteProjection
 	picker?: PickerLayout
 	// How the swatch's fallback triangle forces an out-of-gamut color into sRGB:
 	// 'clip' clamps channels (matches what the browser paints on screen, the default),
 	// 'css' applies the CSS Color 4 gamut-mapping algorithm (chroma reduction, which can
 	// disagree with on-screen rendering — e.g. it renders full-lightness colors white).
 	// Only affects the swatch preview, never the color value itself
-	swatchFallback?: GamutMethod
+	swatchFallback?: ColorPlusSwatchFallback
 	// Show the color model drop-down and per-channel text inputs below the
 	// picker palette (default true)
 	textFields?: boolean
@@ -75,14 +85,14 @@ type ColorPlusInputParamsInternal = ColorPlusInputParams & {
 	constrain: boolean
 	format: ColorFormat
 	gamutLabel: boolean
-	gamutLines: GamutLines
+	gamutLines: ColorPlusGamutLines
 	gamuts: string[]
 	lastExternalValue: ColorPlusValue
 	// Misuse parameters to prevent rounding-related jitter on pane.refresh()
 	lastInternalValue: ColorPlus
-	paletteChannels: PlaneLayout
-	paletteProjection: PaletteProjection
-	swatchFallback: GamutMethod
+	paletteChannels: ColorPlusPaletteChannels
+	paletteProjection: ColorPlusPaletteProjection
+	swatchFallback: ColorPlusSwatchFallback
 	textFields: boolean
 	textsMode: ColorTextsMode
 }

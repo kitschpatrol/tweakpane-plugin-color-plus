@@ -14,4 +14,18 @@ export const plugins: TpPlugin[] = [ColorPlusInputPlugin]
 // E.g. used by svelte-tweakpane-ui for CLS placeholder calculation
 export { ColorPlus as ColorPlusModel } from './model/color-plus.js'
 
-export type { ColorPlusInputParams, ColorPlusValue } from './plugin.js'
+export type {
+	ColorPlusGamutLines,
+	ColorPlusInputParams,
+	ColorPlusPaletteChannels,
+	ColorPlusPaletteProjection,
+	ColorPlusSwatchFallback,
+	ColorPlusType,
+	ColorPlusValue,
+	ColorPlusValueNumber,
+	ColorPlusValueObject,
+	ColorPlusValueRgbaTuple,
+	ColorPlusValueRgbTuple,
+	ColorPlusValueString,
+	ColorPlusValueTuple,
+} from './plugin.js'

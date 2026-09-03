@@ -1,11 +1,11 @@
 import type { ColorFormat, ColorPlusObject, ColorType, TupleColorFormat } from './shared'
 import { convert, formatNumber, roundToWhole } from './shared'
 
-export type ColorTupleRgb = [null | number, null | number, null | number]
-export type ColorTupleRgba = [null | number, null | number, null | number, number]
+export type ColorPlusValueRgbTuple = [null | number, null | number, null | number]
+export type ColorPlusValueRgbaTuple = [null | number, null | number, null | number, number]
 
 // Type guard to ensure array elements are number | null
-function isColorTuple(value: unknown): value is ColorTupleRgb | ColorTupleRgba {
+function isColorTuple(value: unknown): value is ColorPlusValueRgbaTuple | ColorPlusValueRgbTuple {
 	if (!Array.isArray(value)) {
 		return false
 	}
@@ -84,7 +84,7 @@ export function colorToTuple(
 	color: ColorPlusObject,
 	format: TupleColorFormat,
 	alphaOverride?: boolean,
-): ColorTupleRgb | ColorTupleRgba {
+): ColorPlusValueRgbaTuple | ColorPlusValueRgbTuple {
 	const { colorType } = format.format
 	const convertedColor = convert(color, format.space) ?? color
 
@@ -100,10 +100,10 @@ export function colorToTuple(
 	]
 
 	if (alphaOverride ?? format.alpha) {
-		return [...result, convertedColor.alpha] as ColorTupleRgba
+		return [...result, convertedColor.alpha] as ColorPlusValueRgbaTuple
 	}
 
-	return result as ColorTupleRgb
+	return result as ColorPlusValueRgbTuple
 }
 
 /**
