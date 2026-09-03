@@ -38,7 +38,7 @@ The plugin requires [Tweakpane 4](https://www.npmjs.com/package/tweakpane).
 
 If you're using the ["lite" build](#the-lite-plugin-build) of the plugin without a bundler, you'll need to provide the [@tweakpane/core](https://www.npmjs.com/package/@tweakpane/core) library as well.
 
-If you're using Svelte 4 or 5 as a front-end library, take a look at [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui), which wraps Tweakpane in a set of Svelte-friendly components, including a [`<ColorPlus>`](https://kitschpatrol.com/svelte-tweakpane-ui/docs/components/color-plus) component.
+If you're using Svelte 4 or 5 as a front-end library, take a look at [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui), which wraps Tweakpane in a set of Svelte-friendly components, including a [`<ColorPlus>`](https://kitschpatrol.com/svelte-tweakpane-ui/docs/components/colorplus) component.
 
 ### Installation
 
