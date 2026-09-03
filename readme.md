@@ -506,10 +506,10 @@ You can see the effect of externalization on the minified library's size below:
 
 <!-- size-table({ files: ["./dist/tweakpane-plugin-color-plus.min.js", "./dist/tweakpane-plugin-color-plus.lite.min.js"] }) -->
 
-| File                                    | Original | Gzip    | Brotli  |
-| --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.min.js      | 220.2 kB | 60.1 kB | 50.9 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 111.9 kB | 38.1 kB | 33.2 kB |
+| File                                    | Original | Gzip  | Brotli |
+| --------------------------------------- | -------- | ----- | ------ |
+| tweakpane-plugin-color-plus.min.js      | 220 kB   | 60 kB | 50 kB  |
+| tweakpane-plugin-color-plus.lite.min.js | 111 kB   | 38 kB | 33 kB  |
 
 <!-- /size-table -->
 
