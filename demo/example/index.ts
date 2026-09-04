@@ -254,8 +254,8 @@ const extraProps = {
 	},
 }
 
-const CAPITAL_LETTER_REGEX = /([A-Z])/gv
-const DOT_PREFIX_REGEX = /^./v
+const CAPITAL_LETTER_REGEX = /([A-Z])/gu
+const DOT_PREFIX_REGEX = /^./u
 
 function prettyLabel(label: string): string {
 	return label

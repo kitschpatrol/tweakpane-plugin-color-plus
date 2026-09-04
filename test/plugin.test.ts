@@ -52,7 +52,7 @@ function createControllerConfig(value: unknown, params: Params = {}) {
 }
 
 const hex = { alpha: false, format: 'hex', space: 'srgb', type: 'string' } as const
-const HEX_STRING = /^#[\da-f]{6}$/v
+const HEX_STRING = /^#[\da-f]{6}$/u
 
 it('exposes the plugin bundle', () => {
 	expect(id).toBe('color-plus')

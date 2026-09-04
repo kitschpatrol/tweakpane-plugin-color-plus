@@ -397,7 +397,7 @@ function stringifyObject(
 	return `{${parts.join(', ')}}`
 }
 
-const WHITESPACE_REGEX = /\s+/v
+const WHITESPACE_REGEX = /\s+/u
 
 /**
  * Takes a semi-naive JSON5-esque color-like string object, and attempts to
@@ -411,7 +411,7 @@ function parseObjectString(value: string): Record<string, unknown> | undefined {
 		// Manual parse: punctuation becomes whitespace, so keys and values
 		// separate whether or not the string was typed with spaces
 		const parts = value
-			.replaceAll(/["%',:\{\}]/gv, ' ')
+			.replaceAll(/["%',:{}]/gu, ' ')
 			.split(WHITESPACE_REGEX)
 			.filter((part: string) => part !== '')
 

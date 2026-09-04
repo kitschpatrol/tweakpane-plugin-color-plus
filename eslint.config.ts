@@ -8,6 +8,9 @@ export default eslintConfig(
 			},
 		},
 		ignores: ['/src/sass/plugin.scss'],
+		rules: {
+			'require-unicode-regexp': ['error', { requireFlag: 'u' }],
+		},
 		ts: {
 			overrides: {
 				// Knip workaround...
@@ -23,6 +26,7 @@ export default eslintConfig(
 		},
 		type: 'lib',
 	},
+
 	{
 		files: ['readme.md/*.ts'],
 		rules: {

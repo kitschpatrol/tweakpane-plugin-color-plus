@@ -11,7 +11,7 @@ function getDistributionName(packageName: string): string {
 	// `@tweakpane/plugin-foobar` -> `tweakpane-plugin-foobar`
 	// `tweakpane-plugin-foobar`  -> `tweakpane-plugin-foobar`
 	return packageName
-		.split(/[\/@\-]/v)
+		.split(/[/@-]/u)
 		.filter((comp) => comp !== '')
 		.join('-')
 }

@@ -276,7 +276,7 @@ function legacyTweakpaneColorStringNormalization(value: string): string {
 
 	if (trimmed.startsWith('hsl')) {
 		let index = 0
-		return trimmed.replaceAll(/[\d.]+%?/gv, (match) => {
+		return trimmed.replaceAll(/[\d.]+%?/gu, (match) => {
 			if (index === 0 || match.includes('%') || index > 2) {
 				index += 1
 				return match
