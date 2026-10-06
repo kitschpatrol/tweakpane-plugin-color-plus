@@ -65,7 +65,7 @@
 	},
 	"devDependencies": {
 		"@kitschpatrol/shared-config": "^8.12.1",
-		"@types/node": "^20.19.43",
+		"@types/node": "~22.0.3",
 		"@vitest/coverage-v8": "^5.0.3",
 		"autoprefixer": "^10.6.1",
 		"bumpp": "^12.3.0",
@@ -89,7 +89,7 @@
 	},
 	"packageManager": "pnpm@12.9.1",
 	"engines": {
-		"node": "^20.19.0 || ^22.0.0 || ^24.0.0 || >=26.0.0"
+		"node": "^22.0.0 || ^24.0.0 || >=26.0.0"
 	},
 	"devEngines": {
 		"runtime": {
