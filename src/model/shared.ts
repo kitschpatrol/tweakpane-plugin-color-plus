@@ -186,7 +186,7 @@ export function convert(
 
 	const converted = colorJsConvert(color, spaceId)
 
-	// Special case to handle rounding errors inducing huelucinations in achromatic colors
+	// Special case to handle rounding errors inducing hallucinations in achromatic colors
 	if (spaceId === 'hsl' || spaceId === 'hsv') {
 		if (converted.coords[1] !== null && Math.abs(converted.coords[1]) < 1e-8) {
 			converted.coords[0] = lastHue

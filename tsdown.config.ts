@@ -18,7 +18,7 @@ function getDistributionName(packageName: string): string {
 
 async function compileCss(): Promise<string> {
 	const { css } = Sass.compile('src/sass/plugin.scss', {
-		silenceDeprecations: ['global-builtin', 'color-functions', 'import'],
+		silenceDeprecations: ['global-builtin', 'color-functions'],
 		style: 'compressed',
 	})
 

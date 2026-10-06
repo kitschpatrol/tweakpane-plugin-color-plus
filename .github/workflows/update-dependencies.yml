@@ -1,0 +1,75 @@
+name: Update Dependencies
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 3 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm ci
+
+      - name: Run ksc-update
+        uses: kitschpatrol/github-action-skill-to-pr@710cc149d42470565427d1bd957f51bb6d53ef9e # v1.1.0
+        with:
+          skill: ksc-update
+          claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          model: claude-opus-5-5
+          effort: high
+          max-turns: 400
+          instructions: |
+            Scope
+            - Skip the skill's Known consumers step. Do not create or edit CLAUDE.md or AGENTS.md, and do not report the missing consumer list as a gap. Known consumers: Tweakpane 4 apps installing from npm, CDN users loading unversioned jsdelivr URLs (demo/cdn/index.html), and svelte-tweakpane-ui, which imports ColorPlusModel.
+            - Never delete src/scratch.ts. It is an intentional workspace registered as a knip entry.
+
+            Tweakpane compatibility
+            This is a Tweakpane 4 plugin. Treat the following as contracts: defer any change to them for human review, even though the project is 0.x.
+            - Keep @tweakpane/core in dependencies at ^2 and the tweakpane peer at ^4.0.0. Tweakpane refuses to register a plugin whose core major differs from its own (core 2 for Tweakpane 4). Do not move @tweakpane/core to devDependencies: the lite build and the published types import it.
+            - After every build, confirm:
+              - the bundled builds (dist/tweakpane-plugin-color-plus.js and .min.js) have no import statements and embed the core version as Semver 2.x.y;
+              - the lite builds import only "@tweakpane/core";
+              - no '__css__' placeholder remains anywhere in dist;
+              - the module still exports ColorPlusModel, css, id ('color-plus') and plugins, and the plugin id is still 'input-color-plus'.
+            - colorjs.io is bundled into every output, so its changes ship to users. It is 0.x, so treat a new minor (0.8) as breaking and defer it. src/model/keywords.ts deep-imports colorjs.io/src/keywords.js, which is not a public export and can break in any release.
+            - Shipped JavaScript must stay within ES2022 for browsers.
+              - Do not change tsdown's target or platform.
+              - The TypeScript lib is newer than ES2022, and tsdown lowers syntax but does not polyfill APIs, so the type check will not catch newer APIs.
+              - If a lint autofix introduces anything newer than ES2022, revert it and turn the rule off with a reason in eslint.config.ts. Examples: the regex v flag, toSorted/toReversed/with, findLast, Object.groupBy, Set methods, iterator helpers, Promise.withResolvers.
+              - Keep the require-unicode-regexp override.
+            - Keep sass on 1.x, and keep the silenceDeprecations list in tsdown.config.ts. Those deprecations come from @tweakpane/core's own Sass (global lighten() and rgba()), which Dart Sass 2 removes. Report any new Sass warning.
+            - Keep typescript within the peer ranges of @kitschpatrol/typescript-config and typescript-eslint.
+            - Diff the four dist bundles and dist/types against the baseline build.
+              - Minifier-level changes from tsdown or rolldown updates are expected.
+              - The embedded CSS string should change only with a reviewed sass, postcss or autoprefixer update.
+              - The types should change only with a reviewed TypeScript or tsdown update.
+              - Explain everything else.
+
+            Validation
+            - mdat generates the readme size table from dist, so run pnpm build before pnpm fix and pnpm lint.
+            - The test suite runs in plain Node with no DOM and never registers the plugin with a Pane, so add these consumer checks:
+              - Pack the build. Using the Node version from the lowest engines.node range, import both entry points ("tweakpane-plugin-color-plus" and "/lite") with tweakpane and @tweakpane/core installed alongside. Compare exports, plugin id, core version and ColorPlusModel.create('oklch(65% 0.26 357deg)').toString() against the published release.
+              - If the runner has a Chromium-based browser, load the bundled and lite builds next to Tweakpane 4.0.0 and the latest 4.x, call pane.registerPlugin, and add string, number, object and tuple bindings with view 'color-plus'. Otherwise report the browser check as not run.
+            - @types/node stays at ^20 to match the consumer Node floor of 20.19. pnpm-workspace.yaml has a scoped peerDependencyRules entry for vitest 5's optional @types/node peer; remove it once vitest's range accepts 20.
+            - Known warnings already present before 2026-10-06, so don't chase them: deprecated native parser bindings (from tsdown via rolldown-plugin-dts), deprecated glob@10.5.0 (from shared-config's remark and mdat tooling), and eslint-plugin-jsx-a11y's peer range excluding eslint 10.
