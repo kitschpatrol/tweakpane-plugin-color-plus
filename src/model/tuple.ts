@@ -25,11 +25,7 @@ function isColorTuple(value: unknown): value is ColorPlusValueRgbaTuple | ColorP
 	}
 
 	// If length is 4, ensure alpha is a number (not null)
-	if (value.length === 4) {
-		return typeof value[3] === 'number'
-	}
-
-	return true
+	return value.length !== 4 || typeof value[3] === 'number'
 }
 
 /**
@@ -99,11 +95,9 @@ export function colorToTuple(
 		toChannel(convertedColor.coords[2]),
 	]
 
-	if (alphaOverride ?? format.alpha) {
-		return [...result, convertedColor.alpha] as ColorPlusValueRgbaTuple
-	}
-
-	return result as ColorPlusValueRgbTuple
+	return (alphaOverride ?? format.alpha)
+		? ([...result, convertedColor.alpha] as ColorPlusValueRgbaTuple)
+		: (result as ColorPlusValueRgbTuple)
 }
 
 /**

@@ -233,8 +233,10 @@ export function validateColorInputParams(params: ColorPlusInputParams, colorValu
 		params.color.alpha = undefined
 	}
 
-	if (params.color?.type === 'float' && !isObject(colorValue) && !Array.isArray(colorValue)) {
-		console.warn('ColorPlus: float mode is only supported for object or array values... ignoring')
-		params.color.type = 'int'
+	if (params.color?.type !== 'float' || isObject(colorValue) || Array.isArray(colorValue)) {
+		return
 	}
+
+	console.warn('ColorPlus: float mode is only supported for object or array values... ignoring')
+	params.color.type = 'int'
 }

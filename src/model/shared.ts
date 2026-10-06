@@ -350,11 +350,7 @@ export function roundToWhole(value: number): number {
 }
 
 export function formatNumber(value: number, digits: number | undefined): string {
-	if (digits === undefined) {
-		return value.toString()
-	}
-
-	return value.toFixed(Math.max(Math.min(digits, 20), 0))
+	return digits === undefined ? value.toString() : value.toFixed(Math.max(Math.min(digits, 20), 0))
 }
 
 /**
@@ -393,14 +389,10 @@ export function formatsShareShape(a: ColorFormat, b: ColorFormat): boolean {
 		return a.alpha === b.alpha
 	}
 
-	if (a.type === 'object' && b.type === 'object') {
-		return (
-			a.format.alphaKey === b.format.alphaKey &&
-			a.format.coordKeys.every((key, index) => key === b.format.coordKeys[index])
-		)
-	}
-
-	return a.type === b.type
+	return a.type === 'object' && b.type === 'object'
+		? a.format.alphaKey === b.format.alphaKey &&
+				a.format.coordKeys.every((key, index) => key === b.format.coordKeys[index])
+		: a.type === b.type
 }
 
 export function colorPlusObjectsAreEqual(a: ColorPlusObject, b: ColorPlusObject): boolean {

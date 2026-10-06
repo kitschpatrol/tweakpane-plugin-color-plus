@@ -153,13 +153,15 @@ export function lightnessRange(
 	let hi = -1
 	for (let i = 0; i <= LIGHTNESS_SCAN_STEPS; i++) {
 		const l = i / LIGHTNESS_SCAN_STEPS
-		if (probeInGamut(l, c, h, gamutId)) {
-			if (lo < 0) {
-				lo = l
-			}
-
-			hi = l
+		if (!probeInGamut(l, c, h, gamutId)) {
+			continue
 		}
+
+		if (lo < 0) {
+			lo = l
+		}
+
+		hi = l
 	}
 
 	if (lo < 0) {

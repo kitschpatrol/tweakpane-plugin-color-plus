@@ -57,10 +57,12 @@ export function buildOkhsvProfile(hue: number, gamutId: string): OkhsvProfile {
 		const l = i / (PROFILE_SAMPLES - 1)
 		const c = maxChroma(l, hue, gamutId)
 		chromaByLightness[i] = c
-		if (c > cuspChroma) {
-			cuspChroma = c
-			cuspLightness = l
+		if (!(c > cuspChroma)) {
+			continue
 		}
+
+		cuspChroma = c
+		cuspLightness = l
 	}
 
 	const saturationMax = cuspLightness > 0 ? cuspChroma / cuspLightness : 0

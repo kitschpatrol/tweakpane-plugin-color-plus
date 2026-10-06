@@ -143,7 +143,7 @@ export class PlanePaletteController implements ValueController<ColorPlus, PlaneP
 		// hue to zero. When hue is a plane axis the marker position sets it directly,
 		// so honor it even on the achromatic (chroma 0) edge; otherwise the marker
 		// would stick there, unable to slide along the hue it can't write.
-		const carryHue = this.hueOnPlane ? false : coords.c <= ACHROMATIC_CHROMA
+		const carryHue = !this.hueOnPlane && coords.c <= ACHROMATIC_CHROMA
 		const hue = carryHue ? (this.lastHue ?? coords.h) : coords.h
 		if (!carryHue) {
 			this.lastHue = coords.h

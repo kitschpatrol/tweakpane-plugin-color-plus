@@ -67,11 +67,7 @@ export function channelMax(channel: Channel, globalMaxChroma: number): number {
 		return 360
 	}
 
-	if (channel === 'l') {
-		return 1
-	}
-
-	return globalMaxChroma
+	return channel === 'l' ? 1 : globalMaxChroma
 }
 
 /**
@@ -82,11 +78,7 @@ export function channelMax(channel: Channel, globalMaxChroma: number): number {
  */
 export function valueToUnit(channel: Channel, value: number, globalMaxChroma: number): number {
 	const max = channelMax(channel, globalMaxChroma)
-	if (max <= 0) {
-		return 0
-	}
-
-	return clamp01(value / max)
+	return max <= 0 ? 0 : clamp01(value / max)
 }
 
 /** Inverse of `valueToUnit`: a unit position back to a channel value. */
@@ -144,9 +136,7 @@ export type PlaneBand = {
 /** Resolve the band vs iteration axes for a layout (see `PlaneBand`). */
 export function planeBand(roles: LayoutRoles): PlaneBand {
 	const bandChannel: Channel = roles.x === 'c' || roles.y === 'c' ? 'c' : 'l'
-	if (roles.x === bandChannel) {
-		return { bandAxis: 'x', bandChannel, iterAxis: 'y', iterChannel: roles.y }
-	}
-
-	return { bandAxis: 'y', bandChannel, iterAxis: 'x', iterChannel: roles.x }
+	return roles.x === bandChannel
+		? { bandAxis: 'x', bandChannel, iterAxis: 'y', iterChannel: roles.y }
+		: { bandAxis: 'y', bandChannel, iterAxis: 'x', iterChannel: roles.x }
 }

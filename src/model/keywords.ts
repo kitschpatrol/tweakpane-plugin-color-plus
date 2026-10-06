@@ -57,12 +57,14 @@ function nearestEntry(l: number, a: number, b: number): KeywordEntry {
 		const da = entry.lab[1] - a
 		const db = entry.lab[2] - b
 		const distance = dl * dl + da * da + db * db
-		if (distance < bestDistance) {
-			best = entry
-			bestDistance = distance
-			if (distance === 0) {
-				break
-			}
+		if (!(distance < bestDistance)) {
+			continue
+		}
+
+		best = entry
+		bestDistance = distance
+		if (distance === 0) {
+			break
 		}
 	}
 

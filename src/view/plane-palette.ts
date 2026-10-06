@@ -232,10 +232,12 @@ export class PlanePaletteView implements View {
 		config.viewProps.handleDispose(() => {
 			this.value.emitter.off('change', this.onValueChange)
 			this.resizeObserver?.disconnect()
-			if (this.rafHandle !== undefined) {
-				cancelAnimationFrame(this.rafHandle)
-				this.rafHandle = undefined
+			if (this.rafHandle === undefined) {
+				return
 			}
+
+			cancelAnimationFrame(this.rafHandle)
+			this.rafHandle = undefined
 		})
 
 		this.schedulePaint()
@@ -353,11 +355,9 @@ export class PlanePaletteView implements View {
 
 		const band = this.widestBandFor(coords[this.band.iterChannel])
 		const bandValue = coords[this.band.bandChannel]
-		if (band !== undefined && bandValue >= band[0] - 1e-6 && bandValue <= band[1] + 1e-6) {
-			return coords
-		}
-
-		return this.projectToBoundary(xf, yf, slider)
+		return band !== undefined && bandValue >= band[0] - 1e-6 && bandValue <= band[1] + 1e-6
+			? coords
+			: this.projectToBoundary(xf, yf, slider)
 	}
 
 	private bandFor(
@@ -786,11 +786,13 @@ export class PlanePaletteView implements View {
 			const dx = point.x * width - px
 			const dy = point.y * height - py
 			const distance = dx * dx + dy * dy
-			if (distance < bestDistance) {
-				bestDistance = distance
-				bestIter = iterValue
-				bestBand = bandValue
+			if (!(distance < bestDistance)) {
+				return
 			}
+
+			bestDistance = distance
+			bestIter = iterValue
+			bestBand = bandValue
 		}
 
 		for (let s = 0; s <= BAND_STEPS; s++) {
@@ -1091,11 +1093,9 @@ export class PlanePaletteView implements View {
 		const frac = pos - i
 		const a = samples[i]?.band
 		const b = samples[j]?.band
-		if (a === undefined || b === undefined) {
-			return undefined
-		}
-
-		return [a[0] + (b[0] - a[0]) * frac, a[1] + (b[1] - a[1]) * frac]
+		return a === undefined || b === undefined
+			? undefined
+			: [a[0] + (b[0] - a[0]) * frac, a[1] + (b[1] - a[1]) * frac]
 	}
 
 	private widestBandFor(iterValue: number): [number, number] | undefined {

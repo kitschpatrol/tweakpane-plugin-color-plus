@@ -71,21 +71,23 @@ export class ColorPickerView implements View {
 		}
 
 		this.alphaViews = config.alphaViews
-		if (config.alphaViews) {
-			const aElement = doc.createElement('div')
-			aElement.classList.add(cn('a'))
-
-			const apElement = doc.createElement('div')
-			apElement.classList.add(cn('ap'))
-			apElement.append(config.alphaViews.palette.element)
-			aElement.append(apElement)
-
-			const atElement = doc.createElement('div')
-			atElement.classList.add(cn('at'))
-			atElement.append(config.alphaViews.text.element)
-			aElement.append(atElement)
-
-			this.element.append(aElement)
+		if (!config.alphaViews) {
+			return
 		}
+
+		const aElement = doc.createElement('div')
+		aElement.classList.add(cn('a'))
+
+		const apElement = doc.createElement('div')
+		apElement.classList.add(cn('ap'))
+		apElement.append(config.alphaViews.palette.element)
+		aElement.append(apElement)
+
+		const atElement = doc.createElement('div')
+		atElement.classList.add(cn('at'))
+		atElement.append(config.alphaViews.text.element)
+		aElement.append(atElement)
+
+		this.element.append(aElement)
 	}
 }

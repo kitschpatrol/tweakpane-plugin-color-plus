@@ -56,11 +56,7 @@ export class ColorPlus {
 	): ColorPlus | undefined {
 		const parsed = parseColorAndFormat(value, hasAlpha, colorType)
 
-		if (parsed === undefined) {
-			return undefined
-		}
-
-		return new ColorPlus(parsed.color)
+		return parsed === undefined ? undefined : new ColorPlus(parsed.color)
 	}
 
 	public static getFormat(

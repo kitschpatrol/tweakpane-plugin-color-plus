@@ -206,11 +206,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isNumberRecord(value: unknown): value is Record<string, null | number> {
-	if (!isRecord(value)) {
-		return false
-	}
-
-	return Object.values(value).every((v) => v === null || typeof v === 'number')
+	return isRecord(value) && Object.values(value).every((v) => v === null || typeof v === 'number')
 }
 
 /**
@@ -275,12 +271,14 @@ export function objectToColor(
 			for (const [index, channel] of regularChannels.entries()) {
 				const matchingKey = channel.externalKeys.find((key) => inputKeys.has(key.toLowerCase()))
 
-				if (matchingKey !== undefined) {
-					const channelValue = lowerCaseValue[matchingKey.toLowerCase()]!
-
-					objectFormat.coordKeys[index] = ownKeys.get(matchingKey.toLowerCase())!
-					result.coords[index] = channelValue
+				if (matchingKey === undefined) {
+					continue
 				}
+
+				const channelValue = lowerCaseValue[matchingKey.toLowerCase()]!
+
+				objectFormat.coordKeys[index] = ownKeys.get(matchingKey.toLowerCase())!
+				result.coords[index] = channelValue
 			}
 
 			// Handle alpha channel separately

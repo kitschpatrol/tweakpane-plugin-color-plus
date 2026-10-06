@@ -71,11 +71,7 @@ export class ChannelSliderController implements ValueController<ColorPlus, Chann
 			return 1
 		}
 
-		if (channel === 'l') {
-			return 1 / 100
-		}
-
-		return this.view.channelMax / 100
+		return (channel === 'l' ? 1 : this.view.channelMax) / 100
 	}
 
 	constructor(doc: Document, config: Config) {
@@ -144,11 +140,7 @@ export class ChannelSliderController implements ValueController<ColorPlus, Chann
 
 	private clampToChannel(value: number): number {
 		const max = this.view.channelMax
-		if (this.view.channel === 'h') {
-			return ((value % max) + max) % max
-		}
-
-		return constrainRange(value, 0, max)
+		return this.view.channel === 'h' ? ((value % max) + max) % max : constrainRange(value, 0, max)
 	}
 
 	private handlePointerEvent(d: PointerData, options: ValueChangeOptions): void {
