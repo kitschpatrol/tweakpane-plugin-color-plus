@@ -31,7 +31,7 @@ jobs:
         run: pnpm ci
 
       - name: Run ksc-update
-        uses: kitschpatrol/github-action-skill-to-pr@710cc149d42470565427d1bd957f51bb6d53ef9e # v1.1.0
+        uses: kitschpatrol/github-action-skill-to-pr@fe3e8b4aea5851133d8b064a68e92f7b7e4de1e4 # v1.1.1
         with:
           skill: ksc-update
           claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -72,4 +72,3 @@ jobs:
               - Pack the build. Using the Node version from the lowest engines.node range, import both entry points ("tweakpane-plugin-color-plus" and "/lite") with tweakpane and @tweakpane/core installed alongside. Compare exports, plugin id, core version and ColorPlusModel.create('oklch(65% 0.26 357deg)').toString() against the published release.
               - If the runner has a Chromium-based browser, load the bundled and lite builds next to Tweakpane 4.0.0 and the latest 4.x, call pane.registerPlugin, and add string, number, object and tuple bindings with view 'color-plus'. Otherwise report the browser check as not run.
             - Keep @types/node on the major of the consumer Node floor (currently 22, from engines.node). If a dev tool's peer range drops that major, raising the floor is an option to propose in the report; it's not a reason to add a peerDependencyRules exception.
-            - Known warnings already present before 2026-10-06, so don't chase them: deprecated native parser bindings (from tsdown via rolldown-plugin-dts), deprecated glob@10.5.0 (from shared-config's remark and mdat tooling), and eslint-plugin-jsx-a11y's peer range excluding eslint 10.
