@@ -10,10 +10,12 @@
 .env
 .env.*
 .eslint-config-inspector
+.netlify/
 .pnpm-store/
 .svelte-kit/
 .vitest/
 .worktrees/
+.wrangler/
 {tmp,temp}/
 **/*.min.js
 /scratch/

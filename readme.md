@@ -6,11 +6,12 @@
 
 <img alt="Tweakpane Plugin Color Plus Banner" src="./assets/banner.webp">
 
-<!-- badges -->
+<!-- badges({ npmDownloads: true }) -->
 
 [![NPM Package tweakpane-plugin-color-plus](https://img.shields.io/npm/v/tweakpane-plugin-color-plus.svg)](https://www.npmjs.com/package/tweakpane-plugin-color-plus)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit)
 [![CI](https://github.com/kitschpatrol/tweakpane-plugin-color-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/kitschpatrol/tweakpane-plugin-color-plus/actions/workflows/ci.yml)
+[![NPM Downloads tweakpane-plugin-color-plus](https://img.shields.io/npm/dm/tweakpane-plugin-color-plus)](https://www.npmjs.com/package/tweakpane-plugin-color-plus)
 
 <!-- /badges -->
 
