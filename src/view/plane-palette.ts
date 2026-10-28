@@ -722,13 +722,11 @@ export class PlanePaletteView implements View {
 			coords = positionToOklch(this.roles, xFraction, yFraction, sliderValue, this.globalMaxChroma)
 		}
 
-		if (coords === undefined || !this.quantize) {
-			return coords
-		}
-
-		// Posterize to the nearest CSS named color's own color, so the plane shows
-		// the exact patches a named-color binding will write back
-		return nearestKeywordOklch(coords[0], coords[1], coords[2])
+		// When quantizing, posterize to the nearest CSS named color's own color, so
+		// the plane shows the exact patches a named-color binding will write back
+		return coords === undefined || !this.quantize
+			? coords
+			: nearestKeywordOklch(coords[0], coords[1], coords[2])
 	}
 
 	private positionFor(iterValue: number, bandValue: number, widestBand?: [number, number]): Point {

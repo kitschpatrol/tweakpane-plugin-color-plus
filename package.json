@@ -42,15 +42,14 @@
 		"build:dev": "tsdown",
 		"build:dts": "shx rm -rf ./dist/types && tsc --project tsconfig.dts.json",
 		"build:prod": "cross-env BUILD=production tsdown",
-		"clean-deep": "shx rm -f pnpm-lock.yaml && git clean -fdX -e !.claude/",
+		"clean-deep": "shx rm -f pnpm-lock.yaml && git clean -fdX",
 		"dev": "vite",
 		"dev:cdn": "poptab && vite ./demo/cdn --open",
 		"dev:npm": "poptab && vite ./demo/npm --open",
 		"dev:playground": "poptab && vite ./demo/playground --open",
 		"dev:screenshot": "poptab && vite ./demo/screenshot --open",
-		"fix": "ksc fix",
-		"lint": "ksc lint",
-		"prepare": "skills experimental_sync -y -f",
+		"fix": "pnpm build && ksc fix",
+		"lint": "pnpm build && ksc lint",
 		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm build && pnpm publish --otp $(op item get npm --otp)",
 		"start": "run-p watch dev",
 		"test": "vitest run",
@@ -64,7 +63,7 @@
 		"@tweakpane/core": "^2.0.5"
 	},
 	"devDependencies": {
-		"@kitschpatrol/shared-config": "^8.13.1",
+		"@kitschpatrol/shared-config": "^8.14.0",
 		"@types/node": "~22.0.3",
 		"@vitest/coverage-v8": "^5.0.3",
 		"autoprefixer": "^10.6.1",
@@ -77,7 +76,6 @@
 		"postcss": "^8.5.29",
 		"sass": "^1.105.1",
 		"shx": "^0.4.0",
-		"skills": "^1.7.2",
 		"tsdown": "^0.23.1",
 		"tweakpane": "^4.0.5",
 		"typescript": "~6.0.3",
@@ -87,7 +85,7 @@
 	"peerDependencies": {
 		"tweakpane": "^4.0.0"
 	},
-	"packageManager": "pnpm@12.11.2",
+	"packageManager": "pnpm@12.15.0",
 	"engines": {
 		"node": "^22.0.0 || ^24.0.0 || >=26.0.0"
 	},

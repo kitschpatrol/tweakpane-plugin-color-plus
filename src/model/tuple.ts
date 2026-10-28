@@ -20,12 +20,8 @@ function isColorTuple(value: unknown): value is ColorPlusValueRgbaTuple | ColorP
 		.slice(0, 3)
 		.every((v): v is null | number => v === null || typeof v === 'number')
 
-	if (!validRgb) {
-		return false
-	}
-
 	// If length is 4, ensure alpha is a number (not null)
-	return value.length !== 4 || typeof value[3] === 'number'
+	return validRgb && (value.length !== 4 || typeof value[3] === 'number')
 }
 
 /**

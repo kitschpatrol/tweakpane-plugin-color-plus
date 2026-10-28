@@ -55,7 +55,7 @@ export function numberToColor(
  * input, so a sub-step edit writes back the original byte instead of dropping
  * to the one below.
  */
-// eslint-disable-next-line unicorn/prefer-default-parameters -- a default parameter only replaces undefined; colorjs.io alpha can be null
+
 function toByte(unit: null | number): number {
 	return Math.round(constrainRange(unit ?? 0, 0, 1) * 255)
 }

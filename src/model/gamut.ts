@@ -70,11 +70,7 @@ export function maxChroma(l: number, h: number, gamutId: string, ceiling = CHROM
 	// collapses real OKLCH chroma into sub-epsilon RGB coords (ProPhoto admits
 	// ~0.001 at black). Left in, those phantom slivers hand the stretch
 	// normalization inconsistent per-gamut bands at the poles.
-	if (l <= 0 || l >= 1) {
-		return 0
-	}
-
-	if (!probeInGamut(l, 0, h, gamutId)) {
+	if (l <= 0 || l >= 1 || !probeInGamut(l, 0, h, gamutId)) {
 		return 0
 	}
 

@@ -32,7 +32,6 @@ import { serializeKeyword } from './keywords.js'
 // - In the CSS 4 spec
 // - Available in CSS function() style colors
 // - Used by Tweakpane's original implementation
-/* eslint-disable unicorn/no-top-level-side-effects -- Registration must happen at import time; package.json declares `sideEffects: true` so bundlers keep it */
 
 // Colorjs ships the keyword (CSS named-color) format parse-only; attaching a
 // serializer before registration makes canSerialize() truthy, so named colors
@@ -59,7 +58,6 @@ ColorJsColorSpace.register(sRGB_Linear) // Srgb-linear
 ColorJsColorSpace.register(sRGB) // Rgb(), rgba(), srgb
 ColorJsColorSpace.register(XYZ_D50) // Xyz-d50
 ColorJsColorSpace.register(XYZ_D65) // Xyz, xyz-d65
-/* eslint-enable unicorn/no-top-level-side-effects */
 
 export type ColorType = 'float' | 'int'
 
@@ -370,13 +368,9 @@ export function isStringFormat(format: ColorFormat['format']): format is StringF
  */
 export function formatIsSerializable(format: ColorFormat): boolean {
 	// The parse-time Format instance knows (canSerialize returns the custom
-	// serialize function itself when one exists, hence the coercion)
-	if (isStringFormat(format.format)) {
-		return Boolean(format.format.format.canSerialize())
-	}
-
-	// Assume all other formats are serializable
-	return true
+	// serialize function itself when one exists, hence the coercion). Assume all
+	// other formats are serializable.
+	return !isStringFormat(format.format) || Boolean(format.format.format.canSerialize())
 }
 
 /**
