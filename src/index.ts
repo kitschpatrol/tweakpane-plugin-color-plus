@@ -5,7 +5,8 @@ import { ColorPlusInputPlugin } from './plugin.js'
 export const id = 'color-plus'
 
 // Replaced at build time with the compiled stylesheet (see tsdown.config.ts)
-export const css = '__css__'
+// eslint-disable-next-line ts/no-inferrable-types -- Emit string in declarations, since the literal is replaced at build time
+export const css: string = '__css__'
 
 // Export plugins array with explicit typing
 export const plugins: TpPlugin[] = [ColorPlusInputPlugin]
