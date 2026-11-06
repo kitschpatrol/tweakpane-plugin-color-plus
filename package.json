@@ -50,7 +50,7 @@
 		"dev:screenshot": "poptab && vite ./demo/screenshot --open",
 		"fix": "pnpm build && ksc fix",
 		"lint": "pnpm build && ksc lint",
-		"release": "bumpp --commit 'Release: %s' --tag '%s' && pnpm build && pnpm publish --otp $(op item get npm --otp)",
+		"release": "bumpp --commit 'Release: %s' --tag '%s' --all --execute 'chagent' && pnpm build && pnpm publish --otp $(op item get npm --otp)",
 		"start": "run-p watch dev",
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
@@ -63,6 +63,7 @@
 		"@tweakpane/core": "^2.0.5"
 	},
 	"devDependencies": {
+		"@kitschpatrol/chagent": "0.4.0",
 		"@kitschpatrol/shared-config": "^8.14.0",
 		"@types/node": "~22.12.0",
 		"@vitest/coverage-v8": "^5.0.5",

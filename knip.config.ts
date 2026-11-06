@@ -8,4 +8,7 @@ export default knipConfig({
 		'src/scratch.ts',
 	],
 	ignore: ['src/sass/plugin.scss'],
+	ignoreDependencies: [
+		'@kitschpatrol/chagent', // Typically invoked through bumpp's --execute argument, which Knip doesn't parse
+	],
 })

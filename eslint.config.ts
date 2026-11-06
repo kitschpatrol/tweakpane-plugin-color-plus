@@ -2,6 +2,7 @@ import { eslintConfig } from '@kitschpatrol/eslint-config'
 
 export default eslintConfig(
 	{
+		ignores: ['**/changelog.md'],
 		rules: {
 			// The default autofix adds the ES2024 `v` flag, beyond the ES2022 browser build target
 			'require-unicode-regexp': ['error', { requireFlag: 'u' }],
