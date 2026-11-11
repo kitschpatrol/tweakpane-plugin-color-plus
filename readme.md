@@ -35,50 +35,41 @@ Its API surface is a clean superset of Tweakpane's [built-in color input](https:
 
 I originally developed this for the benefit of [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui) and [Tweakpane CSS](https://github.com/kitschpatrol/tweakpane-css), but I've found myself reaching for it in vanilla Tweakpane projects as well.
 
-Color Plus is developed in this repository. Its plugin-development starting point is documented in the [upstream Tweakpane template README](https://github.com/tweakpane/plugin-template/blob/main/README.md).
-
-## Changes from the upstream template
-
-- A color input with wide-gamut support, additional color formats, and the public `ColorPlusModel` API replaces the sample input.
-- Four ESM distributions provide bundled core by default and shared core through `/lite`, each with a minified variant and TypeScript declarations.
-- tsdown handles JavaScript and inline SCSS; Vite serves the named demos under `demo/`, and Vitest covers plugin behavior.
-- ksc manages linting and formatting, with SCSS configuration local to this repository. mdat generates metadata, examples, and build-size documentation.
-- The release script runs chagent before building and publishing. Maintenance workflows include Tweakpane-specific checks.
-
 ## Getting started
-
-<!-- dependencies -->
 
 ### Dependencies
 
-- [Node.js](https://nodejs.org/) 22.0.0 or newer (specifically `^22.0.0 || ^24.0.0 || >=26.0.0`)
-- [tweakpane](https://www.npmjs.com/package/tweakpane) `^4.0.0` _(peer dependency)_
+The plugin requires [Tweakpane 4](https://www.npmjs.com/package/tweakpane).
 
-<!-- /dependencies -->
+If you're using the ["lite" build](#the-lite-plugin-build) of the plugin without a bundler, you'll need to provide the [@tweakpane/core](https://www.npmjs.com/package/@tweakpane/core) library as well.
 
-<!-- install -->
+If you're using Svelte 4 or 5 as a front-end library, take a look at [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui), which wraps Tweakpane in a set of Svelte-friendly components, including the [`<ColorPlus>`](https://kitschpatrol.com/svelte-tweakpane-ui/docs/components/colorplus) control from this plugin.
 
 ### Installation
 
-Add it to your project:
+#### NPM
 
 ```sh
 npm install tweakpane-plugin-color-plus
 ```
 
-<!-- /install -->
+#### CDN
 
-For direct browser imports, use the [CDN example](#from-cdn). The [lite build](#the-lite-plugin-build) needs an import map for `@tweakpane/core` when used without a bundler.
+The package is published as an ES module, so import it from a module script (see the [complete example](#from-cdn) below):
 
-For Svelte applications, [Svelte Tweakpane UI](https://kitschpatrol.com/svelte-tweakpane-ui) provides a [`<ColorPlus>` component](https://kitschpatrol.com/svelte-tweakpane-ui/docs/components/colorplus).
+```html
+<script type="module">
+  import * as TweakpanePluginColorPlus from 'https://cdn.jsdelivr.net/npm/tweakpane-plugin-color-plus'
+</script>
+```
 
-## Usage
+### Usage
 
 Import and register the plugin, then pass `view: 'color-plus'` in the params of each `addBinding` call that should use it.
 
 Note that the plugin does not automatically take over color values, you must pass `view` explicitly on the bindings you'd like to control with Color Plus.
 
-### From NPM
+#### From NPM
 
 <!-- code({ file: "./demo/npm/index.js" }) -->
 
@@ -103,7 +94,7 @@ pane.on('change', () => {
 
 <!-- /code -->
 
-### From CDN
+#### From CDN
 
 <!-- code({ file: "./demo/cdn/index.html" }) -->
 
@@ -484,7 +475,7 @@ const functions = {
 
 The plugin uses Color.js' [procedural API](https://colorjs.io/docs/procedural) and [only imports a subset of available color spaces](#color-spaces) in the interest of performance and bundle size optimization.
 
-Color.js is bundled and tree-shaken in all four JavaScript files. The lite files leave `@tweakpane/core` external; Tweakpane itself is a peer dependency in every variant.
+This dependency is bundled and tree-shaken, so there are no external third-party dependencies in the plugin (except Tweakpane itself).
 
 #### Other JavaScript color libraries
 
@@ -496,72 +487,38 @@ I investigated a number of libraries to back the internal color representation i
 
 - [thi.ng/color](https://github.com/thi-ng/umbrella/tree/develop/packages/color#readme) by [Karsten Schmidt](https://mastodon.thi.ng/@toxi)
 
-## Distribution
+#### The "lite" plugin build
 
-The build writes four files directly under `dist/`:
+The [Rollup](https://rollupjs.org) configuration provided in the [Tweakpane plugin template](https://github.com/tweakpane/plugin-template) does not externalize [`@tweakpane/core`](https://github.com/cocopon/tweakpane/tree/main/packages/core) as a production dependency.
 
-| File                                      | Core     | Minified |
-| ----------------------------------------- | -------- | -------- |
-| `tweakpane-plugin-color-plus.js`          | Bundled  | No       |
-| `tweakpane-plugin-color-plus.min.js`      | Bundled  | Yes      |
-| `tweakpane-plugin-color-plus.lite.js`     | External | No       |
-| `tweakpane-plugin-color-plus.lite.min.js` | External | Yes      |
+Instead, it gets built into the single-file plugin artifact, which is typically what's published to NPM and imported by plugin consumers. This makes it easy to import as an ES module from a URL, but means that larger projects importing multiple Tweakpane plugins end up with duplicate bundled copies of the `@tweakpane/core` code, adding about \~100 Kb to the final minified build for each plugin after the first.
 
-The package root resolves to `.js`; `/lite` resolves to `.lite.js`. Minified files support direct browser/CDN imports. Both package entries share `dist/tweakpane-plugin-color-plus.d.ts`, bundled by tsdown. All JavaScript and declarations omit source maps.
+To avoid this size penalty, Color Plus includes a "lite" version of the build, which is configured to externalize the `@tweakpane/core` dependency. This allows multiple Tweakpane plugins to share a single instance of the `@tweakpane/core`. (I also maintain [forks of a number of popular Tweakpane plugins](https://kitschpatrol.com/svelte-tweakpane-ui/docs/plugins#bundled-plugins) with the `@tweakpane/core` dependency externalization optimization.)
 
-The package exports only the root, `/lite`, and `/package.json`. Import public types such as `ColorPlusInputParams` from the root or `/lite`; `dist/` paths are internal and are not package exports.
-
-### The "lite" plugin build
-
-The default build bundles the core helpers used by the plugin, following the [upstream template](https://github.com/tweakpane/plugin-template/blob/main/README.md). Applications using several plugins can share core by choosing their `/lite` entries consistently:
+You can import the "lite" version like this:
 
 ```ts
 import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
 ```
 
-Direct URL imports of lite files require an [import map](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap) for `@tweakpane/core`. Tweakpane remains an external peer dependency; Color.js stays bundled in both builds and installed for public type references.
+If you're not using a bundler, direct ESM imports from URLs can still work by defining the `@tweakpane/core` dependency manually in an [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script/type/importmap).
 
-Bundled and lite entries contain separate instances of exported classes. Use one entry consistently when relying on class identity. The size difference depends on the core code each plugin uses; the table below is generated from the current build.
+Or, if you're just using a single plugin and would rather not think about it, a "classic" all-inclusive build is exported by default to match the typical behavior of a Tweakpane plugin:
 
-<!-- size-table({ files: ["./dist/tweakpane-plugin-color-plus.js", "./dist/tweakpane-plugin-color-plus.min.js", "./dist/tweakpane-plugin-color-plus.lite.js", "./dist/tweakpane-plugin-color-plus.lite.min.js"], precision: 1 }) -->
-
-| File                                    | Original | Gzip    | Brotli  |
-| --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.js          | 280.4 kB | 73.6 kB | 60.8 kB |
-| tweakpane-plugin-color-plus.min.js      | 130.3 kB | 42.7 kB | 37.1 kB |
-| tweakpane-plugin-color-plus.lite.js     | 243.1 kB | 66.1 kB | 54.4 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 112.4 kB | 38.2 kB | 33.3 kB |
-
-<!-- /size-table -->
-
-## Development
-
-<!-- development-dependencies -->
-
-### Development dependencies
-
-- [Node.js](https://nodejs.org/) ^24.16.0 || >=26.3.0
-- [pnpm](https://pnpm.io/) 12.16.1
-
-<!-- /development-dependencies -->
-
-```sh
-pnpm install
-pnpm build
-pnpm dev
+```ts
+import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus'
 ```
 
-The default source demo is `demo/example/`. Named CDN, npm, playground, and screenshot demos also live under `demo/`; `pnpm dev:npm` builds first to exercise the published package entry. Automated tests live in `test/`.
+You can see the effect of externalization on the minified library's size below:
 
-`pnpm watch` rebuilds JavaScript, imported Sass partials, and the bundled declarations. Internal TypeScript imports are extensionless; tsdown resolves them when building the package. `pnpm test` runs Vitest, and `pnpm test:coverage` measures coverage. `pnpm fix` and `pnpm lint` run ksc. Build first: mdat reads the built files for the size table and embeds the npm/CDN examples from their demo files.
+<!-- size-table({ files: ["./dist/tweakpane-plugin-color-plus.min.js", "./dist/tweakpane-plugin-color-plus.lite.min.js"] }) -->
 
-SCSS lint support is configured locally using `stylelint-config-standard-scss`. Keep tsdown and `@tsdown/css` on matching versions while CSS support is experimental. Styles are exported as a string and installed by Tweakpane during plugin registration.
+| File                                    | Original | Gzip  | Brotli |
+| --------------------------------------- | -------- | ----- | ------ |
+| tweakpane-plugin-color-plus.min.js      | 220 kB   | 60 kB | 51 kB  |
+| tweakpane-plugin-color-plus.lite.min.js | 112 kB   | 38 kB | 33 kB  |
 
-The release script runs chagent through bumpp before building and publishing. Maintenance workflows include Tweakpane-specific compatibility instructions.
-
-## Versioning
-
-This original plugin uses its own release versions, without the `fork` suffix used by the related plugin forks. See the [changelog](changelog.md) for release history.
+<!-- /size-table -->
 
 ## Maintainers
 
@@ -575,7 +532,7 @@ Thanks also to [Lea Verou](https://lea.verou.me/) and [contributors](https://git
 
 Ryan Kiley's recent [tweakpane-plugin-wide-gamut](https://github.com/ryankiley/tweakpane-plugin-wide-gamut) inspired me to finally get around to updating the view layer of this plugin to handle wide color. Ultimately, the [OKLCH Color Picker & Converter](https://oklch.com/) informed the revised view implementation, in combination with Björn Ottosson's [color picker comparison](https://bottosson.github.io/misc/colorpicker/) and accompanying [blog post](https://bottosson.github.io/posts/colorpicker/).
 
-<!-- contributing -->
+<!-- footer -->
 
 ## Contributing
 
@@ -585,12 +542,8 @@ Please open an issue to discuss changes before submitting a pull request. Unsoli
 
 This repository uses [@kitschpatrol/shared-config](https://github.com/kitschpatrol/shared-config) (via its `ksc` CLI) for linting and formatting, plus [MDAT](https://github.com/kitschpatrol/mdat) for readme placeholder expansion.
 
-<!-- /contributing -->
-
-<!-- license -->
-
 ## License
 
 [MIT](license.txt) © [Eric Mika](https://ericmika.com)
 
-<!-- /license -->
+<!-- /footer -->
