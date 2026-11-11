@@ -63,6 +63,14 @@ function probeInGamut(l: number, c: number, h: number, gamutId: string): boolean
  * Largest in-gamut OKLCH chroma at lightness `l` and hue `h` for `gamutId`, by
  * bisection. Returns 0 when the gamut doesn't contain the achromatic point at
  * this lightness (an empty row).
+ *
+ * The bisection assumes the in-gamut chroma at a fixed lightness and hue is a
+ * single interval. Near the blue corner of sRGB and Rec2020 it is not: the
+ * constant-hue slice leaves the gamut and touches it again only along the
+ * black-to-blue edge, a line that no bisection or raster can reach, so this
+ * returns the boundary of the main body and the plane cannot show pure blue.
+ * `clampToGamut` checks a color itself first, so sRGB colors on that edge are
+ * not shed.
  */
 export function maxChroma(l: number, h: number, gamutId: string, ceiling = CHROMA_CEILING): number {
 	// The exact black/white poles are single achromatic points, so any chroma
