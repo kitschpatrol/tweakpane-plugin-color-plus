@@ -1,12 +1,12 @@
 import { expect, it } from 'vitest'
 // Registers the colorjs color spaces (oklch, srgb, p3, rec2020, ...) by side effect
-import '../src/model/shared.js'
-import { maxChroma } from '../src/model/gamut.js'
+import '../src/model/shared'
+import { maxChroma } from '../src/model/gamut'
 import {
 	buildOkhsvProfile,
 	lightnessChromaToOkhsv,
 	okhsvToLightnessChroma,
-} from '../src/model/okhsv.js'
+} from '../src/model/okhsv'
 
 it('round-trips saturation/value through a hue profile', () => {
 	const profile = buildOkhsvProfile(30, 'srgb')

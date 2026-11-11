@@ -1,11 +1,11 @@
 import { BindingTarget, createValue, ViewProps } from '@tweakpane/core'
 import { afterEach, expect, it, vi } from 'vitest'
-import { ColorController } from '../src/controller/color.js'
-import { css, id, plugins } from '../src/index.js'
-import { ColorPlus } from '../src/model/color-plus.js'
-import { maxChroma } from '../src/model/gamut.js'
-import { ColorPlusInputPlugin } from '../src/plugin.js'
-import { spyOnWarnings } from './helpers.js'
+import { ColorController } from '../src/controller/color'
+import { css, id, plugins } from '../src/index'
+import { ColorPlus } from '../src/model/color-plus'
+import { maxChroma } from '../src/model/gamut'
+import { ColorPlusInputPlugin } from '../src/plugin'
+import { spyOnWarnings } from './helpers'
 
 // The controller builds DOM views; stub it to capture the configuration the
 // plugin hands it, which carries the text parser and formatter

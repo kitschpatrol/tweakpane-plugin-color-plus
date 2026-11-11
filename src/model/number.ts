@@ -83,6 +83,10 @@ export function colorToNumber(
 	)
 }
 
+/**
+ * Formats a color as a hexadecimal number literal such as `0xff0000`, padded to
+ * include alpha when the format or override calls for it.
+ */
 export function colorToNumberString(
 	color: ColorPlusObject,
 	format: NumberColorFormat,

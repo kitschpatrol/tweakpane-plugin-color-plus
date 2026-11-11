@@ -20,64 +20,58 @@
 		"email": "eric@ericmika.com",
 		"url": "https://ericmika.com"
 	},
-	"sideEffects": true,
+	"sideEffects": false,
 	"type": "module",
 	"exports": {
 		".": {
-			"types": "./dist/types/index.d.ts",
+			"types": "./dist/tweakpane-plugin-color-plus.d.ts",
 			"default": "./dist/tweakpane-plugin-color-plus.js"
 		},
 		"./lite": {
-			"types": "./dist/types/index.d.ts",
+			"types": "./dist/tweakpane-plugin-color-plus.d.ts",
 			"default": "./dist/tweakpane-plugin-color-plus.lite.js"
-		}
+		},
+		"./package.json": "./package.json"
 	},
-	"main": "dist/tweakpane-plugin-color-plus.js",
-	"types": "dist/types/index.d.ts",
+	"main": "./dist/tweakpane-plugin-color-plus.js",
+	"module": "./dist/tweakpane-plugin-color-plus.js",
+	"types": "./dist/tweakpane-plugin-color-plus.d.ts",
 	"files": [
 		"dist"
 	],
 	"scripts": {
-		"build": "run-p build:*",
-		"build:dev": "tsdown",
-		"build:dts": "shx rm -rf ./dist/types && tsc --project tsconfig.dts.json",
-		"build:prod": "cross-env BUILD=production tsdown",
+		"build": "tsdown",
 		"clean-deep": "shx rm -f pnpm-lock.yaml && git clean -fdX",
 		"dev": "vite",
-		"dev:cdn": "poptab && vite ./demo/cdn --open",
-		"dev:npm": "poptab && vite ./demo/npm --open",
-		"dev:playground": "poptab && vite ./demo/playground --open",
-		"dev:screenshot": "poptab && vite ./demo/screenshot --open",
-		"fix": "pnpm build && ksc fix",
-		"lint": "pnpm build && ksc lint",
+		"dev:cdn": "vite --open /demo/cdn/",
+		"dev:npm": "pnpm build && vite --open /demo/npm/",
+		"dev:playground": "vite --open /demo/playground/",
+		"dev:screenshot": "vite --open /demo/screenshot/",
+		"fix": "ksc fix",
+		"lint": "ksc lint",
 		"release": "bumpp --commit 'Release: %s' --tag '%s' --all --execute 'chagent' && pnpm build && pnpm publish --otp $(op item get npm --otp)",
-		"start": "run-p watch dev",
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
-		"watch": "run-p watch:*",
-		"watch:dts": "onchange --initial --kill \"src/**/*.ts\" -- pnpm build:dts",
-		"watch:sass": "onchange --initial --kill \"src/sass/**/*.scss\" -- pnpm build:dev",
-		"watch:ts": "onchange --initial --kill \"src/**/*.ts\" -- pnpm build:dev"
+		"watch": "tsdown --watch"
 	},
 	"dependencies": {
-		"@tweakpane/core": "^2.0.5"
+		"@tweakpane/core": "^2.0.5",
+		"colorjs.io": "^0.7.1"
 	},
 	"devDependencies": {
+		"@arethetypeswrong/core": "^0.18.5",
 		"@kitschpatrol/chagent": "^0.5.0",
-		"@kitschpatrol/shared-config": "^8.14.0",
+		"@kitschpatrol/shared-config": "^8.14.1",
+		"@tsdown/css": "0.23.4",
 		"@types/node": "~22.12.0",
 		"@vitest/coverage-v8": "^5.0.5",
-		"autoprefixer": "^10.6.2",
 		"bumpp": "^12.3.0",
-		"colorjs.io": "^0.7.1",
-		"cross-env": "^10.1.0",
-		"npm-run-all": "^4.1.5",
-		"onchange": "^7.1.0",
-		"poptab": "^1.2.2",
-		"postcss": "^8.5.32",
+		"happy-dom": "^21.0.4",
+		"publint": "^0.3.25",
 		"sass": "^1.107.1",
 		"shx": "^0.4.0",
-		"tsdown": "^0.23.4",
+		"stylelint-config-standard-scss": "^17.0.0",
+		"tsdown": "0.23.4",
 		"tweakpane": "^4.0.5",
 		"typescript": "~6.0.3",
 		"vite": "^8.3.5",

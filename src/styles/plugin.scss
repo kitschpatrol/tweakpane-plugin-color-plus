@@ -1,5 +1,4 @@
-/* stylelint-disable */
-@use '../../node_modules/@tweakpane/core/lib/sass/tp';
+@use '@tweakpane/core/lib/sass/tp';
 
 // The OKLCH picker plane reuses Tweakpane's native SV-palette classes (tp-svpv on
 // the container, tp-svpv_c on the canvas, tp-svpv_m on the marker) so its
@@ -22,10 +21,10 @@
 // Minimum-representable-gamut readout, inset into the plane's bottom-left corner.
 // Font size inherits from the pane; color and the corner inset come from the theme.
 .#{tp.$prefix}-plpv_label {
-	bottom: tp.cssVar('container-v-padding');
-	color: tp.cssVar('label-fg');
-	left: tp.cssVar('container-h-padding');
-	line-height: 1;
 	pointer-events: none;
 	position: absolute;
+	bottom: tp.cssVar('container-v-padding');
+	left: tp.cssVar('container-h-padding');
+	line-height: 1;
+	color: tp.cssVar('label-fg');
 }

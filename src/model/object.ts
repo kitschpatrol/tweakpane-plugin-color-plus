@@ -310,6 +310,10 @@ export function objectToColor(
 	return undefined
 }
 
+/**
+ * Converts a color to a plain object with the given object format's channel
+ * keys, or returns `undefined` for an unsupported color space.
+ */
 export function colorToObject(
 	color: ColorPlusObject,
 	format: ObjectColorFormat,
@@ -362,6 +366,10 @@ export function colorToObject(
 	return result
 }
 
+/**
+ * Formats a color as an object literal string in the given object format, or
+ * returns `undefined` for an unsupported color space.
+ */
 export function colorToObjectString(
 	color: ColorPlusObject,
 	format: ObjectColorFormat,

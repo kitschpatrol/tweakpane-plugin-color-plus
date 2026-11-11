@@ -26,7 +26,7 @@ import {
 	XYZ_D50,
 	XYZ_D65,
 } from 'colorjs.io/fn'
-import { serializeKeyword } from './keywords.js'
+import { serializeKeyword } from './keywords'
 
 // Loading color spaces that are either:
 // - In the CSS 4 spec
@@ -214,6 +214,9 @@ export function convert(
 	return getColorPlusObjectFromColorJsObject(converted)
 }
 
+/**
+ * Copies the space, coordinates, and alpha of one color into another in place.
+ */
 export function setFromColorPlusObject(
 	targetColor: ColorPlusObject,
 	sourceColor: ColorPlusObject,
@@ -236,6 +239,9 @@ export function getColorPlusObjectFromColorJsObject(
 	}
 }
 
+/**
+ * Returns a copy of a color with its own coordinates array.
+ */
 export function copyColorPlusObject(color: ColorPlusObject): ColorPlusObject {
 	return {
 		alpha: color.alpha,
@@ -244,11 +250,17 @@ export function copyColorPlusObject(color: ColorPlusObject): ColorPlusObject {
 	}
 }
 
+/**
+ * Checks whether a `#rgba` or `#rrggbbaa` hex string includes an alpha channel.
+ */
 export function hexHasAlpha(hex: string): boolean {
 	return hex.length === 5 || hex.length === 9
 }
 
-// Generic serialization...
+/**
+ * Serializes a color with any supported string, number, object, or tuple
+ * format.
+ */
 export function serialize(
 	color: ColorPlusObject,
 	format: ColorFormat,
@@ -283,6 +295,9 @@ function getColorJsColorSpaceById(spaceId: ColorSpaceId): ColorJsColorSpace | un
 	}
 }
 
+/**
+ * Returns the `[min, max]` range of a channel in a color space.
+ */
 export function getRangeForChannel(spaceId: ColorSpaceId, channelIndex: number): [number, number] {
 	const space = getColorJsColorSpaceById(spaceId)
 	if (space === undefined) {
@@ -347,6 +362,10 @@ export function roundToWhole(value: number): number {
 	return Math.round(value) + 0
 }
 
+/**
+ * Formats a number with a fixed number of digits, clamped to 0–20, or with full
+ * precision when digits is undefined.
+ */
 export function formatNumber(value: number, digits: number | undefined): string {
 	return digits === undefined ? value.toString() : value.toFixed(Math.max(Math.min(digits, 20), 0))
 }
@@ -389,6 +408,9 @@ export function formatsShareShape(a: ColorFormat, b: ColorFormat): boolean {
 		: a.type === b.type
 }
 
+/**
+ * Checks whether two colors have the same space, coordinates, and alpha.
+ */
 export function colorPlusObjectsAreEqual(a: ColorPlusObject, b: ColorPlusObject): boolean {
 	return (
 		a.spaceId === b.spaceId &&
@@ -399,6 +421,10 @@ export function colorPlusObjectsAreEqual(a: ColorPlusObject, b: ColorPlusObject)
 	)
 }
 
+/**
+ * Maps a channel value from its color space's range to 0–1. Null (a missing
+ * coordinate) passes through.
+ */
 export function normalizeCoord(
 	space: ColorSpaceId,
 	channelIndex: number,
@@ -412,6 +438,10 @@ export function normalizeCoord(
 	return mapRange(value, range[0], range[1], 0, 1)
 }
 
+/**
+ * Maps a 0–1 channel value back to its color space's range. Null (a missing
+ * coordinate) passes through.
+ */
 export function denormalizeCoord(
 	space: ColorSpaceId,
 	channelIndex: number,

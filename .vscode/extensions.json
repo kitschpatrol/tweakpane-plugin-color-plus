@@ -4,8 +4,6 @@
 		"esbenp.prettier-vscode",
 		"dbaeumer.vscode-eslint",
 		"stylelint.vscode-stylelint",
-		"astro-build.astro-vscode",
-		"svelte.svelte-vscode",
 		"unifiedjs.vscode-mdx"
 	]
 }

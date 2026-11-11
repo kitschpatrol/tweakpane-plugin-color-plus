@@ -1,5 +1,10 @@
 import { stylelintConfig } from '@kitschpatrol/stylelint-config'
 
 export default stylelintConfig({
-	ignoreFiles: ['src/sass/plugin.scss'],
+	overrides: [
+		{
+			extends: ['stylelint-config-standard-scss'],
+			files: ['**/*.scss'],
+		},
+	],
 })

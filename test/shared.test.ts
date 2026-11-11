@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import type { ColorPlusObject, ColorSpaceId } from '../src/model/shared.js'
+import type { ColorPlusObject, ColorSpaceId } from '../src/model/shared'
 import {
 	convert,
 	denormalizeCoord,
@@ -8,8 +8,8 @@ import {
 	normalizeCoord,
 	serialize,
 	toDecimalPrecision,
-} from '../src/model/shared.js'
-import { spyOnWarnings } from './helpers.js'
+} from '../src/model/shared'
+import { spyOnWarnings } from './helpers'
 
 afterEach(() => {
 	vi.restoreAllMocks()

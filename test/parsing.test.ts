@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { ColorPlus } from '../src/model/color-plus.js'
-import { spyOnWarnings } from './helpers.js'
+import { ColorPlus } from '../src/model/color-plus'
+import { spyOnWarnings } from './helpers'
 
 afterEach(() => {
 	vi.restoreAllMocks()

@@ -6,11 +6,11 @@ import type { ColorFormat, ColorSpaceId, ColorType, GamutMethod } from './model/
 import type { ColorPlusInputParams } from './plugin'
 import type { ColorTextsMode } from './view/color-texts'
 import type { GamutLines } from './view/plane-palette'
-import { PLANE_LAYOUTS } from './model/channel.js'
-import { clampToGamut, normalizeGamutId, widestGamut } from './model/gamut.js'
-import { nearestKeywordSrgb } from './model/keywords.js'
-import { isStringFormat } from './model/shared.js'
-import { connectValues } from './model/value-sync.js'
+import { PLANE_LAYOUTS } from './model/channel'
+import { clampToGamut, normalizeGamutId, widestGamut } from './model/gamut'
+import { nearestKeywordSrgb } from './model/keywords'
+import { isStringFormat } from './model/shared'
+import { connectValues } from './model/value-sync'
 
 /**
  * Option defaults that adapt to the gamut reach of the initially bound color's

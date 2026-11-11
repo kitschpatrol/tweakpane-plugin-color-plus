@@ -1,7 +1,7 @@
 import type { Value, View, ViewProps } from '@tweakpane/core'
 import { ClassName, mapRange } from '@tweakpane/core'
-import type { ColorPlus } from '../model/color-plus.js'
-import type { ColorFormat } from '../model/shared.js'
+import type { ColorPlus } from '../model/color-plus'
+import type { ColorFormat } from '../model/shared'
 
 /**
  * Serialized as oklch like the swatch, so the browser paints wide colors itself

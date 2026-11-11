@@ -4,7 +4,7 @@ import { ColorPlus } from '../src/model/color-plus'
 import { colorToObject, colorToObjectString } from '../src/model/object'
 import { formatIsSerializable } from '../src/model/shared'
 import { colorToString } from '../src/model/string'
-import { spyOnWarnings } from './helpers.js'
+import { spyOnWarnings } from './helpers'
 
 afterEach(() => {
 	vi.restoreAllMocks()

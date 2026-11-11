@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest'
-import type { ChannelTextConfig, ColorTextConfig } from '../src/controller/color-texts.js'
-import { channelValue, parseColorText, withChannelValue } from '../src/controller/color-texts.js'
-import { ColorPlus } from '../src/model/color-plus.js'
-import { maxChroma } from '../src/model/gamut.js'
+import type { ChannelTextConfig, ColorTextConfig } from '../src/controller/color-texts'
+import { channelValue, parseColorText, withChannelValue } from '../src/controller/color-texts'
+import { ColorPlus } from '../src/model/color-plus'
+import { maxChroma } from '../src/model/gamut'
 
 const hex = { alpha: false, format: 'hex', space: 'srgb', type: 'string' } as const
 

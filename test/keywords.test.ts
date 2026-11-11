@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest'
 // Registers the colorjs color spaces by side effect
-import '../src/model/shared.js'
-import { ColorPlus } from '../src/model/color-plus.js'
-import { nearestKeywordOklch, nearestKeywordSrgb } from '../src/model/keywords.js'
+import '../src/model/shared'
+import { ColorPlus } from '../src/model/color-plus'
+import { nearestKeywordOklch, nearestKeywordSrgb } from '../src/model/keywords'
 
 function oklch(value: string): [number, number, number] {
 	const [l, c, h] = ColorPlus.create(value)!.getAll('oklch')

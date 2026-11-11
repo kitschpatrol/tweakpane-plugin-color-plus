@@ -1,7 +1,7 @@
 import { inGamut as colorJsInGamut } from 'colorjs.io/fn'
 import { expect, it } from 'vitest'
-import { ColorPlus } from '../src/model/color-plus.js'
-import { clampColorToGamut } from '../src/utilities.js'
+import { ColorPlus } from '../src/model/color-plus'
+import { clampColorToGamut } from '../src/utilities'
 
 it('converts to a simple string', () => {
 	const c = ColorPlus.create('#f00')

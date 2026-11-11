@@ -1,7 +1,7 @@
 /* eslint-disable perfectionist/sort-objects */
 
 import { Pane } from 'tweakpane'
-import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
+import * as TweakpanePluginColorPlus from '../../src/index'
 
 const { ColorPlusModel } = TweakpanePluginColorPlus
 

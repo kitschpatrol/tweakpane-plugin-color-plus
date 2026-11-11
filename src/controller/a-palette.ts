@@ -7,8 +7,8 @@ import type {
 	ViewProps,
 } from '@tweakpane/core'
 import { getHorizontalStepKeys, getStepForKey, PointerHandler } from '@tweakpane/core'
-import type { ColorPlus } from '../model/color-plus.js'
-import { APaletteView } from '../view/a-palette.js'
+import type { ColorPlus } from '../model/color-plus'
+import { APaletteView } from '../view/a-palette'
 
 type Config = {
 	value: Value<ColorPlus>

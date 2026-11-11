@@ -17,15 +17,15 @@ import {
 	TextController,
 	ValueMap,
 } from '@tweakpane/core'
-import type { PaletteProjection, PlaneLayout } from '../model/channel.js'
-import type { ColorPlus } from '../model/color-plus.js'
-import type { ColorType, GamutMethod } from '../model/shared.js'
-import type { ColorTextsMode } from '../view/color-texts.js'
-import type { GamutLines } from '../view/plane-palette.js'
-import { clampColorToGamut, createKeywordDisplayValue } from '../utilities.js'
-import { ColorView } from '../view/color.js'
-import { ColorPickerController } from './color-picker.js'
-import { ColorSwatchController } from './color-swatch.js'
+import type { PaletteProjection, PlaneLayout } from '../model/channel'
+import type { ColorPlus } from '../model/color-plus'
+import type { ColorType, GamutMethod } from '../model/shared'
+import type { ColorTextsMode } from '../view/color-texts'
+import type { GamutLines } from '../view/plane-palette'
+import { clampColorToGamut, createKeywordDisplayValue } from '../utilities'
+import { ColorView } from '../view/color'
+import { ColorPickerController } from './color-picker'
+import { ColorSwatchController } from './color-swatch'
 
 type Config = {
 	colorType: ColorType

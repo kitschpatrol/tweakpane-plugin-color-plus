@@ -24,9 +24,9 @@ import type {
 	PaletteProjection,
 	PlaneBand,
 	PlaneLayout,
-} from '../model/channel.js'
-import type { ColorPlus } from '../model/color-plus.js'
-import type { OkhsvProfile } from '../model/okhsv.js'
+} from '../model/channel'
+import type { ColorPlus } from '../model/color-plus'
+import type { OkhsvProfile } from '../model/okhsv'
 import {
 	axisFractionToUnit,
 	LAYOUTS,
@@ -35,7 +35,7 @@ import {
 	unitToAxisFraction,
 	unitToValue,
 	valueToUnit,
-} from '../model/channel.js'
+} from '../model/channel'
 import {
 	computeGlobalMaxChroma,
 	GAMUT_LABELS,
@@ -45,13 +45,9 @@ import {
 	minimumGamut,
 	oklchToRgb,
 	widestGamut,
-} from '../model/gamut.js'
-import { nearestKeywordOklch } from '../model/keywords.js'
-import {
-	buildOkhsvProfile,
-	lightnessChromaToOkhsv,
-	okhsvToLightnessChroma,
-} from '../model/okhsv.js'
+} from '../model/gamut'
+import { nearestKeywordOklch } from '../model/keywords'
+import { buildOkhsvProfile, lightnessChromaToOkhsv, okhsvToLightnessChroma } from '../model/okhsv'
 
 const cn = ClassName('plp')
 // Reuse Tweakpane's native SV-palette classes so the canvas + marker inherit

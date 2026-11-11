@@ -1,13 +1,9 @@
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-	build: {
-		outDir: '../dist',
-	},
-	root: './demo/example',
-	server: {
-		open: '/index.html',
-	},
+	// Core's Sass helpers use deprecated functions, so only report this package's warnings.
+	css: { preprocessorOptions: { scss: { quietDeps: true } } },
+	server: { open: '/demo/example/' },
 	test: {
 		coverage: {
 			exclude: ['src/scratch.ts'],
@@ -15,6 +11,7 @@ export default defineConfig({
 			provider: 'v8',
 			reporter: ['text', 'html'],
 		},
-		root: './',
+		css: true,
+		environment: 'happy-dom',
 	},
 })

@@ -1,9 +1,9 @@
 import type { NumberTextView, View, ViewProps } from '@tweakpane/core'
 import { ClassName } from '@tweakpane/core'
-import type { APaletteView } from './a-palette.js'
-import type { ChannelSliderView } from './channel-slider.js'
-import type { ColorTextsView } from './color-texts.js'
-import type { PlanePaletteView } from './plane-palette.js'
+import type { APaletteView } from './a-palette'
+import type { ChannelSliderView } from './channel-slider'
+import type { ColorTextsView } from './color-texts'
+import type { PlanePaletteView } from './plane-palette'
 
 const cn = ClassName('colp')
 

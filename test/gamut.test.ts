@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 // Registers the colorjs color spaces (oklch, srgb, p3, rec2020, ...) by side effect
-import '../src/model/shared.js'
+import '../src/model/shared'
 import {
 	clampToGamut,
 	computeGlobalMaxChroma,
@@ -11,7 +11,7 @@ import {
 	normalizeGamutId,
 	oklchToRgb,
 	widestGamut,
-} from '../src/model/gamut.js'
+} from '../src/model/gamut'
 
 it('normalizes colorjs ids and CSS aliases, rejecting unknowns', () => {
 	expect(normalizeGamutId('srgb')).toBe('srgb')

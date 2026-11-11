@@ -8,10 +8,10 @@
 import type { Value, View, ViewProps } from '@tweakpane/core'
 import { ClassName } from '@tweakpane/core'
 import { to as colorJsConvert } from 'colorjs.io/fn'
-import type { Channel, PlaneLayout } from '../model/channel.js'
-import type { ColorPlus } from '../model/color-plus.js'
-import { channelMax, LAYOUTS, unitToValue, valueToUnit } from '../model/channel.js'
-import { computeGlobalMaxChroma, maxChroma, oklchToRgb, widestGamut } from '../model/gamut.js'
+import type { Channel, PlaneLayout } from '../model/channel'
+import type { ColorPlus } from '../model/color-plus'
+import { channelMax, LAYOUTS, unitToValue, valueToUnit } from '../model/channel'
+import { computeGlobalMaxChroma, maxChroma, oklchToRgb, widestGamut } from '../model/gamut'
 
 const cn = ClassName('hpl')
 /** Ramp samples across the strip; the canvas is scaled up by CSS. */

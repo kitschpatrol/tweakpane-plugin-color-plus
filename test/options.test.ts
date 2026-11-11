@@ -1,15 +1,15 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import type { ColorPlusInputParams } from '../src/plugin.js'
-import type { ColorTextsMode } from '../src/view/color-texts.js'
-import { ColorPlus } from '../src/model/color-plus.js'
+import type { ColorPlusInputParams } from '../src/plugin'
+import type { ColorTextsMode } from '../src/view/color-texts'
+import { ColorPlus } from '../src/model/color-plus'
 import {
 	defaultsForFormat,
 	parseColorInputParams,
 	resolveGamuts,
 	textsModeForFormat,
 	validateColorInputParams,
-} from '../src/utilities.js'
-import { spyOnWarnings } from './helpers.js'
+} from '../src/utilities'
+import { spyOnWarnings } from './helpers'
 
 afterEach(() => {
 	vi.restoreAllMocks()

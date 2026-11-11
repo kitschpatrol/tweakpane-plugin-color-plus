@@ -16,14 +16,14 @@ import {
 	TextController,
 	ValueMap,
 } from '@tweakpane/core'
-import type { ColorType } from '../model/shared.js'
-import type { ColorTextsMode } from '../view/color-texts.js'
-import { ColorPlus } from '../model/color-plus.js'
-import { CHROMA_CEILING } from '../model/gamut.js'
-import { denormalizeCoord, getRangeForChannel, normalizeCoord } from '../model/shared.js'
-import { connectValues } from '../model/value-sync.js'
-import { clampColorToGamut } from '../utilities.js'
-import { ColorTextsView } from '../view/color-texts.js'
+import type { ColorType } from '../model/shared'
+import type { ColorTextsMode } from '../view/color-texts'
+import { ColorPlus } from '../model/color-plus'
+import { CHROMA_CEILING } from '../model/gamut'
+import { denormalizeCoord, getRangeForChannel, normalizeCoord } from '../model/shared'
+import { connectValues } from '../model/value-sync'
+import { clampColorToGamut } from '../utilities'
+import { ColorTextsView } from '../view/color-texts'
 
 type Config = {
 	colorType: ColorType

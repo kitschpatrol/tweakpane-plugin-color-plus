@@ -31,17 +31,13 @@ import {
 	mapRange,
 	PointerHandler,
 } from '@tweakpane/core'
-import type { PaletteProjection, PlaneLayout } from '../model/channel.js'
-import type { ColorPlus } from '../model/color-plus.js'
-import { LAYOUTS, planeBand } from '../model/channel.js'
-import { lightnessRange, maxChroma, widestGamut } from '../model/gamut.js'
-import {
-	buildOkhsvProfile,
-	lightnessChromaToOkhsv,
-	okhsvToLightnessChroma,
-} from '../model/okhsv.js'
-import { clampColorToGamut } from '../utilities.js'
-import { ChannelSliderView } from '../view/channel-slider.js'
+import type { PaletteProjection, PlaneLayout } from '../model/channel'
+import type { ColorPlus } from '../model/color-plus'
+import { LAYOUTS, planeBand } from '../model/channel'
+import { lightnessRange, maxChroma, widestGamut } from '../model/gamut'
+import { buildOkhsvProfile, lightnessChromaToOkhsv, okhsvToLightnessChroma } from '../model/okhsv'
+import { clampColorToGamut } from '../utilities'
+import { ChannelSliderView } from '../view/channel-slider'
 
 const finite = (value: null | number | undefined): number =>
 	value === null || value === undefined || Number.isNaN(value) ? 0 : value

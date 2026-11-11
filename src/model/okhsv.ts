@@ -15,7 +15,7 @@
  * gamut and stays in OKLCH internally — unlike OKHSL/OKHSV's sRGB-locked
  * definitions. (This omits Ottosson's lightness "toe"; value is linear in L.)
  */
-import { maxChroma } from './gamut.js'
+import { maxChroma } from './gamut'
 
 /** Lightness samples used to locate the cusp and trace the gamut boundary. */
 const PROFILE_SAMPLES = 96

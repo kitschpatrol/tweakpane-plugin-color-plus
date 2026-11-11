@@ -21,11 +21,11 @@ import {
 	isArrowKey,
 	PointerHandler,
 } from '@tweakpane/core'
-import type { Channel, PaletteProjection, PlaneLayout } from '../model/channel.js'
-import type { ColorPlus } from '../model/color-plus.js'
-import type { GamutLines } from '../view/plane-palette.js'
-import { LAYOUTS } from '../model/channel.js'
-import { PlanePaletteView } from '../view/plane-palette.js'
+import type { Channel, PaletteProjection, PlaneLayout } from '../model/channel'
+import type { ColorPlus } from '../model/color-plus'
+import type { GamutLines } from '../view/plane-palette'
+import { LAYOUTS } from '../model/channel'
+import { PlanePaletteView } from '../view/plane-palette'
 
 /** Marker nudge per arrow key, as a fraction of the plane. */
 const KEY_STEP = 1 / 100

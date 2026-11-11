@@ -2,7 +2,7 @@
 /* eslint-disable capitalized-comments */
 import { isObject } from '@tweakpane/core'
 import { Pane } from 'tweakpane'
-import * as TweakpanePluginColorPlus from 'tweakpane-plugin-color-plus/lite'
+import * as TweakpanePluginColorPlus from '../../src/index'
 
 const params: Record<string, unknown> = {
 	// Hex strings

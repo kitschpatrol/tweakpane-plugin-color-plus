@@ -1,19 +1,19 @@
 import type { TpPlugin } from '@tweakpane/core'
-import { ColorPlusInputPlugin } from './plugin.js'
+import { ColorPlusInputPlugin } from './plugin'
+import pluginCss from './styles/plugin.scss?inline'
 
 // The identifier of the plugin bundle
 export const id = 'color-plus'
 
-// Replaced at build time with the compiled stylesheet (see tsdown.config.ts)
-// eslint-disable-next-line ts/no-inferrable-types -- Emit string in declarations, since the literal is replaced at build time
-export const css: string = '__css__'
+// Tweakpane installs this compiled stylesheet when the bundle is registered.
+export const css: string = pluginCss
 
 // Export plugins array with explicit typing
 export const plugins: TpPlugin[] = [ColorPlusInputPlugin]
 
 // Exposed for working with color values outside of the plugin
 // E.g. used by svelte-tweakpane-ui for CLS placeholder calculation
-export { ColorPlus as ColorPlusModel } from './model/color-plus.js'
+export { ColorPlus as ColorPlusModel } from './model/color-plus'
 
 export type {
 	ColorPlusGamutLines,
@@ -29,4 +29,4 @@ export type {
 	ColorPlusValueRgbTuple,
 	ColorPlusValueString,
 	ColorPlusValueTuple,
-} from './plugin.js'
+} from './plugin'

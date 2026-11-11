@@ -1,8 +1,8 @@
 import type { BindingWriter } from '@tweakpane/core'
 import { BindingTarget } from '@tweakpane/core'
 import { expect, it } from 'vitest'
-import { ColorPlus } from '../src/model/color-plus.js'
-import { ColorPlusInputPlugin } from '../src/plugin.js'
+import { ColorPlus } from '../src/model/color-plus'
+import { ColorPlusInputPlugin } from '../src/plugin'
 
 /**
  * Build a writer for an externally bound value the same way Tweakpane does:

@@ -1,7 +1,7 @@
 import { connectValues, createValue } from '@tweakpane/core'
 import { expect, it } from 'vitest'
-import { ColorPlus } from '../src/model/color-plus.js'
-import { withAlpha } from '../src/utilities.js'
+import { ColorPlus } from '../src/model/color-plus'
+import { withAlpha } from '../src/utilities'
 
 function color(value: string): ColorPlus {
 	const created = ColorPlus.create(value)

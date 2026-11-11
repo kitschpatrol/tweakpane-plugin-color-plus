@@ -8,17 +8,17 @@ import {
 	parseNumber,
 	ValueMap,
 } from '@tweakpane/core'
-import type { PaletteProjection, PlaneLayout } from '../model/channel.js'
-import type { ColorPlus } from '../model/color-plus.js'
-import type { ColorType } from '../model/shared.js'
-import type { ColorTextsMode } from '../view/color-texts.js'
-import type { GamutLines } from '../view/plane-palette.js'
-import { createKeywordDisplayValue, withAlpha } from '../utilities.js'
-import { ColorPickerView } from '../view/color-picker.js'
-import { APaletteController } from './a-palette.js'
-import { ChannelSliderController } from './channel-slider.js'
-import { ColorTextsController } from './color-texts.js'
-import { PlanePaletteController } from './plane-palette.js'
+import type { PaletteProjection, PlaneLayout } from '../model/channel'
+import type { ColorPlus } from '../model/color-plus'
+import type { ColorType } from '../model/shared'
+import type { ColorTextsMode } from '../view/color-texts'
+import type { GamutLines } from '../view/plane-palette'
+import { createKeywordDisplayValue, withAlpha } from '../utilities'
+import { ColorPickerView } from '../view/color-picker'
+import { APaletteController } from './a-palette'
+import { ChannelSliderController } from './channel-slider'
+import { ColorTextsController } from './color-texts'
+import { PlanePaletteController } from './plane-palette'
 
 type Config = {
 	colorType: ColorType

@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import type { Channel } from '../src/model/channel.js'
+import type { Channel } from '../src/model/channel'
 import {
 	axisFractionToUnit,
 	channelMax,
@@ -10,13 +10,13 @@ import {
 	unitToAxisFraction,
 	unitToValue,
 	valueToUnit,
-} from '../src/model/channel.js'
+} from '../src/model/channel'
 
 // Stands in for the widest configured gamut's global maximum chroma
 const GLOBAL_MAX_CHROMA = 0.4
 
 it('names every layout as [X][Y]_[slider] over a permutation of the channels', () => {
-	expect(Object.keys(LAYOUTS).toSorted()).toEqual([...PLANE_LAYOUTS].toSorted())
+	expect(Object.keys(LAYOUTS).sort()).toEqual([...PLANE_LAYOUTS].sort())
 
 	for (const id of PLANE_LAYOUTS) {
 		const roles = LAYOUTS[id]
@@ -24,7 +24,7 @@ it('names every layout as [X][Y]_[slider] over a permutation of the channels', (
 		expect(roles.x).toBe(plane![0]!.toLowerCase())
 		expect(roles.y).toBe(plane![1]!.toLowerCase())
 		expect(roles.slider).toBe(slider!.toLowerCase())
-		expect([roles.x, roles.y, roles.slider].toSorted()).toEqual(['c', 'h', 'l'])
+		expect([roles.x, roles.y, roles.slider].sort()).toEqual(['c', 'h', 'l'])
 	}
 })
 

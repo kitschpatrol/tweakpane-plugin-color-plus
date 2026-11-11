@@ -1,7 +1,7 @@
 import type { Value, ValueController, ViewProps } from '@tweakpane/core'
-import type { ColorPlus } from '../model/color-plus.js'
-import type { GamutMethod } from '../model/shared.js'
-import { ColorSwatchView } from '../view/color-swatch.js'
+import type { ColorPlus } from '../model/color-plus'
+import type { GamutMethod } from '../model/shared'
+import { ColorSwatchView } from '../view/color-swatch'
 
 type Config = {
 	swatchFallback: GamutMethod

@@ -1,8 +1,18 @@
 allowBuilds:
-  '@parcel/watcher': true
-  unrs-resolver: true
+  # Sass uses its JS API; its optional native watcher is not needed.
+  '@parcel/watcher': false
+  esbuild: true
 minimumReleaseAgeExclude:
-  - '@kitschpatrol/chagent@0.4.0'
+  - '@kitschpatrol/cspell-config@8.14.1'
+  - '@kitschpatrol/eslint-config@8.14.1'
+  - '@kitschpatrol/knip-config@8.14.1'
+  - '@kitschpatrol/mdat-config@8.14.1'
+  - '@kitschpatrol/prettier-config@8.14.1'
+  - '@kitschpatrol/remark-config@8.14.1'
+  - '@kitschpatrol/repo-config@8.14.1'
+  - '@kitschpatrol/shared-config@8.14.1'
+  - '@kitschpatrol/stylelint-config@8.14.1'
+  - '@kitschpatrol/typescript-config@8.14.1'
 peerDependencyRules:
   allowedVersions:
     # Remove once the installed version declares ESLint 10 support.

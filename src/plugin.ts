@@ -1,13 +1,13 @@
 import type { BaseInputParams, InputBindingPlugin, PickerLayout } from '@tweakpane/core'
 import { createPlugin, writePrimitive } from '@tweakpane/core'
-import type { PaletteProjection, PlaneLayout } from './model/channel.js'
-import type { ColorFormat, ColorType, GamutMethod } from './model/shared.js'
-import type { ColorPlusValueRgbaTuple, ColorPlusValueRgbTuple } from './model/tuple.js'
-import type { ColorTextsMode } from './view/color-texts.js'
-import type { GamutLines } from './view/plane-palette.js'
-import { ColorController } from './controller/color.js'
-import { ColorPlus } from './model/color-plus.js'
-import { formatIsSerializable, formatsShareShape, isStringFormat } from './model/shared.js'
+import type { PaletteProjection, PlaneLayout } from './model/channel'
+import type { ColorFormat, ColorType, GamutMethod } from './model/shared'
+import type { ColorPlusValueRgbaTuple, ColorPlusValueRgbTuple } from './model/tuple'
+import type { ColorTextsMode } from './view/color-texts'
+import type { GamutLines } from './view/plane-palette'
+import { ColorController } from './controller/color'
+import { ColorPlus } from './model/color-plus'
+import { formatIsSerializable, formatsShareShape, isStringFormat } from './model/shared'
 import {
 	clampColorToGamut,
 	defaultsForFormat,
@@ -15,7 +15,7 @@ import {
 	resolveGamuts,
 	textsModeForFormat,
 	validateColorInputParams,
-} from './utilities.js'
+} from './utilities'
 
 export type ColorPlusGamutLines = GamutLines
 export type ColorPlusPaletteChannels = PlaneLayout
@@ -24,7 +24,7 @@ export type ColorPlusSwatchFallback = GamutMethod
 export type ColorPlusType = ColorType
 export type ColorPlusValueNumber = number
 export type ColorPlusValueObject = Record<string, null | number>
-export type { ColorPlusValueRgbaTuple, ColorPlusValueRgbTuple } from './model/tuple.js'
+export type { ColorPlusValueRgbaTuple, ColorPlusValueRgbTuple } from './model/tuple'
 export type ColorPlusValueString = string
 export type ColorPlusValueTuple = ColorPlusValueRgbaTuple | ColorPlusValueRgbTuple
 export type ColorPlusValue =
