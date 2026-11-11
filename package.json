@@ -47,8 +47,8 @@
 		"dev:npm": "pnpm build && vite --open /demo/npm/",
 		"dev:playground": "vite --open /demo/playground/",
 		"dev:screenshot": "vite --open /demo/screenshot/",
-		"fix": "ksc fix",
-		"lint": "ksc lint",
+		"fix": "pnpm build && ksc fix",
+		"lint": "pnpm build && ksc lint",
 		"release": "bumpp --commit 'Release: %s' --tag '%s' --all --execute 'chagent' && pnpm build && pnpm publish --otp $(op item get npm --otp)",
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
@@ -62,25 +62,25 @@
 		"@arethetypeswrong/core": "^0.18.5",
 		"@kitschpatrol/chagent": "^0.5.0",
 		"@kitschpatrol/shared-config": "^8.14.1",
-		"@tsdown/css": "0.23.4",
+		"@tsdown/css": "^0.23.7",
 		"@types/node": "~22.12.0",
-		"@vitest/coverage-v8": "^5.0.5",
+		"@vitest/coverage-v8": "^5.1.0",
 		"bumpp": "^12.3.0",
 		"happy-dom": "^21.0.4",
 		"publint": "^0.3.25",
-		"sass": "^1.107.1",
+		"sass": "^1.108.1",
 		"shx": "^0.4.0",
 		"stylelint-config-standard-scss": "^17.0.0",
-		"tsdown": "0.23.4",
+		"tsdown": "^0.23.7",
 		"tweakpane": "^4.0.5",
 		"typescript": "~6.0.3",
-		"vite": "^8.3.5",
-		"vitest": "^5.0.5"
+		"vite": "^8.3.7",
+		"vitest": "^5.1.0"
 	},
 	"peerDependencies": {
 		"tweakpane": "^4.0.0"
 	},
-	"packageManager": "pnpm@12.16.1",
+	"packageManager": "pnpm@12.18.0",
 	"engines": {
 		"node": "^22.0.0 || ^24.0.0 || >=26.0.0"
 	},

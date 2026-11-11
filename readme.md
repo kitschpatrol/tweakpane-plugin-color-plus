@@ -475,7 +475,7 @@ const functions = {
 
 The plugin uses Color.js' [procedural API](https://colorjs.io/docs/procedural) and [only imports a subset of available color spaces](#color-spaces) in the interest of performance and bundle size optimization.
 
-This dependency is bundled and tree-shaken, so there are no external third-party dependencies in the plugin (except Tweakpane itself).
+This dependency is bundled and tree-shaken, so there are no external third-party dependencies in the plugin at runtime (except Tweakpane itself). Package managers still install Color.js alongside the plugin because the published type declarations reference its types.
 
 #### Other JavaScript color libraries
 
@@ -515,7 +515,7 @@ You can see the effect of externalization on the minified library's size below:
 
 | File                                    | Original | Gzip  | Brotli |
 | --------------------------------------- | -------- | ----- | ------ |
-| tweakpane-plugin-color-plus.min.js      | 220 kB   | 60 kB | 51 kB  |
+| tweakpane-plugin-color-plus.min.js      | 130 kB   | 42 kB | 37 kB  |
 | tweakpane-plugin-color-plus.lite.min.js | 112 kB   | 38 kB | 33 kB  |
 
 <!-- /size-table -->

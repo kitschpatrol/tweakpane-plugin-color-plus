@@ -1,8 +1,10 @@
 {
 	"extends": "@kitschpatrol/typescript-config",
 	"compilerOptions": {
+		// Keep source within the ES2022 browser build target; the shared base targets ES2025.
 		"target": "ES2022",
 		"lib": ["ES2022", "DOM"],
+		// Vite's client types declare the ?inline stylesheet import.
 		"types": ["node", "vite/client"]
 	}
 }
