@@ -60,6 +60,20 @@ function probeInGamut(l: number, c: number, h: number, gamutId: string): boolean
 }
 
 /**
+ * Whether `gamutId` holds a color, using colorjs's default tolerance. Unlike
+ * the boundary probe, this absorbs conversion noise, such as the ~3e-7
+ * round-trip error at Rec2020's blue corner, so a color in the gamut is never
+ * reported as outside it. colorjs uses the same tolerance when it serializes a
+ * color.
+ */
+function isInGamut(l: number, c: number, h: number, gamutId: string): boolean {
+	probe.coords[0] = l
+	probe.coords[1] = c
+	probe.coords[2] = h
+	return colorJsInGamut(probe, gamutId)
+}
+
+/**
  * Largest in-gamut OKLCH chroma at lightness `l` and hue `h` for `gamutId`, by
  * bisection. Returns 0 when the gamut doesn't contain the achromatic point at
  * this lightness (an empty row).
@@ -69,8 +83,8 @@ function probeInGamut(l: number, c: number, h: number, gamutId: string): boolean
  * constant-hue slice leaves the gamut and touches it again only along the
  * black-to-blue edge, a line that no bisection or raster can reach, so this
  * returns the boundary of the main body and the plane cannot show pure blue.
- * `clampToGamut` checks a color itself first, so sRGB colors on that edge are
- * not shed.
+ * `clampToGamut` checks a color itself first, so colors on that edge are not
+ * shed.
  */
 export function maxChroma(l: number, h: number, gamutId: string, ceiling = CHROMA_CEILING): number {
 	// The exact black/white poles are single achromatic points, so any chroma
@@ -110,9 +124,10 @@ export function clampToGamut(
 	ceiling = CHROMA_CEILING,
 ): [number, number, number] {
 	const clampedL = Math.max(0, Math.min(1, l))
-	// The in-gamut chroma at a fixed lightness and hue is not always one interval: sRGB
-	// blue's cube corner lies beyond a gap that `maxChroma`'s bisection stops short of.
-	const clampedC = probeInGamut(clampedL, c, h, gamutId)
+	// The in-gamut chroma at a fixed lightness and hue is not always one interval: the
+	// blue corners of sRGB and Rec2020 lie beyond a gap that `maxChroma`'s bisection
+	// stops short of, so check the color itself first.
+	const clampedC = isInGamut(clampedL, c, h, gamutId)
 		? c
 		: Math.min(c, maxChroma(clampedL, h, gamutId, ceiling))
 	return [clampedL, clampedC, h]

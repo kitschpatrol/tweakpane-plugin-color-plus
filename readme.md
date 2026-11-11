@@ -191,7 +191,7 @@ A typed value can only move between formats that share the bound value's shape: 
 
 Keep the color inside the widest configured gamut (see [`gamuts`](#gamuts)): picks on the palette plane snap to the in-gamut frontier, while slider moves, typed text, and externally bound values shed chroma (at constant lightness and hue) to fit. Set to `false` to allow out-of-gamut colors. Default `true`.
 
-Because lightness and hue stay exact, constrained colors can differ from a browser's [CSS gamut mapping](https://www.w3.org/TR/css-color-4/#gamut-mapping), which may shift the hue slightly. This shows most around sRGB blue: `oklch(45% 0.4 264)` constrains to `#0032e2` here, while CSS gamut mapping gives `#0500ff`.
+Colors already inside the gamut are never changed. Because lightness and hue stay exact, constrained colors can differ from a browser's [CSS gamut mapping](https://www.w3.org/TR/css-color-4/#gamut-mapping), which may shift the hue slightly. This shows most around sRGB blue: `oklch(45% 0.4 264)` constrains to `#0032e2` here, while CSS gamut mapping gives `#0500ff`.
 
 ##### `gamuts`
 
@@ -527,10 +527,10 @@ Bundled and lite entries contain separate instances of exported classes. Use one
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.js          | 280 kB   | 73.5 kB | 60.7 kB |
-| tweakpane-plugin-color-plus.min.js      | 130.2 kB | 42.7 kB | 37.1 kB |
-| tweakpane-plugin-color-plus.lite.js     | 242.7 kB | 65.9 kB | 54.4 kB |
-| tweakpane-plugin-color-plus.lite.min.js | 112.3 kB | 38.2 kB | 33.3 kB |
+| tweakpane-plugin-color-plus.js          | 280.4 kB | 73.6 kB | 60.8 kB |
+| tweakpane-plugin-color-plus.min.js      | 130.3 kB | 42.7 kB | 37.1 kB |
+| tweakpane-plugin-color-plus.lite.js     | 243.1 kB | 66.1 kB | 54.4 kB |
+| tweakpane-plugin-color-plus.lite.min.js | 112.4 kB | 38.2 kB | 33.3 kB |
 
 <!-- /size-table -->
 

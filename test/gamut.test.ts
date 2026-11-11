@@ -98,6 +98,8 @@ it.each([
 	['#ffffff', 'srgb'],
 	// Every color on the black-to-blue edge shares blue's hue and sits past the same gap
 	['navy', 'srgb'],
+	// Rec2020's blue corner has the same gap and round-trips with ~3e-7 conversion noise
+	['color(rec2020 0 0 1)', 'rec2020'],
 ])('keeps the in-gamut color %s unchanged when clamping into %s', (input, gamut) => {
 	// Blue's corner lies past a gap in its constant-hue chroma slice, beyond where
 	// the maxChroma bisection stops, so in-gamut colors must be checked directly.
