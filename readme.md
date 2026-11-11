@@ -525,9 +525,9 @@ Bundled and lite entries contain separate instances of exported classes. Use one
 
 | File                                    | Original | Gzip    | Brotli  |
 | --------------------------------------- | -------- | ------- | ------- |
-| tweakpane-plugin-color-plus.js          | 279.5 kB | 73.2 kB | 60.5 kB |
+| tweakpane-plugin-color-plus.js          | 279.6 kB | 73.3 kB | 60.5 kB |
 | tweakpane-plugin-color-plus.min.js      | 130.2 kB | 42.7 kB | 37 kB   |
-| tweakpane-plugin-color-plus.lite.js     | 242.2 kB | 65.7 kB | 54.1 kB |
+| tweakpane-plugin-color-plus.lite.js     | 242.2 kB | 65.7 kB | 54.2 kB |
 | tweakpane-plugin-color-plus.lite.min.js | 112.3 kB | 38.2 kB | 33.3 kB |
 
 <!-- /size-table -->

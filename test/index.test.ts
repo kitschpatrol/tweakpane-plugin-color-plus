@@ -61,6 +61,12 @@ describe('color-plus plugin', () => {
 		expect(changes.at(-1)).toEqual({ last: true, value: '#00ff00' })
 	})
 
+	it('keeps an in-gamut sRGB corner such as pure blue unchanged', () => {
+		const { input, params } = setup({ color: '#0000ff' })
+		expect(params.color).toBe('#0000ff')
+		expect(input.value).toBe('#0000ff')
+	})
+
 	it('keeps the bound value when the committed text cannot be parsed', () => {
 		const { input, params } = setup({ color: '#ff0000' })
 		commit(input, 'not a color')

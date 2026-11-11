@@ -102,7 +102,12 @@ export function clampToGamut(
 	ceiling = CHROMA_CEILING,
 ): [number, number, number] {
 	const clampedL = Math.max(0, Math.min(1, l))
-	return [clampedL, Math.min(c, maxChroma(clampedL, h, gamutId, ceiling)), h]
+	// The in-gamut chroma at a fixed lightness and hue is not always one interval: sRGB
+	// blue's cube corner lies beyond a gap that `maxChroma`'s bisection stops short of.
+	const clampedC = probeInGamut(clampedL, c, h, gamutId)
+		? c
+		: Math.min(c, maxChroma(clampedL, h, gamutId, ceiling))
+	return [clampedL, clampedC, h]
 }
 
 /** Coarse lightness samples used to bracket the in-gamut band before bisection. */

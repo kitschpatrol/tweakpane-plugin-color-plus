@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest'
 // Registers the colorjs color spaces (oklch, srgb, p3, rec2020, ...) by side effect
 import '../src/model/shared'
+import { ColorPlus } from '../src/model/color-plus'
 import {
 	clampToGamut,
 	computeGlobalMaxChroma,
@@ -85,6 +86,22 @@ it('clamps OKLCH coordinates into a gamut by shedding chroma at constant lightne
 	expect(clampToGamut(1.5, 0.2, 30, 'srgb')).toEqual([1, 0, 30])
 	expect(clampToGamut(-0.5, 0.2, 30, 'srgb')).toEqual([0, 0, 30])
 })
+
+it.each(['#000000', '#0000ff', '#00ff00', '#00ffff', '#ff0000', '#ff00ff', '#ffff00', '#ffffff'])(
+	'keeps the sRGB cube corner %s unchanged when clamping into sRGB',
+	(hex) => {
+		// Blue's corner lies past a gap in its constant-hue chroma slice, beyond where
+		// the maxChroma bisection stops, so in-gamut colors must be checked directly.
+		const color = ColorPlus.create(hex)!
+		color.convert('oklch')
+		const [l, c, h] = color.getAll('oklch') as [number, number, number]
+		// White and black keep only float noise as chroma, which the pole guard zeroes
+		const [clampedL, clampedC, clampedH] = clampToGamut(l, c, h, 'srgb')
+		expect(clampedL).toBeCloseTo(l, 6)
+		expect(clampedC).toBeCloseTo(c, 6)
+		expect(clampedH).toBe(h)
+	},
+)
 
 it('finds the in-gamut lightness band at a fixed chroma and hue', () => {
 	const range = lightnessRange(0.1, 30, 'srgb')
