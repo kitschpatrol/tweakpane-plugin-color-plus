@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.2] - 2026-11-11
+
+### Added
+
+- Expose package metadata through `tweakpane-plugin-color-plus/package.json`.
+
+### Fixed
+
+- Preserve in-gamut colors when constraining, including pure blue, `navy`, and wide-gamut primaries affected by conversion noise.
+- Keep gamut labels consistent with clamping near black and blue boundaries by sharing a containment check that tolerates conversion noise.
+- Clamp out-of-gamut colors in gaps beside sRGB blue instead of leaving them unchanged.
+- Inline Color.js types in published declarations so TypeScript consumers do not need a separate `colorjs.io` installation.
+
+### Documentation
+
+- Explain CSS gamut-mapping differences, gaps near sRGB blue, disagreements between gamut labels and boundaries, and hex display limitations.
+- Add JSDoc for color serialization and shared color-model helpers.
+
+### Maintenance
+
+- Unify JavaScript, inline SCSS, and bundled declaration builds under tsdown, with publint and Are the Types Wrong validation.
+- Mark the package as side-effect-free and tree-shake unused Tweakpane core code, reducing the documented minified bundled build from about 220 kB to 130 kB.
+- Simplify demo and watch commands, use source imports in development demos, and enable SCSS linting and ES2022 checks.
+- Add DOM integration tests for plugin registration, styles, value editing, refresh, disabled state, and disposal, plus gamut regression coverage.
+- Add chagent-based changelog generation to releases, refresh GitHub Actions, and expand dependency-update compatibility checks.
+- Refresh development dependencies and update pnpm to 12.18.0.
+
 ## [0.7.1] - 2026-11-02
 
 ### Fixed
@@ -311,3 +338,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.6.2]: https://github.com/kitschpatrol/tweakpane-plugin-color-plus/compare/0.6.1...0.6.2
 [0.7.0]: https://github.com/kitschpatrol/tweakpane-plugin-color-plus/compare/0.6.2...0.7.0
 [0.7.1]: https://github.com/kitschpatrol/tweakpane-plugin-color-plus/compare/0.7.0...0.7.1
+[0.7.2]: https://github.com/kitschpatrol/tweakpane-plugin-color-plus/compare/0.7.1...0.7.2
