@@ -1,6 +1,8 @@
 allowBuilds:
   # Sass uses its JS API; its optional native watcher is not needed.
   '@parcel/watcher': false
+minimumReleaseAgeExclude:
+  - '@kitschpatrol/chagent@0.6.0'
 peerDependencyRules:
   allowedVersions:
     # Remove once the installed version declares ESLint 10 support.

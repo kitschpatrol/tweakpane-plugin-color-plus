@@ -59,7 +59,7 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "^0.18.5",
-		"@kitschpatrol/chagent": "^0.5.0",
+		"@kitschpatrol/chagent": "^0.6.0",
 		"@kitschpatrol/shared-config": "^8.14.1",
 		"@tsdown/css": "^0.23.7",
 		"@types/node": "~22.12.0",
