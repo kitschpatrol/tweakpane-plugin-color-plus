@@ -14,6 +14,12 @@ import {
 	widestGamut,
 } from '../src/model/gamut'
 
+function oklchOf(input: string): [number, number, number] {
+	const color = ColorPlus.create(input)!
+	color.convert('oklch')
+	return color.getAll('oklch') as [number, number, number]
+}
+
 it('normalizes colorjs ids and CSS aliases, rejecting unknowns', () => {
 	expect(normalizeGamutId('srgb')).toBe('srgb')
 	expect(normalizeGamutId('display-p3')).toBe('p3')
@@ -100,18 +106,56 @@ it.each([
 	['navy', 'srgb'],
 	// Rec2020's blue corner has the same gap and round-trips with ~3e-7 conversion noise
 	['color(rec2020 0 0 1)', 'rec2020'],
+	// These primaries also round-trip with noise that puts them just outside their own cube
+	['color(rec2020 0 1 0)', 'rec2020'],
+	['color(a98-rgb 0 1 0)', 'a98rgb'],
 ])('keeps the in-gamut color %s unchanged when clamping into %s', (input, gamut) => {
 	// Blue's corner lies past a gap in its constant-hue chroma slice, beyond where
 	// the maxChroma bisection stops, so in-gamut colors must be checked directly.
-	const color = ColorPlus.create(input)!
-	color.convert('oklch')
-	const [l, c, h] = color.getAll('oklch') as [number, number, number]
+	const [l, c, h] = oklchOf(input)
 	// White and black keep only float noise as chroma, which the pole guard zeroes
 	const [clampedL, clampedC, clampedH] = clampToGamut(l, c, h, gamut)
 	expect(clampedL).toBeCloseTo(l, 6)
 	expect(clampedC).toBeCloseTo(c, 6)
 	expect(clampedH).toBe(h)
 })
+
+it('sheds chroma near black, where an RGB tolerance spans a wide band of chroma', () => {
+	for (const l of [0.01, 0.03, 0.05, 0.1]) {
+		for (const h of [30, 145, 264]) {
+			const frontier = maxChroma(l, h, 'srgb')
+			const [, c] = clampToGamut(l, frontier * 1.2, h, 'srgb')
+			expect(c).toBeLessThanOrEqual(frontier + 1e-5)
+			expect(minimumGamut(l, c, h, ['srgb'])).toBe('srgb')
+		}
+	}
+})
+
+it('clamps a color in the gap beside sRGB blue into the gamut', () => {
+	// Just past blue's hue, a thin sliver of sRGB along the black-to-blue edge is
+	// detached from the main body. A color between the two is out of gamut, though
+	// a bisection from the chroma ceiling can land beyond it on the sliver.
+	const [l, , blueHue] = oklchOf('#0000ff')
+	const h = blueHue + 0.05
+	expect(minimumGamut(l, 0.29, h, ['srgb'])).toBeUndefined()
+
+	const [, c] = clampToGamut(l, 0.29, h, 'srgb')
+	expect(c).toBeLessThan(0.29)
+	expect(minimumGamut(l, c, h, ['srgb'])).toBe('srgb')
+})
+
+it.each(['srgb', 'a98rgb', 'p3', 'rec2020', 'prophoto'])(
+	'leaves a color it has clamped into %s unchanged and labeled as inside',
+	(gamut) => {
+		for (const l of [0.001, 0.01, 0.1, 0.5, 0.9, 0.999]) {
+			for (let h = 0; h < 360; h += 15) {
+				const once = clampToGamut(l, 0.45, h, gamut)
+				expect(clampToGamut(...once, gamut)).toEqual(once)
+				expect(minimumGamut(...once, [gamut])).toBe(gamut)
+			}
+		}
+	},
+)
 
 it('finds the in-gamut lightness band at a fixed chroma and hue', () => {
 	const range = lightnessRange(0.1, 30, 'srgb')
@@ -159,6 +203,35 @@ it('picks the narrowest configured gamut holding a color', () => {
 	// Without P3 configured the color is out of every gamut
 	expect(minimumGamut(0.6, 0.2, 145, ['srgb'])).toBeUndefined()
 	expect(minimumGamut(0.6, 0.1, 30, [])).toBeUndefined()
+})
+
+it('labels a color picked on the black-to-blue edge as sRGB', () => {
+	// P3 shares sRGB's blue primary, so up to sRGB blue's lightness the P3 frontier
+	// at blue's hue is sRGB's black-to-blue edge. A pick there takes its chroma
+	// from the bisected frontier, which lands within conversion noise of the edge.
+	for (const input of ['navy', '#0000ff']) {
+		const [l, , h] = oklchOf(input)
+		expect(minimumGamut(l, maxChroma(l, h, 'p3'), h, ['srgb', 'p3'])).toBe('srgb')
+	}
+
+	// Above sRGB blue's lightness the frontier rises to P3's brighter blue
+	const [l, c, h] = oklchOf('color(display-p3 0 0 1)')
+	expect(minimumGamut(l, c, h, ['srgb', 'p3'])).toBe('p3')
+})
+
+it('labels a color just past the sRGB boundary as P3 at any lightness', () => {
+	// Near blue's hue these colors sit ~7e-5 from sRGB in OKLab. Near black they
+	// are also within colorjs's RGB tolerance of sRGB, which spans a wide band of
+	// OKLCH chroma there.
+	for (const l of [0.03, 0.08, 0.3]) {
+		const c = maxChroma(l, 264, 'srgb') + 1e-3
+		expect(minimumGamut(l, c, 264, ['srgb', 'p3'])).toBe('p3')
+	}
+})
+
+it('labels Rec2020 blue despite its conversion noise', () => {
+	const [l, c, h] = oklchOf('color(rec2020 0 0 1)')
+	expect(minimumGamut(l, c, h, ['srgb', 'p3', 'rec2020'])).toBe('rec2020')
 })
 
 it('falls back to the first id, or sRGB, when no configured gamut is known', () => {

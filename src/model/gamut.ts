@@ -9,12 +9,25 @@
  * caches the resolved space on it, so repeat calls skip the id lookup).
  */
 import type { ColorConstructor } from 'colorjs.io/fn'
-import { to as colorJsConvert, inGamut as colorJsInGamut } from 'colorjs.io/fn'
+import {
+	to as colorJsConvert,
+	inGamut as colorJsInGamut,
+	toGamut as colorJsToGamut,
+	deltaEOK,
+} from 'colorjs.io/fn'
 
 /** Upper bound for the chroma bisection — beyond every physical display gamut. */
 export const CHROMA_CEILING = 0.5
 /** Bisection steps: 16 ⇒ ~0.5/2¹⁶ ≈ 8e-6 chroma resolution. */
 const BISECT_STEPS = 16
+/**
+ * Largest OKLab distance (`deltaEOK`) from a gamut at which a color still
+ * counts as inside it. Wide enough for a pick on one gamut's bisected frontier
+ * to count as inside a narrower gamut sharing that frontier, as P3 and sRGB do
+ * along the black-to-blue edge, and thousands of times below a visible
+ * difference (~0.02).
+ */
+const GAMUT_TOLERANCE = 3e-6
 
 /**
  * RGB gamut ids by chroma extent, narrow → wide. Used to pick the widest
@@ -52,25 +65,31 @@ function probeInGamut(l: number, c: number, h: number, gamutId: string): boolean
 	// The colorjs default tolerance (7.5e-5) is far too loose near black: it accepts
 	// colors whose RGB coords are within it, and since a narrower gamut maps a given
 	// OKLCH to smaller coords, sRGB/P3 then spuriously "contain" more chroma than
-	// wider gamuts there — a phantom boundary hook, plus an "out of gamut" label for
-	// what is really white. A tiny epsilon instead tracks the true cube boundary (the
-	// hook shrinks to a sub-pixel sliver at lightness 0) while still admitting white,
-	// whose round-trip overshoots 1 by only a float rounding step.
+	// wider gamuts there — a phantom boundary hook. A tiny epsilon instead tracks the
+	// true cube boundary (the hook shrinks to a sub-pixel sliver at lightness 0)
+	// while still admitting white, whose round-trip overshoots 1 by only a float
+	// rounding step.
 	return colorJsInGamut(probe, gamutId, { epsilon: 1e-9 })
 }
 
 /**
- * Whether `gamutId` holds a color, using colorjs's default tolerance. Unlike
- * the boundary probe, this absorbs conversion noise, such as the ~3e-7
- * round-trip error at Rec2020's blue corner, so a color in the gamut is never
- * reported as outside it. colorjs uses the same tolerance when it serializes a
- * color.
+ * Whether `gamutId` holds a color: the color passes the boundary probe, or lies
+ * within `GAMUT_TOLERANCE` of its clipped counterpart. The clamp and the gamut
+ * label share this test, so they cannot disagree about a color.
+ *
+ * The distance absorbs conversion noise, such as the ~3e-7 round-trip error at
+ * Rec2020's blue corner, without the reach of an RGB tolerance, which balloons
+ * in OKLCH chroma near black. The probe covers the bisected frontier at
+ * lightness below ~0.01, where its own RGB epsilon exceeds that distance.
  */
 function isInGamut(l: number, c: number, h: number, gamutId: string): boolean {
-	probe.coords[0] = l
-	probe.coords[1] = c
-	probe.coords[2] = h
-	return colorJsInGamut(probe, gamutId)
+	if (probeInGamut(l, c, h, gamutId)) {
+		return true
+	}
+
+	// `probeInGamut` left the color's coordinates in `probe`
+	const clipped = colorJsToGamut(colorJsConvert(probe, gamutId), { method: 'clip' })
+	return deltaEOK(probe, clipped) < GAMUT_TOLERANCE
 }
 
 /**
@@ -79,12 +98,13 @@ function isInGamut(l: number, c: number, h: number, gamutId: string): boolean {
  * this lightness (an empty row).
  *
  * The bisection assumes the in-gamut chroma at a fixed lightness and hue is a
- * single interval. Near the blue corner of sRGB and Rec2020 it is not: the
- * constant-hue slice leaves the gamut and touches it again only along the
- * black-to-blue edge, a line that no bisection or raster can reach, so this
- * returns the boundary of the main body and the plane cannot show pure blue.
- * `clampToGamut` checks a color itself first, so colors on that edge are not
- * shed.
+ * single interval. Beside the blue corner of sRGB and Rec2020 it is not. At
+ * blue's exact hue the slice leaves the gamut and touches it again only along
+ * the black-to-blue edge, so this returns the boundary of the main body and the
+ * plane cannot show pure blue. For about 0.2° past that hue the edge widens
+ * into a thin sliver detached from the main body, and this returns the outer
+ * boundary of either one, depending on where the bisection's midpoints fall.
+ * ProPhoto has wider gaps around hue 200.
  */
 export function maxChroma(l: number, h: number, gamutId: string, ceiling = CHROMA_CEILING): number {
 	// The exact black/white poles are single achromatic points, so any chroma
@@ -124,13 +144,16 @@ export function clampToGamut(
 	ceiling = CHROMA_CEILING,
 ): [number, number, number] {
 	const clampedL = Math.max(0, Math.min(1, l))
-	// The in-gamut chroma at a fixed lightness and hue is not always one interval: the
-	// blue corners of sRGB and Rec2020 lie beyond a gap that `maxChroma`'s bisection
-	// stops short of, so check the color itself first.
-	const clampedC = isInGamut(clampedL, c, h, gamutId)
-		? c
-		: Math.min(c, maxChroma(clampedL, h, gamutId, ceiling))
-	return [clampedL, clampedC, h]
+	// The in-gamut chroma at a fixed lightness and hue is not always one interval
+	// (see `maxChroma`), so check the color itself first.
+	if (isInGamut(clampedL, c, h, gamutId)) {
+		return [clampedL, c, h]
+	}
+
+	const frontier = maxChroma(clampedL, h, gamutId, ceiling)
+	// A frontier above an out-of-gamut color means the bisection landed beyond a
+	// gap that the color sits in, so search below the color instead.
+	return [clampedL, frontier < c ? frontier : maxChroma(clampedL, h, gamutId, c), h]
 }
 
 /** Coarse lightness samples used to bracket the in-gamut band before bisection. */
@@ -233,6 +256,7 @@ export const GAMUT_LABELS: Record<string, string> = {
 /**
  * The narrowest configured gamut that contains the OKLCH color, tested narrow →
  * wide. Returns undefined when the color falls outside every configured gamut.
+ * Uses the same containment test as `clampToGamut`.
  */
 export function minimumGamut(
 	l: number,
@@ -241,7 +265,7 @@ export function minimumGamut(
 	gamutIds: string[],
 ): string | undefined {
 	for (const id of gamutsByExtent(gamutIds)) {
-		if (probeInGamut(l, c, h, id)) {
+		if (isInGamut(l, c, h, id)) {
 			return id
 		}
 	}

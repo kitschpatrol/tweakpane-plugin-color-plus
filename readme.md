@@ -198,6 +198,10 @@ pane.addBinding(params, 'color', { view: 'color-plus', gamuts: ['srgb', 'p3', 'r
 
 Draw the name of the narrowest configured gamut that holds the current color in the picker plane's bottom-left corner. There are some contrast and legibility issues with this to be resolved in a future version.
 
+The label tests the color itself, so it can disagree with the boundary lines at sRGB blue. At blue's exact hue, sRGB holds chroma up to about 85% of blue's, then nothing until blue itself, which it reaches only along the black-to-blue edge of the RGB cube. The boundary line traces the wider part, so `#0000ff` and the darker blues on that edge, such as `navy`, are labeled sRGB while their markers sit past the sRGB line. For about 0.15° past blue's hue, that edge widens into a thin sliver of sRGB colors detached from the rest, and the line there can follow either part. Rounding moves a color off that edge: `oklch(0.452 0.313 264)`, blue rounded to three decimals, is outside sRGB.
+
+Hex values can only describe sRGB, so a color outside sRGB is shown as a nearby sRGB hex value, and several colors can share one. With P3 configured, the plane's top-right corner at blue's hue is P3's brighter blue: it also reads `#0000ff`, but is labeled P3.
+
 _Adaptive default:_ `true` when the bound color uses a wide or perceptual model, `false` when it's sRGB-bound.
 
 ##### `gamutLines`
