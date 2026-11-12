@@ -479,7 +479,7 @@ const functions = {
 
 The plugin uses Color.js' [procedural API](https://colorjs.io/docs/procedural) and [only imports a subset of available color spaces](#color-spaces) in the interest of performance and bundle size optimization.
 
-This dependency is bundled and tree-shaken, so there are no external third-party dependencies in the plugin at runtime (except Tweakpane itself). Package managers still install Color.js alongside the plugin because the published type declarations reference its types.
+This dependency is bundled and tree-shaken, so there are no external third-party dependencies in the plugin (except Tweakpane itself).
 
 #### Other JavaScript color libraries
 

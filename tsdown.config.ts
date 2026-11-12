@@ -17,8 +17,9 @@ const shared: UserConfig = {
 	deps: {
 		// Color.js is bundled into every build; only core differs between the bundled and lite builds.
 		alwaysBundle: ['@tweakpane/core', COLOR_JS_MODULE],
-		// Keep public types compatible with the consumer's installed core and Color.js.
-		dts: { neverBundle: ['@tweakpane/core', 'tweakpane', COLOR_JS_MODULE] },
+		// Keep public types compatible with the consumer's installed core. Color.js types
+		// are inlined to match the bundled runtime, so consumers do not install Color.js.
+		dts: { neverBundle: ['@tweakpane/core', 'tweakpane'] },
 		neverBundle: ['tweakpane'],
 		onlyBundle: ['@tweakpane/core', 'colorjs.io'],
 	},

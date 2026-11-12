@@ -44,7 +44,7 @@ jobs:
             Scope
             - Known consumers: Tweakpane 4 apps installing from npm, CDN users loading unversioned jsdelivr URLs (demo/cdn/index.html), and svelte-tweakpane-ui, which imports ColorPlusModel from the /lite entry.
             - Contracts specific to this package: the bundle id 'color-plus', the plugin id 'input-color-plus', the ColorPlusModel export, and all exported color value and option types.
-            - colorjs.io is bundled into every output, including the lite builds, so its changes ship to users. It is 0.x, so treat a new minor (0.8) as breaking and defer it. src/model/keywords.ts deep-imports colorjs.io/src/keywords.js, which is not a public export and can break in any release.
+            - colorjs.io is bundled into every output, including the lite builds and the type declarations, so it stays in devDependencies and its changes ship to users. It is 0.x, so treat a new minor (0.8) as breaking and defer it. src/model/keywords.ts deep-imports colorjs.io/src/keywords.js, which is not a public export and can break in any release.
             - Keep @types/node on the major of the consumer Node floor (currently 22, from engines.node). If a dev tool's peer range drops that major, raising the floor is an option to propose in the report; it's not a reason to add a peerDependencyRules exception.
             - Never delete src/scratch.ts. It is an intentional workspace registered as a knip entry.
             - Keep the npm, CDN, picker playground, screenshot, and default demo variants under demo/.
